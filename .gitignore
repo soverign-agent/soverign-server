@@ -1,0 +1,39 @@
+# Go
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+# Test binary, built with `go test -c`
+*.test
+# Output of the go coverage tool
+*.out
+# Dependency directories
+vendor/
+# Go workspace file
+go.work.sum
+
+# Environment
+.env
+.env.*
+*.env
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Local docker-compose overrides
+docker-compose.override.yml
+
+# Build
+*.deb
+*.rpm
+
+# JWT certificates
+certs/private.pem
+certs/public.pem
