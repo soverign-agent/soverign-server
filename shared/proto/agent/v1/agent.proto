@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package agent.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/agent/v1;agentv1";
+
+// AgentCard describes an agent's identity, capabilities, and endpoint.
+message AgentCard {
+  string agent_id = 1;
+  string name = 2;
+  string description = 3;
+  string endpoint = 4;       // gRPC or HTTP endpoint address
+  repeated string skills = 5; // List of capabilities, e.g., ["audit", "rag", "doc_gen"]
+  string version = 6;
+  bool   available = 7;       // Whether the agent is currently accepting tasks
+}
+
+// AgentRequest is sent by a client or supervisor to invoke an agent.
+message AgentRequest {
+  string request_id = 1;
+  string agent_id = 2;        // Target agent identifier
+  string tenant_id = 3;       // Multi-tenant isolation field
+  string task_type = 4;       // E.g., "compliance_audit", "document_generation"
+  bytes  payload = 5;         // Opaque task payload (JSON or protobuf)
+  map<string, string> metadata = 6;
+}
+
+// AgentResponse is returned by an agent after processing a request.
+message AgentResponse {
+  string request_id = 1;
+  string agent_id = 2;
+  Status status = 3;
+  bytes  result = 4;          // Opaque result payload
+  string error_message = 5;
+  map<string, string> metadata = 6;
+
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_PENDING = 1;
+    STATUS_IN_PROGRESS = 2;
+    STATUS_COMPLETED = 3;
+    STATUS_FAILED = 4;
+    STATUS_CANCELLED = 5;
+  }
+}
+
+// TransferEvent signals task hand-off between agents in the orchestration graph.
+message TransferEvent {
+  string event_id = 1;
+  string from_agent_id = 2;
+  string to_agent_id = 3;
+  string task_type = 4;
+  bytes  payload = 5;
+  int64  timestamp_unix = 6;
+}
+
+// AgentService defines the gRPC interface for agent-to-agent communication.
+service AgentService {
+  // Invoke sends a task to an agent and blocks until completion.
+  rpc Invoke(AgentRequest) returns (AgentResponse);
+
+  // StreamInvoke opens a bidirectional stream for long-running tasks.
+  rpc StreamInvoke(stream AgentRequest) returns (stream AgentResponse);
+
+  // GetAgentCard returns the capability description of the requested agent.
+  rpc GetAgentCard(AgentCardRequest) returns (AgentCard);
+
+  // SubscribeTransfers opens a server-side stream of hand-off events.
+  rpc SubscribeTransfers(TransferSubscriptionRequest) returns (stream TransferEvent);
+}
+
+message AgentCardRequest {
+  string agent_id = 1;
+}
+
+message TransferSubscriptionRequest {
+  string tenant_id = 1;
+  repeated string agent_ids = 2;
+}
