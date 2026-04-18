@@ -54,10 +54,29 @@ CREATE TABLE IF NOT EXISTS repositories (
     url TEXT NOT NULL,
     provider VARCHAR(50) NOT NULL,
     encrypted_credentials BYTEA,
+    webhook_secret BYTEA,
+    webhook_id VARCHAR(255),
+    default_branch VARCHAR(255) NOT NULL DEFAULT 'main',
     last_scanned_at TIMESTAMPTZ,
     metadata JSONB DEFAULT '{}',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS repository_scan_results (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    branch VARCHAR(255) NOT NULL,
+    commit_hash VARCHAR(255) NOT NULL,
+    ai_uses JSONB DEFAULT '[]',
+    data_flows JSONB DEFAULT '[]',
+    sensitive_data JSONB DEFAULT '[]',
+    total_files INT NOT NULL DEFAULT 0,
+    scanned_files INT NOT NULL DEFAULT 0,
+    started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS documents (
@@ -207,6 +226,9 @@ ALTER TABLE ai_systems FORCE ROW LEVEL SECURITY;
 ALTER TABLE repositories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE repositories FORCE ROW LEVEL SECURITY;
 
+ALTER TABLE repository_scan_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE repository_scan_results FORCE ROW LEVEL SECURITY;
+
 ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE documents FORCE ROW LEVEL SECURITY;
 
@@ -275,6 +297,12 @@ CREATE POLICY tenant_isolation ON ai_systems
 
 -- Repositories policy
 CREATE POLICY tenant_isolation ON repositories
+    FOR ALL
+    USING (tenant_id = current_tenant_id())
+    WITH CHECK (tenant_id = current_tenant_id());
+
+-- Repository Scan Results policy
+CREATE POLICY tenant_isolation ON repository_scan_results
     FOR ALL
     USING (tenant_id = current_tenant_id())
     WITH CHECK (tenant_id = current_tenant_id());
@@ -358,6 +386,7 @@ CREATE INDEX IF NOT EXISTS idx_embeddings_vector ON embeddings
 CREATE INDEX IF NOT EXISTS idx_users_tenant_email ON users(tenant_id, email);
 CREATE INDEX IF NOT EXISTS idx_ai_systems_tenant_status ON ai_systems(tenant_id, status);
 CREATE INDEX IF NOT EXISTS idx_repositories_tenant_provider ON repositories(tenant_id, provider);
+CREATE INDEX IF NOT EXISTS idx_repository_scans_tenant_repo ON repository_scan_results(tenant_id, repository_id);
 CREATE INDEX IF NOT EXISTS idx_documents_tenant_type ON documents(tenant_id, doc_type);
 CREATE INDEX IF NOT EXISTS idx_embeddings_tenant_doc ON embeddings(tenant_id, document_id);
 CREATE INDEX IF NOT EXISTS idx_audit_jobs_tenant_system ON audit_jobs(tenant_id, ai_system_id);
