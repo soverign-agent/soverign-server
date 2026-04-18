@@ -2,6 +2,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -9,6 +10,7 @@ import (
 
 	"sovereign-ai-compliance/org-service/internal/logic"
 	"sovereign-ai-compliance/org-service/internal/types"
+	"sovereign-ai-compliance/shared/tenant"
 )
 
 // OrgHandler holds org business logic.
@@ -23,14 +25,14 @@ func NewOrgHandler(org *logic.Org) *OrgHandler {
 
 // GetTenant returns current tenant information.
 func (h *OrgHandler) GetTenant(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		TenantID string `form:"tenant_id"`
-	}
-	if err := httpx.Parse(r, &req); err != nil {
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	tenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
 		httpx.Error(w, err)
 		return
 	}
-	tenant, err := h.org.GetTenant(r.Context(), parseUUID(req.TenantID))
+	tenant, err := h.org.GetTenant(r.Context(), tenantID)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -45,7 +47,15 @@ func (h *OrgHandler) UpdateTenant(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, err)
 		return
 	}
-	tenant, err := h.org.UpdateTenant(r.Context(), req.TenantID, req.Name, req.Domain, req.Settings)
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	// Ignore tenant_id from request for security - can only modify your own tenant
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	authenticatedTenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+	tenant, err := h.org.UpdateTenant(r.Context(), authenticatedTenantID, req.Name, req.Domain, req.Settings)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -53,16 +63,16 @@ func (h *OrgHandler) UpdateTenant(w http.ResponseWriter, r *http.Request) {
 	httpx.OkJson(w, types.TenantResponse{Tenant: *tenant})
 }
 
-// ListUsers returns all users in a tenant.
+// ListUsers returns all users in the current tenant.
 func (h *OrgHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		TenantID string `form:"tenant_id"`
-	}
-	if err := httpx.Parse(r, &req); err != nil {
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	tenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
 		httpx.Error(w, err)
 		return
 	}
-	users, err := h.org.ListUsers(r.Context(), parseUUID(req.TenantID))
+	users, err := h.org.ListUsers(r.Context(), tenantID)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -70,14 +80,22 @@ func (h *OrgHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	httpx.OkJson(w, types.UsersResponse{Users: users})
 }
 
-// InviteUser invites a new user to a tenant.
+// InviteUser invites a new user to the current tenant.
 func (h *OrgHandler) InviteUser(w http.ResponseWriter, r *http.Request) {
 	var req types.InviteUserRequest
 	if err := httpx.Parse(r, &req); err != nil {
 		httpx.Error(w, err)
 		return
 	}
-	user, err := h.org.InviteUser(r.Context(), req.TenantID, req.Email, req.Role)
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	// Ignore tenant_id from request for security - can only invite to your own tenant
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	authenticatedTenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+	user, err := h.org.InviteUser(r.Context(), authenticatedTenantID, req.Email, req.Role)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -92,7 +110,15 @@ func (h *OrgHandler) UpdateUserRole(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, err)
 		return
 	}
-	user, err := h.org.UpdateUserRole(r.Context(), req.TenantID, req.UserID, req.Role)
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	// Ignore tenant_id from request for security - can only modify users in your own tenant
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	authenticatedTenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+	user, err := h.org.UpdateUserRole(r.Context(), authenticatedTenantID, req.UserID, req.Role)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -107,7 +133,15 @@ func (h *OrgHandler) ToggleUser(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, err)
 		return
 	}
-	user, err := h.org.ToggleUserActive(r.Context(), req.TenantID, req.UserID, req.IsActive)
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	// Ignore tenant_id from request for security - can only toggle users in your own tenant
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	authenticatedTenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+	user, err := h.org.ToggleUserActive(r.Context(), authenticatedTenantID, req.UserID, req.IsActive)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -115,16 +149,16 @@ func (h *OrgHandler) ToggleUser(w http.ResponseWriter, r *http.Request) {
 	httpx.OkJson(w, user)
 }
 
-// ListAISystems returns all AI systems for a tenant.
+// ListAISystems returns all AI systems for the current tenant.
 func (h *OrgHandler) ListAISystems(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		TenantID string `form:"tenant_id"`
-	}
-	if err := httpx.Parse(r, &req); err != nil {
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	tenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
 		httpx.Error(w, err)
 		return
 	}
-	systems, err := h.org.ListAISystems(r.Context(), parseUUID(req.TenantID))
+	systems, err := h.org.ListAISystems(r.Context(), tenantID)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -139,7 +173,15 @@ func (h *OrgHandler) CreateAISystem(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, err)
 		return
 	}
-	system, err := h.org.CreateAISystem(r.Context(), req.TenantID, req.Name, req.Description, req.RiskClassification, req.Status, req.Metadata)
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	// Ignore tenant_id from request for security - can only create in your own tenant
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	authenticatedTenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+	system, err := h.org.CreateAISystem(r.Context(), authenticatedTenantID, req.Name, req.Description, req.RiskClassification, req.Status, req.Metadata)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -154,7 +196,15 @@ func (h *OrgHandler) UpdateAISystem(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, err)
 		return
 	}
-	system, err := h.org.UpdateAISystem(r.Context(), req.TenantID, req.SystemID, req.Name, req.Description, req.RiskClassification, req.Status, req.Metadata)
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	// Ignore tenant_id from request for security - can only update in your own tenant
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	authenticatedTenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+	system, err := h.org.UpdateAISystem(r.Context(), authenticatedTenantID, req.SystemID, req.Name, req.Description, req.RiskClassification, req.Status, req.Metadata)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -165,30 +215,41 @@ func (h *OrgHandler) UpdateAISystem(w http.ResponseWriter, r *http.Request) {
 // DeleteAISystem soft deletes an AI system.
 func (h *OrgHandler) DeleteAISystem(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		TenantID string `form:"tenant_id"`
 		SystemID string `form:"system_id"`
 	}
 	if err := httpx.Parse(r, &req); err != nil {
 		httpx.Error(w, err)
 		return
 	}
-	if err := h.org.DeleteAISystem(r.Context(), parseUUID(req.TenantID), parseUUID(req.SystemID)); err != nil {
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	tenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+	systemID, err := parseUUID(req.SystemID)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+	if err := h.org.DeleteAISystem(r.Context(), tenantID, systemID); err != nil {
 		httpx.Error(w, err)
 		return
 	}
 	httpx.OkJson(w, map[string]string{"message": "deleted"})
 }
 
-// GetActivePolicy returns the current active compliance policy.
+// GetActivePolicy returns the current active compliance policy for the current tenant.
 func (h *OrgHandler) GetActivePolicy(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		TenantID string `form:"tenant_id"`
-	}
-	if err := httpx.Parse(r, &req); err != nil {
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	tenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
 		httpx.Error(w, err)
 		return
 	}
-	policy, err := h.org.GetActivePolicy(r.Context(), parseUUID(req.TenantID))
+	policy, err := h.org.GetActivePolicy(r.Context(), tenantID)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -203,7 +264,15 @@ func (h *OrgHandler) UpdatePolicy(w http.ResponseWriter, r *http.Request) {
 		httpx.Error(w, err)
 		return
 	}
-	policy, err := h.org.UpdatePolicy(r.Context(), req.TenantID, req.Name, req.PolicyType, req.Rules)
+	// Get authenticated tenant from context (set by API Gateway after JWT validation)
+	// Ignore tenant_id from request for security - can only update policy in your own tenant
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	authenticatedTenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+	policy, err := h.org.UpdatePolicy(r.Context(), authenticatedTenantID, req.Name, req.PolicyType, req.Rules)
 	if err != nil {
 		httpx.Error(w, err)
 		return
@@ -211,7 +280,10 @@ func (h *OrgHandler) UpdatePolicy(w http.ResponseWriter, r *http.Request) {
 	httpx.OkJson(w, types.PolicyResponse{CompliancePolicy: *policy})
 }
 
-func parseUUID(s string) uuid.UUID {
-	id, _ := uuid.Parse(s)
-	return id
+func parseUUID(s string) (uuid.UUID, error) {
+	id, err := uuid.Parse(s)
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("invalid UUID: %w", err)
+	}
+	return id, nil
 }

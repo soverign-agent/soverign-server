@@ -4,6 +4,7 @@ package logic
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,6 +12,26 @@ import (
 	"sovereign-ai-compliance/org-service/model"
 	"sovereign-ai-compliance/org-service/repo"
 )
+
+// Validation constants.
+const (
+	maxEmailLength     = 254
+	maxNameLength      = 255
+	maxDescriptionLength = 1000
+	maxDomainLength    = 255
+	maxSettingsLength  = 10000
+	maxMetadataLength  = 10000
+	maxRulesLength     = 50000
+)
+
+var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
+
+// Valid roles.
+var validRoles = map[string]bool{
+	"admin":    true,
+	"auditor":  true,
+	"reviewer": true,
+}
 
 // Org handles organization business logic.
 type Org struct {
@@ -31,6 +52,17 @@ func (o *Org) GetTenant(ctx context.Context, tenantID uuid.UUID) (*model.Tenant,
 
 // UpdateTenant updates tenant information.
 func (o *Org) UpdateTenant(ctx context.Context, tenantID uuid.UUID, name, domain, settings string) (*model.Tenant, error) {
+	// Validate input
+	if name != "" && len(name) > maxNameLength {
+		return nil, fmt.Errorf("name exceeds maximum length of %d characters", maxNameLength)
+	}
+	if domain != "" && len(domain) > maxDomainLength {
+		return nil, fmt.Errorf("domain exceeds maximum length of %d characters", maxDomainLength)
+	}
+	if settings != "" && len(settings) > maxSettingsLength {
+		return nil, fmt.Errorf("settings exceeds maximum length of %d characters", maxSettingsLength)
+	}
+
 	tenant, err := o.repo.GetTenant(ctx, tenantID)
 	if err != nil {
 		return nil, err
@@ -55,12 +87,23 @@ func (o *Org) UpdateTenant(ctx context.Context, tenantID uuid.UUID, name, domain
 
 // InviteUser creates a new user in a tenant.
 func (o *Org) InviteUser(ctx context.Context, tenantID uuid.UUID, email, role string) (*model.SafeUser, error) {
+	// Validate input
+	if len(email) > maxEmailLength {
+		return nil, fmt.Errorf("email exceeds maximum length of %d characters", maxEmailLength)
+	}
+	if !emailRegex.MatchString(email) {
+		return nil, fmt.Errorf("invalid email format")
+	}
+	if !validRoles[role] {
+		return nil, fmt.Errorf("invalid role: must be one of [admin, auditor, reviewer]")
+	}
+
 	// In a real implementation, send invitation email and set a temporary password
 	user := &model.User{
 		ID:           uuid.Must(uuid.NewRandom()),
 		TenantID:     tenantID,
 		Email:        email,
-		PasswordHash: "", // Will be set when user accepts invitation
+		PasswordHash: "", // Will be set when user accepts invitation - Verify handles this securely
 		Role:         role,
 		IsActive:     true,
 		CreatedAt:    time.Now(),
@@ -88,6 +131,11 @@ func (o *Org) ListUsers(ctx context.Context, tenantID uuid.UUID) ([]model.SafeUs
 
 // UpdateUserRole updates a user's role.
 func (o *Org) UpdateUserRole(ctx context.Context, tenantID, userID uuid.UUID, role string) (*model.SafeUser, error) {
+	// Validate input
+	if !validRoles[role] {
+		return nil, fmt.Errorf("invalid role: must be one of [admin, auditor, reviewer]")
+	}
+
 	user, err := o.repo.GetUserByID(ctx, tenantID, userID)
 	if err != nil {
 		return nil, err
@@ -120,6 +168,17 @@ func (o *Org) ToggleUserActive(ctx context.Context, tenantID, userID uuid.UUID, 
 
 // CreateAISystem creates a new AI system.
 func (o *Org) CreateAISystem(ctx context.Context, tenantID uuid.UUID, name, description, riskClassification, status, metadata string) (*model.AISystem, error) {
+	// Validate input
+	if len(name) > maxNameLength {
+		return nil, fmt.Errorf("name exceeds maximum length of %d characters", maxNameLength)
+	}
+	if len(description) > maxDescriptionLength {
+		return nil, fmt.Errorf("description exceeds maximum length of %d characters", maxDescriptionLength)
+	}
+	if len(metadata) > maxMetadataLength {
+		return nil, fmt.Errorf("metadata exceeds maximum length of %d characters", maxMetadataLength)
+	}
+
 	system := &model.AISystem{
 		ID:                 uuid.Must(uuid.NewRandom()),
 		TenantID:           tenantID,
@@ -149,6 +208,17 @@ func (o *Org) ListAISystems(ctx context.Context, tenantID uuid.UUID) ([]model.AI
 
 // UpdateAISystem updates an AI system.
 func (o *Org) UpdateAISystem(ctx context.Context, tenantID, systemID uuid.UUID, name, description, riskClassification, status, metadata string) (*model.AISystem, error) {
+	// Validate input
+	if name != "" && len(name) > maxNameLength {
+		return nil, fmt.Errorf("name exceeds maximum length of %d characters", maxNameLength)
+	}
+	if description != "" && len(description) > maxDescriptionLength {
+		return nil, fmt.Errorf("description exceeds maximum length of %d characters", maxDescriptionLength)
+	}
+	if metadata != "" && len(metadata) > maxMetadataLength {
+		return nil, fmt.Errorf("metadata exceeds maximum length of %d characters", maxMetadataLength)
+	}
+
 	system, err := o.repo.GetAISystem(ctx, tenantID, systemID)
 	if err != nil {
 		return nil, err
@@ -189,6 +259,14 @@ func (o *Org) GetActivePolicy(ctx context.Context, tenantID uuid.UUID) (*model.C
 
 // UpdatePolicy creates a new active policy and deactivates the old one.
 func (o *Org) UpdatePolicy(ctx context.Context, tenantID uuid.UUID, name, policyType, rules string) (*model.CompliancePolicy, error) {
+	// Validate input
+	if len(name) > maxNameLength {
+		return nil, fmt.Errorf("name exceeds maximum length of %d characters", maxNameLength)
+	}
+	if len(rules) > maxRulesLength {
+		return nil, fmt.Errorf("rules exceeds maximum length of %d characters", maxRulesLength)
+	}
+
 	// Deactivate old policies first
 	if err := o.repo.DeactivateOldPolicies(ctx, tenantID); err != nil {
 		return nil, fmt.Errorf("failed to deactivate old policies: %w", err)
