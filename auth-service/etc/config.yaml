@@ -1,0 +1,17 @@
+Name: auth-service
+Host: 0.0.0.0
+Port: 8001
+
+Auth:
+  PrivateKeyPath: "../api-gateway/certs/jwt-private.pem"
+  AccessExpiry: 900   # 15 minutes in seconds
+  RefreshExpiry: 604800 # 7 days in seconds
+  Issuer: "sovereign-ai-compliance"
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: sovereign
+  Password: sovereign-dev-password
+  Database: sovereign
+  SSLMode: disable
