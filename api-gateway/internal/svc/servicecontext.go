@@ -2,6 +2,7 @@
 package svc
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -15,11 +16,11 @@ import (
 
 // ServiceContext holds the gateway runtime dependencies.
 type ServiceContext struct {
-	Config           config.Config
-	JWTAuth          func(http.HandlerFunc) http.HandlerFunc
-	Tenant           func(http.HandlerFunc) http.HandlerFunc
-	UpstreamProxies  map[string]*httputil.ReverseProxy
-	Breakers         map[string]breaker.Breaker
+	Config          config.Config
+	JWTAuth         func(http.HandlerFunc) http.HandlerFunc
+	Tenant          func(http.HandlerFunc) http.HandlerFunc
+	UpstreamProxies map[string]*httputil.ReverseProxy
+	Breakers        map[string]breaker.Breaker
 }
 
 // NewServiceContext creates a ServiceContext from configuration.
@@ -80,7 +81,7 @@ func (sc *ServiceContext) Proxy(name string) http.HandlerFunc {
 			p.ServeHTTP(w, r)
 			return nil
 		})
-		if err == breaker.ErrServiceUnavailable {
+		if errors.Is(err, breaker.ErrServiceUnavailable) {
 			http.Error(w, "circuit breaker open", http.StatusServiceUnavailable)
 		}
 	}
