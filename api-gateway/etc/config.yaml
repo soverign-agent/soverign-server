@@ -1,0 +1,24 @@
+Name: api-gateway
+Host: 0.0.0.0
+Port: 8080
+
+Auth:
+  PublicKeyPath: "certs/jwt-public.pem"
+
+Upstream:
+  Auth: "http://localhost:8001"
+  Org: "http://localhost:8002"
+  Repo: "http://localhost:8003"
+  RAG: "http://localhost:8004"
+  Doc: "http://localhost:8005"
+  Audit: "http://localhost:8006"
+  Agent: "http://localhost:8007"
+  Notification: "http://localhost:8008"
+
+PublicEndpoints:
+  - "/api/v1/auth/login"
+  - "/api/v1/auth/register"
+  - "/api/v1/auth/refresh"
+
+MaxConns: 10000
+Timeout: 30000
