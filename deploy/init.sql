@@ -172,6 +172,26 @@ CREATE TABLE IF NOT EXISTS notification_events (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS refresh_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    token_hash VARCHAR(255) NOT NULL,
+    expires_at TIMESTAMPTZ NOT NULL,
+    revoked BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    token_hash VARCHAR(255) NOT NULL,
+    used BOOLEAN NOT NULL DEFAULT FALSE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- =============================================================================
 -- 3. Row Level Security
 -- =============================================================================
@@ -212,6 +232,12 @@ ALTER TABLE compliance_policies FORCE ROW LEVEL SECURITY;
 
 ALTER TABLE notification_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notification_events FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE refresh_tokens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE refresh_tokens FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE password_reset_tokens ENABLE ROW LEVEL SECURITY;
+ALTER TABLE password_reset_tokens FORCE ROW LEVEL SECURITY;
 
 -- Tenants table: users can only see their own tenant
 ALTER TABLE tenants ENABLE ROW LEVEL SECURITY;
@@ -306,6 +332,18 @@ CREATE POLICY tenant_isolation ON notification_events
     USING (tenant_id = current_tenant_id())
     WITH CHECK (tenant_id = current_tenant_id());
 
+-- Refresh Tokens policy
+CREATE POLICY tenant_isolation ON refresh_tokens
+    FOR ALL
+    USING (tenant_id = current_tenant_id())
+    WITH CHECK (tenant_id = current_tenant_id());
+
+-- Password Reset Tokens policy
+CREATE POLICY tenant_isolation ON password_reset_tokens
+    FOR ALL
+    USING (tenant_id = current_tenant_id())
+    WITH CHECK (tenant_id = current_tenant_id());
+
 -- =============================================================================
 -- 5. Indexes
 -- =============================================================================
@@ -328,3 +366,5 @@ CREATE INDEX IF NOT EXISTS idx_approval_requests_tenant_status ON approval_reque
 CREATE INDEX IF NOT EXISTS idx_approval_history_tenant_request ON approval_history(tenant_id, approval_request_id);
 CREATE INDEX IF NOT EXISTS idx_compliance_policies_tenant_type ON compliance_policies(tenant_id, policy_type);
 CREATE INDEX IF NOT EXISTS idx_notification_events_tenant_status ON notification_events(tenant_id, status);
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_hash ON refresh_tokens(user_id, token_hash);
+CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens(token_hash);
