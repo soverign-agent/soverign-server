@@ -30,11 +30,11 @@ import (
 
 // RepositoryLogic handles repository connection management business logic.
 type RepositoryLogic struct {
-	cfg         config.Config
-	repo        repo.Repository
-	encryption  *security.AESGCMEncryption
-	logger      *zap.Logger
-	tempDir     string
+	cfg        config.Config
+	repo       repo.Repository
+	encryption *security.AESGCMEncryption
+	tempDir    string
+	logger     *zap.Logger
 }
 
 // NewRepositoryLogic creates a new RepositoryLogic instance.
@@ -84,7 +84,7 @@ func (l *RepositoryLogic) Create(ctx context.Context, tenantID uuid.UUID, req *t
 	// Encrypt webhook secret if provided
 	if req.WebhookSecret != nil {
 		secretBytes := []byte(*req.WebhookSecret)
-		encrypted, err := l.encryption.Encrypt(secretBytes);
+		encrypted, err := l.encryption.Encrypt(secretBytes)
 		if err != nil {
 			return nil, fmt.Errorf("encrypt webhook secret: %w", err)
 		}
@@ -172,9 +172,9 @@ func (l *RepositoryLogic) TestConnection(ctx context.Context, tenantID, repoID u
 
 	// Try to clone with a depth of 1 to be quick
 	cloneOptions := &git.CloneOptions{
-		URL:               repository.URL,
-		Depth:             1,
-		NoCheckout:        true,
+		URL:        repository.URL,
+		Depth:      1,
+		NoCheckout: true,
 	}
 	if auth != nil {
 		cloneOptions.Auth = auth
@@ -281,18 +281,18 @@ func (l *RepositoryLogic) CreateScanRecord(ctx context.Context, tenantID, repoID
 	now := time.Now()
 
 	scan := &model.ScanResult{
-		ID:           scanID,
-		RepositoryID: repoID,
-		TenantID:     tenantID,
-		Branch:       branch,
-		CommitHash:   commitHash,
-		AIUses:       []byte("[]"),
-		DataFlows:    []byte("[]"),
+		ID:            scanID,
+		RepositoryID:  repoID,
+		TenantID:      tenantID,
+		Branch:        branch,
+		CommitHash:    commitHash,
+		AIUses:        []byte("[]"),
+		DataFlows:     []byte("[]"),
 		SensitiveData: []byte("[]"),
-		TotalFiles:   0,
-		ScannedFiles: 0,
-		StartedAt:    now,
-		CreatedAt:    now,
+		TotalFiles:    0,
+		ScannedFiles:  0,
+		StartedAt:     now,
+		CreatedAt:     now,
 	}
 
 	if err := l.repo.CreateScanResult(ctx, scan); err != nil {
@@ -320,6 +320,11 @@ func (l *RepositoryLogic) GetScanResult(ctx context.Context, tenantID, scanID uu
 // GetByID retrieves a repository by ID.
 func (l *RepositoryLogic) GetByID(ctx context.Context, tenantID, repoID uuid.UUID) (*model.Repository, error) {
 	return l.repo.GetByID(ctx, tenantID, repoID)
+}
+
+// GetByIDAnyTenant retrieves a repository by ID for webhook handling.
+func (l *RepositoryLogic) GetByIDAnyTenant(ctx context.Context, repoID uuid.UUID) (*model.Repository, error) {
+	return l.repo.GetByIDAnyTenant(ctx, repoID)
 }
 
 // ListScanResults lists all scan results for a repository.
@@ -355,15 +360,15 @@ func (l *RepositoryLogic) PullCode(ctx context.Context, repository *model.Reposi
 	var cloneOptions *git.CloneOptions
 	if branch != "" {
 		cloneOptions = &git.CloneOptions{
-			URL:  repository.URL,
-			Depth: 1,
+			URL:           repository.URL,
+			Depth:         1,
 			ReferenceName: plumbing.ReferenceName("refs/heads/" + branch),
-			SingleBranch: true,
+			SingleBranch:  true,
 		}
 	} else {
 		cloneOptions = &git.CloneOptions{
-			URL:  repository.URL,
-			Depth: 1,
+			URL:          repository.URL,
+			Depth:        1,
 			SingleBranch: true,
 		}
 		if repository.DefaultBranch != "" {
@@ -409,10 +414,6 @@ func (l *RepositoryLogic) FullScan(ctx context.Context, tenantID, repoID uuid.UU
 		branch = repository.DefaultBranch
 	}
 
-	// Get current HEAD commit hash before we pull
-	// We'll get it after clone
-	var commitHash string
-
 	// Pull code to temp dir
 	cloneDir, err := l.PullCode(ctx, repository, branch)
 	if err != nil {
@@ -421,7 +422,15 @@ func (l *RepositoryLogic) FullScan(ctx context.Context, tenantID, repoID uuid.UU
 	defer l.CleanupCode(cloneDir)
 
 	// Get commit hash from cloned repo
-	// TODO: actually get the HEAD commit hash from the cloned repo
+	clonedRepo, err := git.PlainOpen(cloneDir)
+	if err != nil {
+		return nil, fmt.Errorf("open cloned repository: %w", err)
+	}
+	head, err := clonedRepo.Head()
+	if err != nil {
+		return nil, fmt.Errorf("get HEAD: %w", err)
+	}
+	commitHash := head.Hash().String()
 
 	// Create scan record
 	scan, err := l.CreateScanRecord(ctx, tenantID, repoID, branch, commitHash)

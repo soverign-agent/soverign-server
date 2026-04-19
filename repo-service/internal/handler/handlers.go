@@ -2,9 +2,11 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/zeromicro/go-zero/rest/httpx"
@@ -126,18 +128,31 @@ func (h *RepositoryHandler) TriggerScan(w http.ResponseWriter, r *http.Request) 
 	}
 
 	tenantIDStr := tenant.MustFromContext(r.Context())
-	_, err := parseUUID(tenantIDStr)
+	tenantID, err := parseUUID(tenantIDStr)
 	if err != nil {
 		httpx.Error(w, err)
 		return
 	}
 
-	// TODO: actually run the scan async after implementing code pull
-	// For now just return queued status
-	httpx.OkJson(w, map[string]interface{}{
-		"scan_id": uuid.New(),
-		"status": "queued",
+	// Run scan synchronously for now - in the future this will be async via Temporal
+	scan, err := h.logic.FullScan(r.Context(), tenantID, req.RepositoryID, getBranch(req.Branch))
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+
+	httpx.OkJson(w, types.TriggerScanResponse{
+		ScanID: scan.ID,
+		Status: "completed",
 	})
+}
+
+// getBranch returns the branch to use, falling back to default if empty.
+func getBranch(b *string) string {
+	if b == nil || *b == "" {
+		return ""
+	}
+	return *b
 }
 
 // WebhookCallback handles incoming webhook from Git provider.
@@ -169,20 +184,15 @@ func (h *RepositoryHandler) WebhookCallback(w http.ResponseWriter, r *http.Reque
 		signature = r.Header.Get("X-Gitlab-Token")
 	}
 
-	// TODO: In the future we'll need to get tenant ID from the repository since webhook doesn't have it
-	// For now, we expect the API gateway has already set tenant context
-	// Wait - actually repository is already tenant-isolated via RLS, so we need to get tenant from context
-	tenantIDStr := tenant.MustFromContext(r.Context())
-	tenantID, err := parseUUID(tenantIDStr)
+	// Webhook callbacks are sent by Git providers, so resolve tenant ownership from
+	// the repository record before triggering tenant-scoped scan work.
+	repository, err := h.logic.GetByIDAnyTenant(r.Context(), repoID)
 	if err != nil {
 		httpx.Error(w, err)
 		return
 	}
-
-	// Get repository from database
-	repository, err := h.logic.GetByID(r.Context(), tenantID, repoID)
-	if err != nil {
-		httpx.Error(w, err)
+	if len(repository.WebhookSecret) == 0 {
+		http.Error(w, "webhook secret required", http.StatusUnauthorized)
 		return
 	}
 
@@ -198,12 +208,31 @@ func (h *RepositoryHandler) WebhookCallback(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// TODO: When we implement code pulling and audit triggering, we need to trigger an audit job here
-	// For now just accept the webhook
+	scan, err := h.logic.FullScan(r.Context(), repository.TenantID, repoID, branchFromWebhookPayload(bodyBytes))
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+
 	httpx.OkJson(w, map[string]string{
-		"status": "accepted",
-		"message": "webhook received, audit will be triggered shortly",
+		"status":  "completed",
+		"scan_id": scan.ID.String(),
 	})
+}
+
+func branchFromWebhookPayload(payload []byte) string {
+	var event struct {
+		Ref string `json:"ref"`
+	}
+	if err := json.Unmarshal(payload, &event); err != nil {
+		return ""
+	}
+
+	const headsPrefix = "refs/heads/"
+	if strings.HasPrefix(event.Ref, headsPrefix) {
+		return strings.TrimPrefix(event.Ref, headsPrefix)
+	}
+	return event.Ref
 }
 
 // GetScanResult gets a specific scan result.

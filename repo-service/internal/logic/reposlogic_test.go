@@ -2,13 +2,16 @@ package logic
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"testing"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"sovereign-ai-compliance/repo-service/internal/config"
 	"sovereign-ai-compliance/repo-service/model"
 	"sovereign-ai-compliance/shared/security"
-	"go.uber.org/zap"
 )
 
 func TestVerifyWebhookSignature(t *testing.T) {
@@ -39,29 +42,33 @@ func TestVerifyWebhookSignature(t *testing.T) {
 	}
 
 	repo := &model.Repository{
-		ID:             uuid.New(),
-		TenantID:       uuid.New(),
-		WebhookSecret:  encryptedSecret,
-		Provider:       model.ProviderGitHub,
+		ID:            uuid.New(),
+		TenantID:      uuid.New(),
+		WebhookSecret: encryptedSecret,
+		Provider:      model.ProviderGitHub,
 	}
 
 	// Test payload
 	payload := []byte(`{"ref": "refs/heads/main"}`)
 
-	// Calculate expected signature
-	// GitHub format: sha256=hex
-	// Since we already test the encryption in shared package, just test signature verification
-	// We trust the encryption works
-
-	// Valid signature
 	valid, err := logic.VerifyWebhookSignature(context.Background(), repo, payload, "", model.ProviderGitHub)
 	if err != nil {
 		t.Errorf("VerifyWebhookSignature failed: %v", err)
 	}
-	// No signature with secret configured should still work? Wait no - if secret is configured, signature is required
-	// Actually current logic accepts when signature header empty? Let me check - yes, if secret exists but no header, expected signature will be empty and comparison will fail
 	if valid {
 		t.Errorf("expected invalid signature when no header provided, got valid")
+	}
+
+	mac := hmac.New(sha256.New, secret)
+	mac.Write(payload)
+	signature := "sha256=" + hex.EncodeToString(mac.Sum(nil))
+
+	valid, err = logic.VerifyWebhookSignature(context.Background(), repo, payload, signature, model.ProviderGitHub)
+	if err != nil {
+		t.Errorf("VerifyWebhookSignature failed: %v", err)
+	}
+	if !valid {
+		t.Errorf("expected valid signature, got invalid")
 	}
 }
 

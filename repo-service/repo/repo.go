@@ -13,6 +13,8 @@ import (
 type Repository interface {
 	// GetByID retrieves a repository by ID for the given tenant.
 	GetByID(ctx context.Context, tenantID, repoID uuid.UUID) (*model.Repository, error)
+	// GetByIDAnyTenant retrieves a repository by ID for unauthenticated webhook callbacks.
+	GetByIDAnyTenant(ctx context.Context, repoID uuid.UUID) (*model.Repository, error)
 	// ListByTenant lists all repositories for a tenant.
 	ListByTenant(ctx context.Context, tenantID uuid.UUID) ([]model.Repository, error)
 	// Create creates a new repository connection.

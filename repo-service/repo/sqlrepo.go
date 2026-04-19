@@ -58,6 +58,42 @@ func (r *sqlRepository) GetByID(ctx context.Context, tenantID, repoID uuid.UUID)
 	return &repo, nil
 }
 
+// GetByIDAnyTenant retrieves a repository by ID without a tenant filter.
+func (r *sqlRepository) GetByIDAnyTenant(ctx context.Context, repoID uuid.UUID) (*model.Repository, error) {
+	var repo model.Repository
+	var webhookID sql.NullString
+	var lastScannedAt sql.NullTime
+
+	err := r.db.QueryRowContext(ctx,
+		`SELECT id, tenant_id, name, url, provider, encrypted_credentials, webhook_secret, webhook_id, default_branch, last_scanned_at, created_at, updated_at
+		 FROM repositories WHERE id = $1`,
+		repoID,
+	).Scan(
+		&repo.ID,
+		&repo.TenantID,
+		&repo.Name,
+		&repo.URL,
+		&repo.Provider,
+		&repo.EncryptedCredentials,
+		&repo.WebhookSecret,
+		&webhookID,
+		&repo.DefaultBranch,
+		&lastScannedAt,
+		&repo.CreatedAt,
+		&repo.UpdatedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("repository not found")
+		}
+		return nil, fmt.Errorf("query repository for webhook: %w", err)
+	}
+
+	repo.WebhookID = webhookID
+	repo.LastScannedAt = lastScannedAt
+	return &repo, nil
+}
+
 // ListByTenant lists all repositories for a tenant.
 func (r *sqlRepository) ListByTenant(ctx context.Context, tenantID uuid.UUID) ([]model.Repository, error) {
 	rows, err := r.db.QueryContext(ctx,
