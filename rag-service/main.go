@@ -66,7 +66,7 @@ func main() {
 		MaxTokens:   c.LLM.MaxTokens,
 		Temperature: c.LLM.Temperature,
 	}
-	llmClient, err := llm.NewClient(llmConfig)
+	llmClient, err := llm.NewClient(llmConfig, logger)
 	if err != nil {
 		logx.Must(fmt.Errorf("failed to create LLM client: %w", err))
 	}
@@ -79,12 +79,16 @@ func main() {
 	documentsLogic := logic.NewDocumentsLogic(c, repository, processor, llmClient, logger)
 	searchLogic := logic.NewSearchLogic(repository, llmClient, logger)
 	statsLogic := logic.NewStatsLogic(repository, logger)
-	ragHandler := handler.NewRagHandler(documentsLogic, searchLogic, statsLogic)
+
+	// Create handlers
+	documentsHandler := handler.NewDocumentsHandler(documentsLogic)
+	searchHandler := handler.NewSearchHandler(searchLogic)
+	statsHandler := handler.NewStatsHandler(statsLogic)
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
 
-	handler.RegisterRoutes(server, ragHandler)
+	handler.RegisterRoutes(server, documentsHandler, searchHandler, statsHandler)
 
 	fmt.Printf("Starting rag-service at %s:%d...\n", c.Host, c.Port)
 	server.Start()

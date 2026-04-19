@@ -4,6 +4,8 @@ package llm
 import (
 	"context"
 	"fmt"
+
+	"go.uber.org/zap"
 )
 
 // Message represents a single message in a chat conversation.
@@ -81,13 +83,14 @@ type Config struct {
 }
 
 // NewClient creates a concrete Client based on the provided Config.
-// This is a factory that will delegate to provider-specific implementations
-// when they are registered. For now it validates configuration.
-func NewClient(cfg Config) (Client, error) {
+func NewClient(cfg Config, logger *zap.Logger) (Client, error) {
 	switch cfg.Provider {
-	case ProviderOpenAI, ProviderAnthropic, ProviderCustom:
-		// Valid providers; concrete implementations are wired at service startup.
-		return nil, fmt.Errorf("provider %q not yet implemented: wire the concrete client at service startup", cfg.Provider)
+	case ProviderOpenAI:
+		return NewOpenAIClient(cfg, logger), nil
+	case ProviderAnthropic:
+		return nil, fmt.Errorf("provider %q not yet implemented", cfg.Provider)
+	case ProviderCustom:
+		return nil, fmt.Errorf("custom provider requires explicit wiring at service startup")
 	default:
 		return nil, fmt.Errorf("unsupported LLM provider: %q", cfg.Provider)
 	}
