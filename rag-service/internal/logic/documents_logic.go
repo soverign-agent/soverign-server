@@ -95,7 +95,7 @@ func (l *DocumentsLogic) UploadDocument(ctx context.Context, req UploadDocumentR
 		zap.Int64("file_size", doc.FileSize))
 
 	// Process document asynchronously in a goroutine
-	// In future, this could be a Temporal workflow for durable async processing with retries
+	// TODO: In future, this could be a Temporal workflow for durable async processing with retries
 	go l.processDocumentAsync(ctx, doc.ID, fileContent, fileExt)
 
 	return &UploadDocumentResponse{
