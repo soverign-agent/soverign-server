@@ -1,0 +1,28 @@
+Name: rag-service
+Host: 0.0.0.0
+Port: 8085
+
+RestConf:
+  Host: 0.0.0.0
+  Port: 8085
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: postgres
+  Password: postgres
+  Database: sovereign
+  SSLMode: disable
+
+LLM:
+  Provider: openai
+  APIKey: ""
+  BaseURL: ""
+  EmbeddingModel: text-embedding-3-small
+  Timeout: 30
+  MaxTokens: 1000
+  Temperature: 0.0
+
+Chunking:
+  DefaultChunkSize: 1000
+  DefaultChunkOverlap: 200
