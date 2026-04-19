@@ -3,7 +3,7 @@ package logic
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"mime/multipart"
 	"strings"
 
@@ -21,11 +21,11 @@ import (
 
 // DocumentsLogic handles document management business logic.
 type DocumentsLogic struct {
-	config     config.Config
-	repo       *repo.SQLRepository
-	processor  *processing.Processor
-	llmClient  llm.Client
-	logger     *zap.Logger
+	config    config.Config
+	repo      *repo.SQLRepository
+	processor *processing.Processor
+	llmClient llm.Client
+	logger    *zap.Logger
 }
 
 // NewDocumentsLogic creates a new DocumentsLogic.
@@ -37,11 +37,11 @@ func NewDocumentsLogic(
 	logger *zap.Logger,
 ) *DocumentsLogic {
 	return &DocumentsLogic{
-		config:     cfg,
-		repo:       repo,
-		processor:  processor,
-		llmClient:  llmClient,
-		logger:     logger,
+		config:    cfg,
+		repo:      repo,
+		processor: processor,
+		llmClient: llmClient,
+		logger:    logger,
 	}
 }
 
@@ -240,8 +240,8 @@ func (l *DocumentsLogic) DeleteDocument(ctx context.Context, req DeleteDocumentR
 // ReprocessDocumentRequest reprocesses a document.
 type ReprocessDocumentRequest struct {
 	DocumentID  uuid.UUID `json:"document_id"`
-	FileContent []byte   `json:"-"` // File content if re-uploaded
-	FileType    string   `json:"-"`
+	FileContent []byte    `json:"-"` // File content if re-uploaded
+	FileType    string    `json:"-"`
 }
 
 // ReprocessDocument reprocesses an existing document.
@@ -274,6 +274,6 @@ func (l *DocumentsLogic) ReprocessDocument(ctx context.Context, req ReprocessDoc
 
 // Errors
 var (
-	ErrTenantContextRequired = error(fmt.Errorf("tenant context required"))
-	ErrDocumentNotFound      = error(fmt.Errorf("document not found"))
+	ErrTenantContextRequired = errors.New("tenant context required")
+	ErrDocumentNotFound      = errors.New("document not found")
 )

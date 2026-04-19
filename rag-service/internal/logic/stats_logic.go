@@ -26,10 +26,10 @@ func NewStatsLogic(repo *repo.SQLRepository, logger *zap.Logger) *StatsLogic {
 
 // GetStatsResponse is the statistics response.
 type GetStatsResponse struct {
-	DocumentCount       int   `json:"document_count"`
-	CompletedDocuments  int   `json:"completed_documents"`
-	PendingDocuments    int   `json:"pending_documents"`
-	EmbeddingCount      int   `json:"embedding_count"`
+	DocumentCount      int   `json:"document_count"`
+	CompletedDocuments int   `json:"completed_documents"`
+	PendingDocuments   int   `json:"pending_documents"`
+	EmbeddingCount     int   `json:"embedding_count"`
 	TotalFileSizeBytes int64 `json:"total_file_size_bytes"`
 }
 
@@ -46,10 +46,10 @@ func (l *StatsLogic) GetStats(ctx context.Context) (*GetStatsResponse, error) {
 	}
 
 	return &GetStatsResponse{
-		DocumentCount:       stats.DocumentCount,
-		CompletedDocuments:  stats.CompletedDocuments,
-		PendingDocuments:    stats.PendingDocuments,
-		EmbeddingCount:      stats.EmbeddingCount,
-		TotalFileSizeBytes:  stats.TotalFileSizeBytes,
+		DocumentCount:      stats.DocumentCount,
+		CompletedDocuments: stats.CompletedDocuments,
+		PendingDocuments:   stats.PendingDocuments,
+		EmbeddingCount:     stats.EmbeddingCount,
+		TotalFileSizeBytes: stats.TotalFileSizeBytes,
 	}, nil
 }

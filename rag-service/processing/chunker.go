@@ -7,14 +7,14 @@ import (
 
 // Chunker handles intelligent text chunking with overlap.
 type Chunker struct {
-	chunkSize   int
+	chunkSize    int
 	chunkOverlap int
 }
 
 // NewChunker creates a new Chunker with the specified chunk size and overlap.
 func NewChunker(chunkSize, chunkOverlap int) *Chunker {
 	return &Chunker{
-		chunkSize:   chunkSize,
+		chunkSize:    chunkSize,
 		chunkOverlap: chunkOverlap,
 	}
 }

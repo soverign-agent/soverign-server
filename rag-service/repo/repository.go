@@ -344,9 +344,9 @@ func (r *SQLRepository) GetStats(ctx context.Context) (*Stats, error) {
 
 // Stats contains RAG statistics for the current tenant.
 type Stats struct {
-	DocumentCount       int   `json:"document_count"`
-	CompletedDocuments  int   `json:"completed_documents"`
-	PendingDocuments    int   `json:"pending_documents"`
-	EmbeddingCount      int   `json:"embedding_count"`
+	DocumentCount      int   `json:"document_count"`
+	CompletedDocuments int   `json:"completed_documents"`
+	PendingDocuments   int   `json:"pending_documents"`
+	EmbeddingCount     int   `json:"embedding_count"`
 	TotalFileSizeBytes int64 `json:"total_file_size_bytes"`
 }

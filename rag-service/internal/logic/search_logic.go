@@ -48,9 +48,9 @@ type SearchResult struct {
 
 // SearchResponse is the RAG search response.
 type SearchResponse struct {
-	Query    string          `json:"query"`
-	Results  []SearchResult  `json:"results"`
-	TopK     int             `json:"top_k"`
+	Query   string         `json:"query"`
+	Results []SearchResult `json:"results"`
+	TopK    int            `json:"top_k"`
 }
 
 // Search performs similarity search for the query.
@@ -100,8 +100,8 @@ func (l *SearchLogic) Search(ctx context.Context, req SearchRequest) (*SearchRes
 	)
 
 	return &SearchResponse{
-		Query:    req.Query,
-		Results:  responseResults,
-		TopK:     req.TopK,
+		Query:   req.Query,
+		Results: responseResults,
+		TopK:    req.TopK,
 	}, nil
 }

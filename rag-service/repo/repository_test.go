@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	_ "github.com/lib/pq"
 	_ "sovereign-ai-compliance/rag-service/model"
 	"sovereign-ai-compliance/shared/tenant"
 )

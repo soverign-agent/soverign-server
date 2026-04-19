@@ -10,14 +10,14 @@ import (
 	"sovereign-ai-compliance/rag-service/internal/config"
 	"sovereign-ai-compliance/rag-service/internal/handler"
 	"sovereign-ai-compliance/rag-service/internal/logic"
-	"sovereign-ai-compliance/rag-service/repo"
 	"sovereign-ai-compliance/rag-service/processing"
+	"sovereign-ai-compliance/rag-service/repo"
 	"sovereign-ai-compliance/shared/llm"
 
+	_ "github.com/lib/pq"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
-	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 )
 
