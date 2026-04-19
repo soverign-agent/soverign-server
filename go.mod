@@ -10,9 +10,11 @@ require (
 	github.com/lib/pq v1.12.3
 	github.com/pgvector/pgvector-go v0.3.0
 	github.com/stretchr/testify v1.11.1
+	github.com/yuin/goldmark v1.8.2
 	github.com/zeromicro/go-zero v1.10.1
 	go.uber.org/zap v1.24.0
 	golang.org/x/crypto v0.50.0
+	golang.org/x/net v0.52.0
 	google.golang.org/grpc v1.80.0
 	google.golang.org/protobuf v1.36.11
 )
@@ -71,7 +73,6 @@ require (
 	go.uber.org/automaxprocs v1.6.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/net v0.52.0 // indirect
 	golang.org/x/sys v0.43.0 // indirect
 	golang.org/x/text v0.36.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260128011058-8636f8732409 // indirect
