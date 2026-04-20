@@ -1,0 +1,332 @@
+package repo
+
+import (
+	"context"
+	"database/sql"
+	"fmt"
+
+	"github.com/google/uuid"
+	"sovereign-ai-compliance/audit-service/model"
+	"sovereign-ai-compliance/shared/tenant"
+)
+
+// CreateAudit creates a new audit job.
+func (r *SQLRepository) CreateAudit(ctx context.Context, audit *model.AuditJob) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	query := `
+		INSERT INTO audit_jobs (id, tenant_id, repository_id, name, audit_type, status, risk_score, risk_severity)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING created_at, updated_at`
+
+	err = tx.QueryRowContext(
+		ctx, query,
+		audit.ID, audit.TenantID, audit.RepositoryID, audit.Name,
+		audit.AuditType, audit.Status, audit.RiskScore, audit.RiskSeverity,
+	).Scan(&audit.CreatedAt, &audit.UpdatedAt)
+
+	if err != nil {
+		return fmt.Errorf("insert audit: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// GetAuditByID retrieves an audit job by ID.
+func (r *SQLRepository) GetAuditByID(ctx context.Context, id uuid.UUID) (*model.AuditJob, error) {
+	tenantID, ok := tenant.FromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("tenant context required")
+	}
+
+	query := `
+		SELECT id, tenant_id, repository_id, name, audit_type, status,
+		       risk_score, risk_severity, progress_percentage, findings_count,
+		       critical_findings, high_findings, medium_findings, low_findings,
+		       workflow_id, started_at, completed_at, created_at, updated_at
+		FROM audit_jobs
+		WHERE id = $1`
+
+	var audit model.AuditJob
+	err := r.base.DB().QueryRowContext(ctx, query, id).Scan(
+		&audit.ID, &audit.TenantID, &audit.RepositoryID, &audit.Name,
+		&audit.AuditType, &audit.Status, &audit.RiskScore, &audit.RiskSeverity,
+		&audit.ProgressPercentage, &audit.FindingsCount, &audit.CriticalFindings,
+		&audit.HighFindings, &audit.MediumFindings, &audit.LowFindings,
+		&audit.WorkflowID, &audit.StartedAt, &audit.CompletedAt,
+		&audit.CreatedAt, &audit.UpdatedAt,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get audit: %w", err)
+	}
+
+	// Double-check tenant access (RLS should already handle this)
+	if audit.TenantID.String() != tenantID {
+		return nil, nil
+	}
+
+	return &audit, nil
+}
+
+// ListAudits lists audit jobs for the current tenant with filtering.
+func (r *SQLRepository) ListAudits(ctx context.Context, repoID *uuid.UUID, status *string, page, pageSize int) ([]model.AuditJobSummary, int, error) {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return nil, 0, fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	// Build query with filters
+	var whereClause string
+	var args []interface{}
+	argIdx := 1
+
+	if repoID != nil {
+		whereClause += " WHERE repository_id = $" + fmt.Sprint(argIdx)
+		args = append(args, *repoID)
+		argIdx++
+	}
+	if status != nil {
+		if whereClause == "" {
+			whereClause += " WHERE"
+		} else {
+			whereClause += " AND"
+		}
+		whereClause += " status = $" + fmt.Sprint(argIdx)
+		args = append(args, *status)
+		argIdx++
+	}
+
+	// Get total count
+	var total int
+	countQuery := "SELECT COUNT(*) FROM audit_jobs" + whereClause
+	err = tx.QueryRowContext(ctx, countQuery, args...).Scan(&total)
+	if err != nil {
+		return nil, 0, fmt.Errorf("count audits: %w", err)
+	}
+
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 {
+		pageSize = 20
+	}
+	offset := (page - 1) * pageSize
+
+	// Get paginated results
+	query := `
+		SELECT id, name, audit_type, status, risk_score, risk_severity, findings_count, created_at
+		FROM audit_jobs` + whereClause + `
+		ORDER BY created_at DESC
+		LIMIT $` + fmt.Sprint(argIdx) + ` OFFSET $` + fmt.Sprint(argIdx+1)
+
+	args = append(args, pageSize, offset)
+	rows, err := tx.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, 0, fmt.Errorf("query audits: %w", err)
+	}
+	defer rows.Close()
+
+	var summaries []model.AuditJobSummary
+	for rows.Next() {
+		var summary model.AuditJobSummary
+		err := rows.Scan(
+			&summary.ID, &summary.Name, &summary.AuditType, &summary.Status,
+			&summary.RiskScore, &summary.RiskSeverity, &summary.FindingsCount,
+			&summary.CreatedAt,
+		)
+		if err != nil {
+			return nil, 0, fmt.Errorf("scan audit summary: %w", err)
+		}
+		summaries = append(summaries, summary)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, 0, fmt.Errorf("rows iteration: %w", err)
+	}
+
+	return summaries, total, tx.Commit()
+}
+
+// UpdateAuditStatus updates the status of an audit job.
+func (r *SQLRepository) UpdateAuditStatus(ctx context.Context, id uuid.UUID, status string) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx,
+		`UPDATE audit_jobs SET status = $1, updated_at = NOW() WHERE id = $2`,
+		status, id,
+	)
+	if err != nil {
+		return fmt.Errorf("update audit status: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// UpdateAuditProgress updates audit progress and completion stats.
+func (r *SQLRepository) UpdateAuditProgress(ctx context.Context, id uuid.UUID, progress int, riskScore int, severity string, findingsCount, critical, high, medium, low int) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx,
+		`UPDATE audit_jobs
+		 SET progress_percentage = $1, risk_score = $2, risk_severity = $3,
+		     findings_count = $4, critical_findings = $5, high_findings = $6,
+		     medium_findings = $7, low_findings = $8, updated_at = NOW()
+		 WHERE id = $9`,
+		progress, riskScore, severity, findingsCount, critical, high, medium, low, id,
+	)
+	if err != nil {
+		return fmt.Errorf("update audit progress: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// UpdateAuditWorkflowID sets the Temporal workflow ID for an audit.
+func (r *SQLRepository) UpdateAuditWorkflowID(ctx context.Context, id uuid.UUID, workflowID string) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx,
+		`UPDATE audit_jobs SET workflow_id = $1, updated_at = NOW() WHERE id = $2`,
+		workflowID, id,
+	)
+	if err != nil {
+		return fmt.Errorf("update workflow ID: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// CreateFinding creates a new audit finding.
+func (r *SQLRepository) CreateFinding(ctx context.Context, finding *model.Finding) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	query := `
+		INSERT INTO audit_findings (id, tenant_id, audit_job_id, file_path, line_number,
+		                           issue_type, severity, title, description, remediation)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+		RETURNING created_at`
+
+	err = tx.QueryRowContext(
+		ctx, query,
+		finding.ID, finding.TenantID, finding.AuditJobID, finding.FilePath,
+		finding.LineNumber, finding.IssueType, finding.Severity, finding.Title,
+		finding.Description, finding.Remediation,
+	).Scan(&finding.CreatedAt)
+
+	if err != nil {
+		return fmt.Errorf("insert finding: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// GetFindingsForAudit gets all findings for an audit job.
+func (r *SQLRepository) GetFindingsForAudit(ctx context.Context, auditID uuid.UUID) ([]model.Finding, error) {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	query := `
+		SELECT id, tenant_id, audit_job_id, file_path, line_number,
+		       issue_type, severity, title, description, remediation, created_at
+		FROM audit_findings
+		WHERE audit_job_id = $1
+		ORDER BY severity DESC, created_at ASC`
+
+	rows, err := tx.QueryContext(ctx, query, auditID)
+	if err != nil {
+		return nil, fmt.Errorf("query findings: %w", err)
+	}
+	defer rows.Close()
+
+	var findings []model.Finding
+	for rows.Next() {
+		var finding model.Finding
+		err := rows.Scan(
+			&finding.ID, &finding.TenantID, &finding.AuditJobID, &finding.FilePath,
+			&finding.LineNumber, &finding.IssueType, &finding.Severity, &finding.Title,
+			&finding.Description, &finding.Remediation, &finding.CreatedAt,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("scan finding: %w", err)
+		}
+		findings = append(findings, finding)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration: %w", err)
+	}
+
+	return findings, tx.Commit()
+}
+
+// CountFindingsBySeverity counts findings by severity for an audit.
+func (r *SQLRepository) CountFindingsBySeverity(ctx context.Context, auditID uuid.UUID) (critical, high, medium, low int, err error) {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return 0, 0, 0, 0, fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	rows, err := tx.QueryContext(ctx, `
+		SELECT severity, COUNT(*)
+		FROM audit_findings
+		WHERE audit_job_id = $1
+		GROUP BY severity
+	`, auditID)
+	if err != nil {
+		return 0, 0, 0, 0, fmt.Errorf("count findings by severity: %w", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var sev string
+		var count int
+		if err := rows.Scan(&sev, &count); err != nil {
+			return 0, 0, 0, 0, fmt.Errorf("scan count: %w", err)
+		}
+		switch sev {
+		case model.SeverityCritical:
+			critical = count
+		case model.SeverityHigh:
+			high = count
+		case model.SeverityMedium:
+			medium = count
+		case model.SeverityLow:
+			low = count
+		}
+	}
+
+	if err = rows.Err(); err != nil {
+		return 0, 0, 0, 0, fmt.Errorf("rows iteration: %w", err)
+	}
+
+	return critical, high, medium, low, tx.Commit()
+}
