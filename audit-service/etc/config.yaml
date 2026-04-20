@@ -1,0 +1,24 @@
+Name: audit-service
+Host: 0.0.0.0
+Port: 8086
+
+RestConf:
+  Host: 0.0.0.0
+  Port: 8086
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: postgres
+  Password: postgres
+  Database: sovereign
+  SSLMode: disable
+
+Temporal:
+  HostPort: localhost:7233
+  Namespace: default
+
+Risk:
+  CriticalThreshold: 70
+  HighThreshold: 40
+  MediumThreshold: 20
