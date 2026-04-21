@@ -237,14 +237,59 @@ func branchFromWebhookPayload(payload []byte) string {
 
 // GetScanResult gets a specific scan result.
 func (h *RepositoryHandler) GetScanResult(w http.ResponseWriter, r *http.Request) {
-	// For now - placeholder
-	httpx.OkJson(w, map[string]interface{}{})
+	var pathReq struct {
+		ScanID string `path:"scanId"`
+	}
+	if err := httpx.Parse(r, &pathReq); err != nil {
+		httpx.Error(w, err)
+		return
+	}
+
+	scanID, err := parseUUID(pathReq.ScanID)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+
+	tenantIDStr := tenant.MustFromContext(r.Context())
+	tenantID, err := parseUUID(tenantIDStr)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+
+	scan, err := h.logic.GetScanResult(r.Context(), tenantID, scanID)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+
+	httpx.OkJson(w, types.ScanResultResponse{ScanResult: *scan})
 }
 
 // ListScanResults lists all scan results for a repository.
 func (h *RepositoryHandler) ListScanResults(w http.ResponseWriter, r *http.Request) {
-	// For now - placeholder
-	httpx.OkJson(w, map[string]interface{}{})
+	var pathReq struct {
+		ID string `path:"id"`
+	}
+	if err := httpx.Parse(r, &pathReq); err != nil {
+		httpx.Error(w, err)
+		return
+	}
+
+	repoID, err := parseUUID(pathReq.ID)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+
+	scans, err := h.logic.ListScanResults(r.Context(), repoID)
+	if err != nil {
+		httpx.Error(w, err)
+		return
+	}
+
+	httpx.OkJson(w, types.ListScanResultsResponse{ScanResults: scans})
 }
 
 func parseUUID(s string) (uuid.UUID, error) {
