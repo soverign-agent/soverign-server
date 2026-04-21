@@ -11,6 +11,17 @@ import (
 	"time"
 )
 
+// AnalysisFinding represents a single static analysis finding from repo-service.
+type AnalysisFinding struct {
+	FilePath    string `json:"file_path"`
+	LineNumber  int    `json:"line_number"`
+	IssueType   string `json:"issue_type"`
+	Severity    string `json:"severity"`
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Remediation string `json:"remediation"`
+}
+
 // RepoServiceClient is the interface for repo-service gRPC client.
 // When protobuf contracts are generated, this interface will be implemented by the generated client.
 type RepoServiceClient interface {
@@ -19,7 +30,7 @@ type RepoServiceClient interface {
 	// RunStaticAnalysis runs static analysis on the repository.
 	RunStaticAnalysis(ctx context.Context, repositoryID uuid.UUID) error
 	// GetAnalysisResults gets the static analysis findings.
-	GetAnalysisResults(ctx context.Context, repositoryID uuid.UUID) ([]interface{}, error)
+	GetAnalysisResults(ctx context.Context, repositoryID uuid.UUID) ([]AnalysisFinding, error)
 }
 
 // NotificationServiceClient is the interface for notification-service gRPC client.
@@ -143,18 +154,80 @@ func (a *Activities) RunStaticAnalysis(ctx context.Context, auditID string) erro
 // GenerateFindings generates findings from the static analysis results.
 func (a *Activities) GenerateFindings(ctx context.Context, auditID string) error {
 	if a.repoServiceClient == nil {
-		// No client configured - placeholder implementation
+		// No client configured - skip finding generation to allow workflow to continue
 		return nil
 	}
 
-	// When implemented:
-	// 1. Get analysis results from repo-service
-	// 2. Convert each finding to audit finding model
-	// 3. Insert each finding into database using a.repo.CreateFinding
-	// 4. Return error if any
+	auditUUID, err := uuid.Parse(auditID)
+	if err != nil {
+		return fmt.Errorf("invalid audit ID: %w", err)
+	}
 
-	// Placeholder for now
+	audit, err := a.repo.GetAuditByID(ctx, auditUUID)
+	if err != nil {
+		return fmt.Errorf("get audit: %w", err)
+	}
+	if audit == nil {
+		return fmt.Errorf("audit not found: %s", auditID)
+	}
+
+	findings, err := a.repoServiceClient.GetAnalysisResults(ctx, audit.RepositoryID)
+	if err != nil {
+		return fmt.Errorf("get analysis results: %w", err)
+	}
+
+	for _, af := range findings {
+		finding := &model.Finding{
+			ID:          uuid.New(),
+			TenantID:    audit.TenantID,
+			AuditJobID:  auditUUID,
+			FilePath:    af.FilePath,
+			IssueType:   normalizeIssueType(af.IssueType),
+			Severity:    normalizeSeverity(af.Severity),
+			Title:       af.Title,
+			Description: af.Description,
+			CreatedAt:   time.Now(),
+		}
+
+		if af.LineNumber > 0 {
+			lineNum := af.LineNumber
+			finding.LineNumber = &lineNum
+		}
+
+		if af.Remediation != "" {
+			rem := af.Remediation
+			finding.Remediation = &rem
+		}
+
+		if err := a.repo.CreateFinding(ctx, finding); err != nil {
+			return fmt.Errorf("create finding for file %s: %w", af.FilePath, err)
+		}
+	}
+
 	return nil
+}
+
+// normalizeIssueType maps incoming issue types to the canonical model values.
+func normalizeIssueType(t string) string {
+	switch t {
+	case model.IssueTypeDataPrivacy, model.IssueTypeTransparency,
+		model.IssueTypeHumanOversight, model.IssueTypeAccuracy,
+		model.IssueTypeSecurity, model.IssueTypeRecordKeeping:
+		return t
+	default:
+		return model.IssueTypeSecurity
+	}
+}
+
+// normalizeSeverity maps incoming severities to the canonical model values.
+func normalizeSeverity(s string) string {
+	switch s {
+	case model.SeverityCritical, model.SeverityHigh,
+		model.SeverityMedium, model.SeverityLow:
+		return s
+	default:
+		return model.SeverityMedium
+	}
 }
 
 // CalculateRiskScore calculates the risk score from all findings.
