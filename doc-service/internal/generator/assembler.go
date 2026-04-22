@@ -5,6 +5,12 @@ import (
 	"context"
 	"fmt"
 	"strings"
+
+	"github.com/google/uuid"
+
+	auditv1 "sovereign-ai-compliance/shared/proto/audit/v1"
+	orgv1 "sovereign-ai-compliance/shared/proto/org/v1"
+	ragv1 "sovereign-ai-compliance/shared/proto/rag/v1"
 )
 
 // AssembledData holds all data collected from external services for document generation.
@@ -47,21 +53,172 @@ type KnowledgeChunk struct {
 	Category  string  `json:"category"`
 }
 
+// DownstreamClients holds gRPC clients for services that DataAssembler calls.
+type DownstreamClients struct {
+	OrgClient   orgv1.OrgServiceClient
+	AuditClient auditv1.AuditServiceClient
+	RAGClient   ragv1.RAGServiceClient
+}
+
 // DataAssembler collects and assembles data from external services.
-// For M9 V1, this uses stub implementations since gRPC protos for
-// other services may not be finalized. In production, this will call
-// audit-service, rag-service, and org-service via gRPC.
-type DataAssembler struct{}
+type DataAssembler struct {
+	clients *DownstreamClients
+}
 
 // NewDataAssembler creates a new DataAssembler.
-func NewDataAssembler() *DataAssembler {
-	return &DataAssembler{}
+// If clients is nil, the assembler falls back to stub data.
+func NewDataAssembler(clients *DownstreamClients) *DataAssembler {
+	return &DataAssembler{clients: clients}
 }
 
 // Assemble collects data from all relevant services and returns assembled data.
-// TODO: Replace stub implementations with real gRPC clients when M7/M8 protos are ready.
 func (a *DataAssembler) Assemble(ctx context.Context, aiSystemID string, auditJobID *string) (*AssembledData, error) {
+	if a.clients == nil {
+		return defaultStubData(), nil
+	}
+
 	data := &AssembledData{
+		SystemName:    aiSystemID,
+		SystemVersion: "1.0.0",
+		SystemPurpose: "Automated compliance monitoring and documentation generation for AI systems",
+		SystemMetadata: map[string]string{
+			"domain":     "regulatory_compliance",
+			"industry":   "technology",
+			"deployment": "cloud",
+		},
+	}
+
+	// 1. Fetch organization details from org-service
+	if err := a.fetchOrganization(ctx, data); err != nil {
+		// Log and continue with stub org data
+		data.OrganizationName = "Unknown Organization"
+		data.OrganizationInfo = map[string]string{"note": "failed to fetch from org-service: " + err.Error()}
+	}
+
+	// 2. Fetch AI system metadata from org-service
+	if err := a.fetchAISystem(ctx, aiSystemID, data); err != nil {
+		data.SystemMetadata["fetch_error"] = err.Error()
+	}
+
+	// 3. Fetch audit findings from audit-service
+	if auditJobID != nil && *auditJobID != "" {
+		if err := a.fetchAuditFindings(ctx, *auditJobID, data); err != nil {
+			data.AuditFindings = []AuditFinding{
+				{Severity: "medium", Category: "audit", Description: "Failed to fetch audit findings: " + err.Error(), RuleID: "FETCH-001"},
+			}
+		}
+	}
+
+	// 4. Fetch knowledge chunks from rag-service
+	if err := a.fetchKnowledgeChunks(ctx, aiSystemID, data); err != nil {
+		data.KnowledgeChunks = []KnowledgeChunk{
+			{Source: "error", Content: "Failed to fetch knowledge: " + err.Error(), Relevance: 0, Category: "error"},
+		}
+	}
+
+	return data, nil
+}
+
+func (a *DataAssembler) fetchOrganization(ctx context.Context, data *AssembledData) error {
+	resp, err := a.clients.OrgClient.GetTenant(ctx, &orgv1.GetTenantRequest{})
+	if err != nil {
+		return err
+	}
+	data.OrganizationName = resp.GetName()
+	data.OrganizationInfo = map[string]string{
+		"legal_name": resp.GetName(),
+		"domain":     resp.GetDomain(),
+		"settings":   resp.GetSettings(),
+	}
+	return nil
+}
+
+func (a *DataAssembler) fetchAISystem(ctx context.Context, aiSystemID string, data *AssembledData) error {
+	id, err := uuid.Parse(aiSystemID)
+	if err != nil {
+		return err
+	}
+	resp, err := a.clients.OrgClient.GetAISystem(ctx, &orgv1.GetAISystemRequest{SystemId: id.String()})
+	if err != nil {
+		return err
+	}
+	data.SystemName = resp.GetName()
+	data.SystemPurpose = resp.GetDescription()
+	data.SystemMetadata["risk_classification"] = resp.GetRiskClassification()
+	data.SystemMetadata["status"] = resp.GetStatus()
+	if meta := resp.GetMetadata(); meta != "" {
+		data.SystemMetadata["raw_metadata"] = meta
+	}
+	return nil
+}
+
+func (a *DataAssembler) fetchAuditFindings(ctx context.Context, auditJobID string, data *AssembledData) error {
+	resp, err := a.clients.AuditClient.GetAudit(ctx, &auditv1.GetAuditRequest{AuditId: auditJobID})
+	if err != nil {
+		return err
+	}
+
+	audit := resp.GetAudit()
+	if audit != nil {
+		data.RiskScore = float64(audit.GetRiskScore()) / 100.0
+		data.RiskLevel = strings.ToLower(audit.GetRiskSeverity().String())
+		data.SeverityCounts = map[string]int{
+			"critical": int(audit.GetCriticalFindings()),
+			"high":     int(audit.GetHighFindings()),
+			"medium":   int(audit.GetMediumFindings()),
+			"low":      int(audit.GetLowFindings()),
+		}
+	}
+
+	findings := resp.GetFindings()
+	data.AuditFindings = make([]AuditFinding, 0, len(findings))
+	for _, f := range findings {
+		data.AuditFindings = append(data.AuditFindings, AuditFinding{
+			Severity:    strings.ToLower(f.GetSeverity().String()),
+			Category:    strings.ToLower(f.GetIssueType().String()),
+			Description: f.GetDescription(),
+			RuleID:      f.GetId(),
+		})
+	}
+	return nil
+}
+
+func (a *DataAssembler) fetchKnowledgeChunks(ctx context.Context, aiSystemID string, data *AssembledData) error {
+	searchResp, err := a.clients.RAGClient.Search(ctx, &ragv1.SearchRequest{
+		Query: fmt.Sprintf("AI system %s architecture data governance security", aiSystemID),
+		TopK:  10,
+	})
+	if err != nil {
+		return err
+	}
+
+	results := searchResp.GetResults()
+	data.KnowledgeChunks = make([]KnowledgeChunk, 0, len(results))
+	for _, r := range results {
+		data.KnowledgeChunks = append(data.KnowledgeChunks, KnowledgeChunk{
+			Source:    r.GetDocumentName(),
+			Content:   r.GetText(),
+			Relevance: r.GetSimilarity(),
+			Category:  "general",
+		})
+	}
+
+	// Also fetch stats for metadata
+	statsResp, err := a.clients.RAGClient.GetStats(ctx, &ragv1.GetStatsRequest{})
+	if err == nil && statsResp != nil {
+		data.DataGovernance = map[string]string{
+			"document_count":        fmt.Sprintf("%d", statsResp.GetDocumentCount()),
+			"completed_documents":   fmt.Sprintf("%d", statsResp.GetCompletedDocuments()),
+			"pending_documents":     fmt.Sprintf("%d", statsResp.GetPendingDocuments()),
+			"embedding_count":       fmt.Sprintf("%d", statsResp.GetEmbeddingCount()),
+			"total_file_size_bytes": fmt.Sprintf("%d", statsResp.GetTotalFileSizeBytes()),
+		}
+	}
+	return nil
+}
+
+func defaultStubData() *AssembledData {
+	return &AssembledData{
 		SystemName:    "AI Compliance System",
 		SystemVersion: "1.0.0",
 		SystemPurpose: "Automated compliance monitoring and documentation generation for AI systems",
@@ -108,14 +265,6 @@ func (a *DataAssembler) Assemble(ctx context.Context, aiSystemID string, auditJo
 			"privacy_technique":  "Differential privacy (epsilon=1.0)",
 		},
 	}
-
-	// In a real implementation, we would:
-	// 1. Call org-service gRPC to get organization details
-	// 2. Call audit-service gRPC to get findings for aiSystemID/auditJobID
-	// 3. Call rag-service gRPC to retrieve relevant knowledge chunks
-	// For now, return realistic stub data that enables document generation.
-
-	return data, nil
 }
 
 // BuildSectionPrompt creates an LLM prompt for a specific section using assembled data.

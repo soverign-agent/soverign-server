@@ -2,17 +2,17 @@
 package config
 
 import (
+	"sovereign-ai-compliance/doc-service/internal/client"
 	sharedconfig "sovereign-ai-compliance/shared/config"
-
-	"github.com/zeromicro/go-zero/rest"
 )
 
 // Config holds the application configuration for doc-service.
 type Config struct {
-	rest.RestConf
 	Database sharedconfig.DatabaseConfig
 	LLM      sharedconfig.LLMConfig
 	Export   ExportConfig
+	GRPC     GRPCConfig
+	Clients  client.Config
 }
 
 // ExportConfig holds document export settings.
@@ -29,4 +29,12 @@ func DefaultExportConfig() ExportConfig {
 		DefaultFormat: "pdf",
 		MaxFileSizeMB: 50,
 	}
+}
+
+// GRPCConfig holds gRPC server configuration.
+type GRPCConfig struct {
+	Port        int    `json:"port"`
+	TLSCertFile string `json:"tls_cert_file"`
+	TLSKeyFile  string `json:"tls_key_file"`
+	Insecure    bool   `json:"insecure"`
 }

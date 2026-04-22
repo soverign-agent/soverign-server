@@ -8,12 +8,12 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 // claimsKey is the context key for JWT claims.
@@ -23,7 +23,7 @@ var ck = claimsKey{}
 
 // JWTAuth returns a middleware that validates JWT tokens using RS256.
 // It skips validation for endpoints listed in publicEndpoints.
-func JWTAuth(publicKeyPath string, publicEndpoints []string) func(http.HandlerFunc) http.HandlerFunc {
+func JWTAuth(publicKeyPath string, publicEndpoints []string) func(http.Handler) http.Handler {
 	publicKey := mustLoadPublicKey(publicKeyPath)
 
 	publicPathSet := make(map[string]struct{}, len(publicEndpoints))
@@ -31,10 +31,10 @@ func JWTAuth(publicKeyPath string, publicEndpoints []string) func(http.HandlerFu
 		publicPathSet[p] = struct{}{}
 	}
 
-	return func(next http.HandlerFunc) http.HandlerFunc {
-		return func(w http.ResponseWriter, r *http.Request) {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if _, ok := publicPathSet[r.URL.Path]; ok {
-				next(w, r)
+				next.ServeHTTP(w, r)
 				return
 			}
 
@@ -68,8 +68,8 @@ func JWTAuth(publicKeyPath string, publicEndpoints []string) func(http.HandlerFu
 			}
 
 			ctx := context.WithValue(r.Context(), ck, claims)
-			next(w, r.WithContext(ctx))
-		}
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
 	}
 }
 
@@ -83,7 +83,7 @@ func ClaimsFromContext(ctx context.Context) jwt.MapClaims {
 }
 
 func unauthorized(w http.ResponseWriter, message string) {
-	logx.Infof("JWT auth failed: %s", message)
+	log.Printf("JWT auth failed: %s", message)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusUnauthorized)
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{
@@ -95,22 +95,22 @@ func unauthorized(w http.ResponseWriter, message string) {
 func mustLoadPublicKey(path string) *rsa.PublicKey {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		logx.Must(fmt.Errorf("failed to read JWT public key: %w", err))
+		log.Fatalf("failed to read JWT public key: %v", err)
 	}
 
 	block, _ := pem.Decode(data)
 	if block == nil {
-		logx.Must(fmt.Errorf("failed to decode PEM block"))
+		log.Fatalf("failed to decode PEM block")
 	}
 
 	pub, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		logx.Must(fmt.Errorf("failed to parse public key: %w", err))
+		log.Fatalf("failed to parse public key: %v", err)
 	}
 
 	rsaPub, ok := pub.(*rsa.PublicKey)
 	if !ok {
-		logx.Must(fmt.Errorf("public key is not RSA"))
+		log.Fatalf("public key is not RSA")
 	}
 
 	return rsaPub

@@ -1,14 +1,10 @@
 // Package config defines the configuration structure for rag-service.
 package config
 
-import (
-	"github.com/zeromicro/go-zero/rest"
-	"sovereign-ai-compliance/shared/llm"
-)
+import "sovereign-ai-compliance/shared/llm"
 
 // Config holds the application configuration for rag-service.
 type Config struct {
-	rest.RestConf
 	Database struct {
 		Host     string
 		Port     int
@@ -30,4 +26,13 @@ type Config struct {
 		DefaultChunkSize    int
 		DefaultChunkOverlap int
 	}
+	GRPC GRPCConfig
+}
+
+// GRPCConfig holds gRPC server configuration.
+type GRPCConfig struct {
+	Port        int    `json:"port"`
+	TLSCertFile string `json:"tls_cert_file"`
+	TLSKeyFile  string `json:"tls_key_file"`
+	Insecure    bool   `json:"insecure"`
 }

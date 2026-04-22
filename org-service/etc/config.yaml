@@ -1,7 +1,3 @@
-Name: org-service
-Host: 0.0.0.0
-Port: 8002
-
 Database:
   Host: localhost
   Port: 5432
@@ -9,3 +5,7 @@ Database:
   Password: sovereign-dev-password
   Database: sovereign
   SSLMode: disable
+
+GRPC:
+  Port: 9085
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file

@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package rag.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/rag/v1;ragv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// Document represents an uploaded document.
+message Document {
+  string id           = 1;
+  string tenant_id    = 2;
+  string name         = 3;
+  string description  = 4;
+  string file_type    = 5;
+  int64  file_size    = 6;
+  string status       = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+// UploadDocumentRequest uploads a new document.
+message UploadDocumentRequest {
+  string name        = 1;
+  string description = 2;
+  bytes  file_content = 3;
+  string file_type   = 4;
+}
+
+// UploadDocumentResponse confirms upload.
+message UploadDocumentResponse {
+  string document_id = 1;
+  string status      = 2;
+}
+
+// ListDocumentsRequest lists documents with pagination.
+message ListDocumentsRequest {
+  int32 page      = 1;
+  int32 page_size = 2;
+}
+
+// ListDocumentsResponse returns paginated documents.
+message ListDocumentsResponse {
+  repeated Document documents = 1;
+  int32 total     = 2;
+  int32 page      = 3;
+  int32 page_size = 4;
+}
+
+// DeleteDocumentRequest deletes a document.
+message DeleteDocumentRequest {
+  string document_id = 1;
+}
+
+// DeleteDocumentResponse confirms deletion.
+message DeleteDocumentResponse {
+  bool success = 1;
+}
+
+// ReprocessDocumentRequest reprocesses an existing document.
+message ReprocessDocumentRequest {
+  string document_id = 1;
+  bytes  file_content = 2; // optional new content
+}
+
+// ReprocessDocumentResponse confirms reprocessing.
+message ReprocessDocumentResponse {
+  bool success = 1;
+}
+
+// SearchRequest performs a similarity search.
+message SearchRequest {
+  string query = 1;
+  int32  top_k = 2;
+}
+
+// SearchResult is a single search hit.
+message SearchResult {
+  string document_id   = 1;
+  string document_name = 2;
+  string text          = 3;
+  double similarity    = 4;
+}
+
+// SearchResponse returns search results.
+message SearchResponse {
+  string query            = 1;
+  int32  top_k            = 2;
+  repeated SearchResult results = 3;
+}
+
+// GetStatsRequest fetches RAG statistics.
+message GetStatsRequest {}
+
+// GetStatsResponse returns tenant RAG statistics.
+message GetStatsResponse {
+  int32 document_count       = 1;
+  int32 completed_documents  = 2;
+  int32 pending_documents    = 3;
+  int32 embedding_count      = 4;
+  int64 total_file_size_bytes = 5;
+}
+
+// RAGService provides document management, search, and stats.
+service RAGService {
+  rpc UploadDocument(UploadDocumentRequest) returns (UploadDocumentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/documents/upload"
+      body: "*"
+    };
+  }
+
+  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/documents"
+    };
+  }
+
+  rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/documents/{document_id}"
+    };
+  }
+
+  rpc ReprocessDocument(ReprocessDocumentRequest) returns (ReprocessDocumentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/documents/{document_id}/reprocess"
+      body: "*"
+    };
+  }
+
+  rpc Search(SearchRequest) returns (SearchResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/search"
+      body: "*"
+    };
+  }
+
+  rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/stats"
+    };
+  }
+}

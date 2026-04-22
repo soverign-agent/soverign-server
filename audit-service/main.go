@@ -5,19 +5,27 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
+	"sovereign-ai-compliance/audit-service/internal/client"
 	"sovereign-ai-compliance/audit-service/internal/config"
-	"sovereign-ai-compliance/audit-service/internal/handler"
+	"sovereign-ai-compliance/audit-service/internal/grpcserver"
 	"sovereign-ai-compliance/audit-service/internal/logic"
 	"sovereign-ai-compliance/audit-service/repo"
 	"sovereign-ai-compliance/audit-service/scoring"
 	"sovereign-ai-compliance/audit-service/temporal"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/reflection"
 	_ "github.com/lib/pq"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/rest"
 	"go.uber.org/zap"
 )
 
@@ -61,8 +69,19 @@ func main() {
 	calculator := scoring.NewCalculator(c.Risk)
 	auditLogic := logic.NewAuditLogic(repository, calculator)
 
+	// Create notification-service gRPC client
+	var notificationClient temporal.NotificationServiceClient
+	if c.Notification.Addr != "" {
+		notifConn, err := client.DialNotification(c.Notification.Addr, c.Notification.Insecure, c.Notification.TLSCertFile)
+		if err != nil {
+			logx.Must(fmt.Errorf("failed to dial notification-service: %w", err))
+		}
+		defer notifConn.Close()
+		notificationClient = client.NewNotificationClient(notifConn, repository)
+	}
+
 	// Create Temporal client and start worker
-	temporalClient, err := temporal.NewClient(c.Temporal, repository, auditLogic, calculator)
+	temporalClient, err := temporal.NewClient(c.Temporal, repository, auditLogic, calculator, notificationClient)
 	if err != nil {
 		logx.Must(fmt.Errorf("failed to create temporal client: %w", err))
 	}
@@ -76,17 +95,42 @@ func main() {
 		}
 	}()
 
-	// Create handlers
-	auditHandler := handler.NewAuditHandler(auditLogic, temporalClient)
-	sseHandler := handler.NewSSEHandler(repository, temporalClient)
+	// Start gRPC server
+	grpcAddr := fmt.Sprintf(":%d", c.GRPC.Port)
+	lis, err := net.Listen("tcp", grpcAddr)
+	if err != nil {
+		logx.Must(fmt.Errorf("failed to listen on %s: %w", grpcAddr, err))
+	}
 
-	// Create server
-	server := rest.MustNewServer(c.RestConf)
-	defer server.Stop()
+	var grpcOpts []grpc.ServerOption
+	if c.GRPC.TLSCertFile != "" && c.GRPC.TLSKeyFile != "" {
+		creds, err := credentials.NewServerTLSFromFile(c.GRPC.TLSCertFile, c.GRPC.TLSKeyFile)
+		if err != nil {
+			logx.Must(fmt.Errorf("load TLS credentials: %w", err))
+		}
+		grpcOpts = append(grpcOpts, grpc.Creds(creds))
+	} else if !c.GRPC.Insecure {
+		logx.Must(fmt.Errorf("gRPC TLS config required; set tls_cert_file/tls_key_file or insecure=true for local dev"))
+	} else {
+		grpcOpts = append(grpcOpts, grpc.Creds(insecure.NewCredentials()))
+	}
+	grpcServer := grpc.NewServer(grpcOpts...)
+	grpcSrv := grpcserver.NewServer(auditLogic, repository, temporalClient)
+	grpcSrv.Register(grpcServer)
+	reflection.Register(grpcServer)
 
-	// Register routes
-	handler.RegisterRoutes(server, auditHandler, sseHandler)
+	go func() {
+		logx.Infof("Starting audit-service gRPC server on %s", grpcAddr)
+		if err := grpcServer.Serve(lis); err != nil {
+			logx.Errorf("gRPC server error: %v", err)
+		}
+	}()
 
-	fmt.Printf("Starting audit-service at %s:%d...\n", c.Host, c.Port)
-	server.Start()
+	// Wait for interrupt signal
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logx.Info("Shutting down audit-service gRPC server...")
+	grpcServer.GracefulStop()
 }

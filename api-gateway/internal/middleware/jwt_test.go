@@ -20,14 +20,14 @@ func TestJWTAuth_PublicEndpoint(t *testing.T) {
 	mw := JWTAuth(keyPath, []string{"/public"})
 
 	called := false
-	handler := mw(func(w http.ResponseWriter, r *http.Request) {
+	handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		called = true
 		w.WriteHeader(http.StatusOK)
-	})
+	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/public", nil)
 	rec := httptest.NewRecorder()
-	handler(rec, req)
+	handler.ServeHTTP(rec, req)
 
 	if !called {
 		t.Error("expected handler to be called for public endpoint")
@@ -41,13 +41,13 @@ func TestJWTAuth_MissingToken(t *testing.T) {
 	keyPath := writeTestPublicKey(t)
 	mw := JWTAuth(keyPath, []string{})
 
-	handler := mw(func(w http.ResponseWriter, r *http.Request) {
+	handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Error("handler should not be called without token")
-	})
+	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/protected", nil)
 	rec := httptest.NewRecorder()
-	handler(rec, req)
+	handler.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusUnauthorized {
 		t.Errorf("expected 401, got %d", rec.Code)
@@ -58,14 +58,14 @@ func TestJWTAuth_InvalidToken(t *testing.T) {
 	keyPath := writeTestPublicKey(t)
 	mw := JWTAuth(keyPath, []string{})
 
-	handler := mw(func(w http.ResponseWriter, r *http.Request) {
+	handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Error("handler should not be called with invalid token")
-	})
+	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/protected", nil)
 	req.Header.Set("Authorization", "Bearer invalid-token")
 	rec := httptest.NewRecorder()
-	handler(rec, req)
+	handler.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusUnauthorized {
 		t.Errorf("expected 401, got %d", rec.Code)
@@ -88,15 +88,15 @@ func TestJWTAuth_ValidToken(t *testing.T) {
 	}
 
 	var ctxClaims jwt.MapClaims
-	handler := mw(func(w http.ResponseWriter, r *http.Request) {
+	handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctxClaims = ClaimsFromContext(r.Context())
 		w.WriteHeader(http.StatusOK)
-	})
+	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/protected", nil)
 	req.Header.Set("Authorization", "Bearer "+tokenString)
 	rec := httptest.NewRecorder()
-	handler(rec, req)
+	handler.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusOK {
 		t.Errorf("expected 200, got %d", rec.Code)
@@ -120,14 +120,14 @@ func TestJWTAuth_WrongSigningMethod(t *testing.T) {
 	})
 	tokenString, _ := token.SignedString([]byte("secret"))
 
-	handler := mw(func(w http.ResponseWriter, r *http.Request) {
+	handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t.Error("handler should not be called with wrong signing method")
-	})
+	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/protected", nil)
 	req.Header.Set("Authorization", "Bearer "+tokenString)
 	rec := httptest.NewRecorder()
-	handler(rec, req)
+	handler.ServeHTTP(rec, req)
 
 	if rec.Code != http.StatusUnauthorized {
 		t.Errorf("expected 401, got %d", rec.Code)

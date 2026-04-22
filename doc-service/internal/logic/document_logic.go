@@ -29,7 +29,7 @@ type DocumentLogic struct {
 }
 
 // NewDocumentLogic creates a new DocumentLogic.
-func NewDocumentLogic(repo repo.Repository, llmCfg sharedconfig.LLMConfig, export docserviceconfig.ExportConfig, logger *zap.Logger) *DocumentLogic {
+func NewDocumentLogic(repo repo.Repository, llmCfg sharedconfig.LLMConfig, export docserviceconfig.ExportConfig, logger *zap.Logger, clients *generator.DownstreamClients) *DocumentLogic {
 	// Create LLM client for document generation
 	llmClient, err := llm.NewClient(llm.Config{
 		Provider:    llm.Provider(llmCfg.Provider),
@@ -51,7 +51,7 @@ func NewDocumentLogic(repo repo.Repository, llmCfg sharedconfig.LLMConfig, expor
 		export:    export,
 		logger:    logger,
 		gen:       generator.NewDocumentGenerator(llmClient, logger),
-		assembler: generator.NewDataAssembler(),
+		assembler: generator.NewDataAssembler(clients),
 	}
 }
 

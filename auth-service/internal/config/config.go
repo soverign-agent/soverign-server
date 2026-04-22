@@ -1,17 +1,21 @@
 // Package config holds auth-service configuration.
 package config
 
-import (
-	"time"
-
-	"github.com/zeromicro/go-zero/rest"
-)
+import "time"
 
 // Config defines auth-service configuration.
 type Config struct {
-	rest.RestConf
 	Auth     AuthConfig
 	Database DatabaseConfig
+	GRPC     GRPCConfig
+}
+
+// GRPCConfig holds gRPC server configuration.
+type GRPCConfig struct {
+	Port        int    `json:"port"`
+	TLSCertFile string `json:"tls_cert_file"`
+	TLSKeyFile  string `json:"tls_key_file"`
+	Insecure    bool   `json:"insecure"`
 }
 
 // AuthConfig holds JWT and security settings.

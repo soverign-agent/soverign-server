@@ -2,6 +2,7 @@
 package middleware
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"sovereign-ai-compliance/shared/tenant"
@@ -9,11 +10,12 @@ import (
 
 // Tenant extracts the tenant_id from JWT claims and injects it into the request context.
 // This middleware must run after JWTAuth so that claims are present in the context.
-func Tenant(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+// If claims exist but contain no tenant_id, it returns 400 Bad Request.
+func Tenant(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		claims := ClaimsFromContext(r.Context())
 		if claims == nil {
-			next(w, r)
+			next.ServeHTTP(w, r)
 			return
 		}
 
@@ -25,11 +27,19 @@ func Tenant(next http.HandlerFunc) http.HandlerFunc {
 			tenantID = v
 		}
 
-		if tenantID != "" {
-			ctx := tenant.WithContext(r.Context(), tenantID)
-			r = r.WithContext(ctx)
+		if tenantID == "" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusBadRequest)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				"code":    400,
+				"message": "missing tenant_id in token claims",
+			})
+			return
 		}
 
-		next(w, r)
-	}
+		ctx := tenant.WithContext(r.Context(), tenantID)
+		r = r.WithContext(ctx)
+
+		next.ServeHTTP(w, r)
+	})
 }

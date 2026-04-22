@@ -6,17 +6,24 @@ import (
 	"encoding/hex"
 	"flag"
 	"fmt"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"sovereign-ai-compliance/repo-service/internal/config"
-	"sovereign-ai-compliance/repo-service/internal/handler"
+	"sovereign-ai-compliance/repo-service/internal/grpcserver"
 	"sovereign-ai-compliance/repo-service/internal/logic"
 	"sovereign-ai-compliance/repo-service/repo"
 	"sovereign-ai-compliance/shared/security"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/reflection"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/rest"
 	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 )
@@ -50,7 +57,6 @@ func main() {
 	}
 
 	// Initialize encryption for credentials
-	// Decode encryption key from hex
 	keyBytes, err := hex.DecodeString(c.EncryptionKey)
 	if err != nil {
 		logx.Must(fmt.Errorf("invalid encryption key (must be hex-encoded): %w", err))
@@ -59,7 +65,6 @@ func main() {
 	if err != nil {
 		logx.Must(fmt.Errorf("failed to create encryption: %w", err))
 	}
-	// Zero the key bytes after use to avoid leaving in memory
 	for i := range keyBytes {
 		keyBytes[i] = 0
 	}
@@ -74,13 +79,43 @@ func main() {
 	// Wire dependencies
 	repository := repo.NewSQLRepository(db)
 	repoLogic := logic.NewRepositoryLogic(c, repository, encryption, logger)
-	repoHandler := handler.NewRepositoryHandler(repoLogic)
 
-	server := rest.MustNewServer(c.RestConf)
-	defer server.Stop()
+	// Start gRPC server
+	grpcAddr := fmt.Sprintf(":%d", c.GRPC.Port)
+	lis, err := net.Listen("tcp", grpcAddr)
+	if err != nil {
+		logx.Must(fmt.Errorf("failed to listen on %s: %w", grpcAddr, err))
+	}
 
-	handler.RegisterRoutes(server, repoHandler)
+	var grpcOpts []grpc.ServerOption
+	if c.GRPC.TLSCertFile != "" && c.GRPC.TLSKeyFile != "" {
+		creds, err := credentials.NewServerTLSFromFile(c.GRPC.TLSCertFile, c.GRPC.TLSKeyFile)
+		if err != nil {
+			logx.Must(fmt.Errorf("load TLS credentials: %w", err))
+		}
+		grpcOpts = append(grpcOpts, grpc.Creds(creds))
+	} else if !c.GRPC.Insecure {
+		logx.Must(fmt.Errorf("gRPC TLS config required; set tls_cert_file/tls_key_file or insecure=true for local dev"))
+	} else {
+		grpcOpts = append(grpcOpts, grpc.Creds(insecure.NewCredentials()))
+	}
+	grpcServer := grpc.NewServer(grpcOpts...)
+	grpcSrv := grpcserver.NewServer(repoLogic)
+	grpcSrv.Register(grpcServer)
+	reflection.Register(grpcServer)
 
-	fmt.Printf("Starting repo-service at %s:%d...\n", c.Host, c.Port)
-	server.Start()
+	go func() {
+		logx.Infof("Starting repo-service gRPC server on %s", grpcAddr)
+		if err := grpcServer.Serve(lis); err != nil {
+			logx.Errorf("gRPC server error: %v", err)
+		}
+	}()
+
+	// Wait for interrupt signal
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logx.Info("Shutting down repo-service gRPC server...")
+	grpcServer.GracefulStop()
 }

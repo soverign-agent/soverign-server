@@ -1,10 +1,6 @@
-Name: audit-service
-Host: 0.0.0.0
-Port: 8086
-
-RestConf:
-  Host: 0.0.0.0
-  Port: 8086
+GRPC:
+  Port: 9086
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
 
 Database:
   Host: localhost
@@ -22,3 +18,7 @@ Risk:
   CriticalThreshold: 70
   HighThreshold: 40
   MediumThreshold: 20
+
+Notification:
+  Addr: localhost:9087
+  Insecure: true # local dev only; production must set tls_cert_file
