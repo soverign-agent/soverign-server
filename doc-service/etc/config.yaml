@@ -1,0 +1,25 @@
+Name: doc-service
+Host: 0.0.0.0
+Port: 8888
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: sovereign
+  Password: sovereign-dev-password
+  Database: sovereign
+  SSLMode: disable
+
+LLM:
+  Provider: openai
+  APIKey: ${OPENAI_API_KEY}
+  BaseURL: ""
+  Model: gpt-4o
+  Timeout: 120
+  MaxTokens: 4096
+  Temperature: 0.7
+
+Export:
+  OutputDir: ./exports
+  DefaultFormat: pdf
+  MaxFileSizeMB: 50
