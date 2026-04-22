@@ -1,0 +1,166 @@
+syntax = "proto3";
+
+package auth.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/auth/v1;authv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// SafeUser is a user model without sensitive fields.
+message SafeUser {
+  string id         = 1;
+  string tenant_id  = 2;
+  string email      = 3;
+  string role       = 4;
+  bool   is_active  = 5;
+  google.protobuf.Timestamp last_login = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// LoginRequest initiates a user session.
+message LoginRequest {
+  string tenant_id = 1; // optional, may be inferred from domain
+  string email     = 2;
+  string password  = 3;
+}
+
+// LoginResponse returns tokens and user info.
+message LoginResponse {
+  string   access_token  = 1;
+  string   refresh_token = 2;
+  SafeUser user          = 3;
+}
+
+// RefreshRequest exchanges a refresh token for a new token pair.
+message RefreshRequest {
+  string refresh_token = 1;
+}
+
+// TokenResponse returns a fresh token pair.
+message TokenResponse {
+  string access_token  = 1;
+  string refresh_token = 2;
+}
+
+// LogoutRequest terminates a session.
+message LogoutRequest {
+  string user_id = 1;
+}
+
+// LogoutResponse confirms logout.
+message LogoutResponse {
+  string message = 1;
+}
+
+// RequestPasswordResetRequest initiates a password reset flow.
+message RequestPasswordResetRequest {
+  string tenant_id = 1;
+  string email     = 2;
+}
+
+// RequestPasswordResetResponse confirms the request was accepted.
+message RequestPasswordResetResponse {
+  string message = 1;
+}
+
+// ConfirmPasswordResetRequest completes a password reset.
+message ConfirmPasswordResetRequest {
+  string token        = 1;
+  string new_password = 2;
+}
+
+// ConfirmPasswordResetResponse confirms the reset.
+message ConfirmPasswordResetResponse {
+  string message = 1;
+}
+
+// GetMeRequest fetches the current authenticated user.
+message GetMeRequest {
+  string tenant_id = 1;
+  string user_id   = 2;
+}
+
+// ValidateTokenRequest checks whether an access token is valid.
+message ValidateTokenRequest {
+  string access_token = 1;
+}
+
+// ValidateTokenResponse returns the token's identity claims and validity.
+message ValidateTokenResponse {
+  string user_id   = 1;
+  string tenant_id = 2;
+  string role      = 3;
+  bool   valid     = 4;
+}
+
+// HasPermissionRequest checks whether a role is granted a resource action.
+message HasPermissionRequest {
+  string role      = 1;
+  string resource  = 2;
+  string action    = 3;
+}
+
+// HasPermissionResponse indicates whether the permission is granted.
+message HasPermissionResponse {
+  bool granted = 1;
+}
+
+// AuthService provides authentication and identity operations.
+service AuthService {
+  rpc Login(LoginRequest) returns (LoginResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/login"
+      body: "*"
+    };
+  }
+
+  rpc RefreshToken(RefreshRequest) returns (TokenResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/refresh"
+      body: "*"
+    };
+  }
+
+  rpc Logout(LogoutRequest) returns (LogoutResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/logout"
+      body: "*"
+    };
+  }
+
+  rpc RequestPasswordReset(RequestPasswordResetRequest) returns (RequestPasswordResetResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/password-reset/request"
+      body: "*"
+    };
+  }
+
+  rpc ConfirmPasswordReset(ConfirmPasswordResetRequest) returns (ConfirmPasswordResetResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/password-reset/confirm"
+      body: "*"
+    };
+  }
+
+  rpc GetMe(GetMeRequest) returns (SafeUser) {
+    option (google.api.http) = {
+      get: "/api/v1/auth/me"
+    };
+  }
+
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/validate"
+      body: "*"
+    };
+  }
+
+  rpc HasPermission(HasPermissionRequest) returns (HasPermissionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/auth/permission"
+      body: "*"
+    };
+  }
+}

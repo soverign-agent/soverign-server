@@ -42,7 +42,7 @@ func (m *mockLLMClient) Health(ctx context.Context) error {
 
 func newTestDocumentLogic(mockRepo repo.Repository) *DocumentLogic {
 	logger, _ := zap.NewDevelopment()
-	return NewDocumentLogic(mockRepo, sharedconfig.LLMConfig{}, docserviceconfig.DefaultExportConfig(), logger)
+	return NewDocumentLogic(mockRepo, sharedconfig.LLMConfig{}, docserviceconfig.DefaultExportConfig(), logger, nil)
 }
 
 func TestDocumentLogic_GenerateDocument(t *testing.T) {
@@ -415,7 +415,7 @@ func TestDocumentLogic_runGeneration(t *testing.T) {
 	logic := &DocumentLogic{
 		repo:      mockRepo,
 		gen:       gen,
-		assembler: generator.NewDataAssembler(),
+		assembler: generator.NewDataAssembler(nil),
 		logger:    logger,
 	}
 
@@ -451,7 +451,7 @@ func TestDocumentLogic_runGeneration_NilLLM(t *testing.T) {
 	logic := &DocumentLogic{
 		repo:      mockRepo,
 		gen:       gen,
-		assembler: generator.NewDataAssembler(),
+		assembler: generator.NewDataAssembler(nil),
 		logger:    logger,
 	}
 
@@ -490,7 +490,7 @@ func TestDocumentLogic_runGeneration_UpdateError(t *testing.T) {
 	logic := &DocumentLogic{
 		repo:      mockRepo,
 		gen:       gen,
-		assembler: generator.NewDataAssembler(),
+		assembler: generator.NewDataAssembler(nil),
 		logger:    logger,
 	}
 
@@ -527,7 +527,7 @@ func TestDocumentLogic_runGeneration_CreateVersionError(t *testing.T) {
 	logic := &DocumentLogic{
 		repo:      mockRepo,
 		gen:       gen,
-		assembler: generator.NewDataAssembler(),
+		assembler: generator.NewDataAssembler(nil),
 		logger:    logger,
 	}
 

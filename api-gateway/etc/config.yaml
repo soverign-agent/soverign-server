@@ -12,8 +12,17 @@ Upstream:
   RAG: "http://localhost:8004"
   Doc: "http://localhost:8005"
   Audit: "http://localhost:8006"
-  Agent: "http://localhost:8007"
   Notification: "http://localhost:8008"
+
+GRPCUpstream:
+  Auth: "localhost:9081"
+  Org: "localhost:9085"
+  Repo: "localhost:9083"
+  RAG: "localhost:9082"
+  Doc: "localhost:9888"
+  Audit: "localhost:9086"
+  Notification: "localhost:9087"
+  Insecure: true
 
 PublicEndpoints:
   - "/api/v1/auth/login"

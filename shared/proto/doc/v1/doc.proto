@@ -1,0 +1,296 @@
+syntax = "proto3";
+
+package doc.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/doc/v1;docv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// DocumentStatus represents the lifecycle state of a generated document.
+enum DocumentStatus {
+  DOCUMENT_STATUS_UNSPECIFIED = 0;
+  DOCUMENT_STATUS_GENERATING  = 1;
+  DOCUMENT_STATUS_EDITING     = 2;
+  DOCUMENT_STATUS_APPROVED    = 3;
+  DOCUMENT_STATUS_PUBLISHED   = 4;
+  DOCUMENT_STATUS_FAILED      = 5;
+}
+
+// DocType represents the type of compliance document.
+enum DocType {
+  DOC_TYPE_UNSPECIFIED    = 0;
+  DOC_TYPE_ANNEX_IV       = 1;
+  DOC_TYPE_RISK_REPORT    = 2;
+  DOC_TYPE_COMPLIANCE     = 3;
+}
+
+// ExportFormat represents the output format for document export.
+enum ExportFormat {
+  EXPORT_FORMAT_UNSPECIFIED = 0;
+  EXPORT_FORMAT_PDF         = 1;
+  EXPORT_FORMAT_DOCX        = 2;
+}
+
+// ExportStatus represents the state of an export job.
+enum ExportStatus {
+  EXPORT_STATUS_UNSPECIFIED = 0;
+  EXPORT_STATUS_PENDING     = 1;
+  EXPORT_STATUS_PROCESSING  = 2;
+  EXPORT_STATUS_COMPLETED   = 3;
+  EXPORT_STATUS_FAILED      = 4;
+}
+
+// SubSection represents a document subsection.
+message SubSection {
+  string id      = 1;
+  string title   = 2;
+  string content = 3;
+  int32  order   = 4;
+}
+
+// Section represents a document section.
+message Section {
+  string              id           = 1;
+  string              title        = 2;
+  string              content      = 3;
+  int32               order        = 4;
+  repeated SubSection subsections  = 5;
+}
+
+// DocumentContent holds the structured document with sections and metadata.
+message DocumentContent {
+  repeated Section    sections = 1;
+  map<string, string> metadata = 2;
+}
+
+// GeneratedDocument represents a compliance document.
+message GeneratedDocument {
+  string                    id          = 1;
+  string                    tenant_id   = 2;
+  string                    ai_system_id = 3;
+  DocType                   doc_type    = 4;
+  string                    title       = 5;
+  DocumentContent           content     = 6;
+  int32                     version     = 7;
+  DocumentStatus            status      = 8;
+  string                    created_by  = 9;
+  google.protobuf.Timestamp created_at  = 10;
+  google.protobuf.Timestamp updated_at  = 11;
+}
+
+// DocumentSummary is a lightweight summary for listing documents.
+message DocumentSummary {
+  string                    id          = 1;
+  string                    ai_system_id = 2;
+  DocType                   doc_type    = 3;
+  string                    title       = 4;
+  int32                     version     = 5;
+  DocumentStatus            status      = 6;
+  google.protobuf.Timestamp created_at  = 7;
+  google.protobuf.Timestamp updated_at  = 8;
+}
+
+// DocumentVersion tracks version history for a document.
+message DocumentVersion {
+  string                    id             = 1;
+  string                    tenant_id      = 2;
+  string                    document_id    = 3;
+  int32                     version_number = 4;
+  DocumentContent           content        = 5;
+  string                    created_by     = 6;
+  google.protobuf.Timestamp created_at     = 7;
+  string                    change_summary = 8;
+}
+
+// ExportJob represents an async document export operation.
+message ExportJob {
+  string                    id            = 1;
+  string                    tenant_id     = 2;
+  string                    document_id   = 3;
+  ExportFormat              format        = 4;
+  ExportStatus              status        = 5;
+  string                    file_path     = 6;
+  int64                     file_size     = 7;
+  string                    error_message = 8;
+  string                    created_by    = 9;
+  google.protobuf.Timestamp created_at    = 10;
+  google.protobuf.Timestamp completed_at  = 11;
+}
+
+// GenerateDocumentRequest triggers document generation.
+message GenerateDocumentRequest {
+  string            ai_system_id = 1;
+  DocType           doc_type     = 2;
+  string            audit_job_id = 3; // optional
+  string            title        = 4;
+  map<string, string> options    = 5;
+}
+
+// GenerateDocumentResponse confirms generation was triggered.
+message GenerateDocumentResponse {
+  string         document_id = 1;
+  DocumentStatus status      = 2;
+}
+
+// ListDocumentsRequest lists documents with filtering.
+message ListDocumentsRequest {
+  string ai_system_id = 1; // optional filter
+  string status       = 2; // optional filter by status name
+  string doc_type     = 3; // optional filter by doc type name
+  int32  page         = 4;
+  int32  page_size    = 5;
+}
+
+// ListDocumentsResponse returns paginated documents.
+message ListDocumentsResponse {
+  repeated DocumentSummary items = 1;
+  int32                      total = 2;
+  int32                      page  = 3;
+  int32                      pages = 4;
+}
+
+// GetDocumentRequest fetches a single document.
+message GetDocumentRequest {
+  string document_id = 1;
+}
+
+// GetDocumentResponse returns the full document.
+message GetDocumentResponse {
+  GeneratedDocument document = 1;
+}
+
+// UpdateDocumentRequest updates document content.
+message UpdateDocumentRequest {
+  string          document_id = 1;
+  DocumentContent content     = 2;
+  string          updated_by  = 3;
+}
+
+// UpdateDocumentResponse returns the updated document.
+message UpdateDocumentResponse {
+  GeneratedDocument document = 1;
+}
+
+// UpdateDocumentStatusRequest updates the document status.
+message UpdateDocumentStatusRequest {
+  string         document_id = 1;
+  DocumentStatus status      = 2;
+}
+
+// UpdateDocumentStatusResponse confirms the status update.
+message UpdateDocumentStatusResponse {
+  bool           success = 1;
+  DocumentStatus status  = 2;
+}
+
+// ListVersionsRequest lists versions for a document.
+message ListVersionsRequest {
+  string document_id = 1;
+  int32  page        = 2;
+  int32  page_size   = 3;
+}
+
+// ListVersionsResponse returns paginated versions.
+message ListVersionsResponse {
+  repeated DocumentVersion items = 1;
+  int32                      total = 2;
+  int32                      page  = 3;
+  int32                      pages = 4;
+}
+
+// RollbackVersionRequest rolls back to a specific version.
+message RollbackVersionRequest {
+  string document_id    = 1;
+  int32  version_number = 2;
+}
+
+// RollbackVersionResponse returns the document after rollback.
+message RollbackVersionResponse {
+  GeneratedDocument document = 1;
+}
+
+// CreateExportJobRequest creates an export job.
+message CreateExportJobRequest {
+  string       document_id = 1;
+  ExportFormat format      = 2;
+}
+
+// CreateExportJobResponse confirms export job creation.
+message CreateExportJobResponse {
+  string       job_id = 1;
+  ExportStatus status = 2;
+}
+
+// GetExportJobRequest fetches an export job status.
+message GetExportJobRequest {
+  string job_id = 1;
+}
+
+// GetExportJobResponse returns export job details.
+message GetExportJobResponse {
+  ExportJob job = 1;
+}
+
+// DownloadExportRequest downloads a completed export.
+message DownloadExportRequest {
+  string job_id = 1;
+}
+
+// DownloadExportResponse returns the exported file.
+message DownloadExportResponse {
+  string filename     = 1;
+  string content_type = 2;
+  bytes  data         = 3;
+}
+
+// DocService provides document generation, versioning, and export.
+service DocService {
+  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {
+    option (google.api.http) = { get: "/api/v1/generated-documents" };
+  }
+
+  rpc GenerateDocument(GenerateDocumentRequest) returns (GenerateDocumentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/generated-documents"
+      body: "*"
+    };
+  }
+
+  rpc GetDocument(GetDocumentRequest) returns (GetDocumentResponse) {
+    option (google.api.http) = { get: "/api/v1/generated-documents/{document_id}" };
+  }
+
+  rpc UpdateDocument(UpdateDocumentRequest) returns (UpdateDocumentResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/generated-documents/{document_id}"
+      body: "*"
+    };
+  }
+
+  rpc ListVersions(ListVersionsRequest) returns (ListVersionsResponse) {
+    option (google.api.http) = { get: "/api/v1/generated-documents/{document_id}/versions" };
+  }
+
+  rpc RollbackVersion(RollbackVersionRequest) returns (RollbackVersionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/generated-documents/{document_id}/rollback"
+      body: "*"
+    };
+  }
+
+  rpc CreateExportJob(CreateExportJobRequest) returns (CreateExportJobResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/generated-documents/{document_id}/export"
+      body: "*"
+    };
+  }
+
+  rpc GetExportJob(GetExportJobRequest) returns (GetExportJobResponse) {
+    option (google.api.http) = { get: "/api/v1/export-jobs/{job_id}" };
+  }
+
+  rpc DownloadExport(DownloadExportRequest) returns (DownloadExportResponse) {
+    option (google.api.http) = { get: "/api/v1/export-jobs/{job_id}/download" };
+  }
+}

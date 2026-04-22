@@ -1,12 +1,12 @@
-Name: auth-service
-Host: 0.0.0.0
-Port: 8001
-
 Auth:
   PrivateKeyPath: "../api-gateway/certs/jwt-private.pem"
   AccessExpiry: 900   # 15 minutes in seconds
   RefreshExpiry: 604800 # 7 days in seconds
   Issuer: "sovereign-ai-compliance"
+
+GRPC:
+  Port: 9081
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
 
 Database:
   Host: localhost

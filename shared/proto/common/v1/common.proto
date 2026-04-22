@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package common.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/common/v1;commonv1";
+
+// Pagination controls for list requests.
+message Pagination {
+  int32 page  = 1; // 1-based page number
+  int32 limit = 2; // Items per page, default 20
+}
+
+// PageInfo is returned with paginated list responses.
+message PageInfo {
+  int32 total       = 1; // Total items across all pages
+  int32 page        = 2; // Current page number
+  int32 limit       = 3; // Items per page
+  int32 total_pages = 4; // Total number of pages
+}
+
+// Empty is a generic empty response.
+message Empty {}
+
+// TenantContext carries multi-tenant isolation fields.
+// In gRPC metadata it maps to keys x-tenant-id and x-user-id.
+message TenantContext {
+  string tenant_id = 1;
+  string user_id   = 2;
+}

@@ -1,0 +1,14 @@
+GRPC:
+  Port: 9083
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: postgres
+  Password: postgres
+  Database: sovereign
+  SSLMode: disable
+
+EncryptionKey: "0000000000000000000000000000000000000000000000000000000000000000"
+TempDir: /tmp/repo-scans

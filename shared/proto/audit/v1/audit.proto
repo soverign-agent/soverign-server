@@ -1,0 +1,244 @@
+syntax = "proto3";
+
+package audit.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/audit/v1;auditv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// AuditJobStatus represents the status of an audit job.
+enum AuditJobStatus {
+  AUDIT_JOB_STATUS_UNSPECIFIED = 0;
+  AUDIT_JOB_STATUS_PENDING     = 1;
+  AUDIT_JOB_STATUS_RUNNING     = 2;
+  AUDIT_JOB_STATUS_PAUSED      = 3;
+  AUDIT_JOB_STATUS_COMPLETED   = 4;
+  AUDIT_JOB_STATUS_FAILED      = 5;
+  AUDIT_JOB_STATUS_CANCELLED   = 6;
+}
+
+// AuditType represents the type of audit.
+enum AuditType {
+  AUDIT_TYPE_UNSPECIFIED = 0;
+  AUDIT_TYPE_FULL        = 1;
+  AUDIT_TYPE_INCREMENTAL = 2;
+}
+
+// RiskSeverity represents the risk severity level.
+enum RiskSeverity {
+  RISK_SEVERITY_UNSPECIFIED = 0;
+  RISK_SEVERITY_LOW         = 1;
+  RISK_SEVERITY_MEDIUM      = 2;
+  RISK_SEVERITY_HIGH        = 3;
+  RISK_SEVERITY_CRITICAL    = 4;
+}
+
+// IssueType represents the EU AI Act issue category.
+enum IssueType {
+  ISSUE_TYPE_UNSPECIFIED    = 0;
+  ISSUE_TYPE_DATA_PRIVACY   = 1;
+  ISSUE_TYPE_TRANSPARENCY   = 2;
+  ISSUE_TYPE_HUMAN_OVERSIGHT = 3;
+  ISSUE_TYPE_ACCURACY       = 4;
+  ISSUE_TYPE_SECURITY       = 5;
+  ISSUE_TYPE_RECORD_KEEPING = 6;
+}
+
+// AuditJob represents an audit job.
+message AuditJob {
+  string                    id                  = 1;
+  string                    tenant_id           = 2;
+  string                    repository_id       = 3;
+  string                    name                = 4;
+  AuditType                 audit_type          = 5;
+  AuditJobStatus            status              = 6;
+  int32                     risk_score          = 7;
+  RiskSeverity              risk_severity       = 8;
+  int32                     progress_percentage = 9;
+  int32                     findings_count      = 10;
+  int32                     critical_findings   = 11;
+  int32                     high_findings       = 12;
+  int32                     medium_findings     = 13;
+  int32                     low_findings        = 14;
+  string                    workflow_id         = 15;
+  google.protobuf.Timestamp started_at          = 16;
+  google.protobuf.Timestamp completed_at        = 17;
+  google.protobuf.Timestamp created_at          = 18;
+  google.protobuf.Timestamp updated_at          = 19;
+}
+
+// AuditJobSummary is a lightweight summary for listing.
+message AuditJobSummary {
+  string                    id             = 1;
+  string                    name           = 2;
+  AuditType                 audit_type     = 3;
+  AuditJobStatus            status         = 4;
+  int32                     risk_score     = 5;
+  RiskSeverity              risk_severity  = 6;
+  int32                     findings_count = 7;
+  google.protobuf.Timestamp created_at     = 8;
+}
+
+// Finding represents a single issue found during an audit.
+message Finding {
+  string                    id           = 1;
+  string                    tenant_id    = 2;
+  string                    audit_job_id = 3;
+  string                    file_path    = 4;
+  int32                     line_number  = 5;
+  IssueType                 issue_type   = 6;
+  RiskSeverity              severity     = 7;
+  string                    title        = 8;
+  string                    description  = 9;
+  string                    remediation  = 10;
+  google.protobuf.Timestamp created_at   = 11;
+}
+
+// AuditReportSummary contains summary statistics for the report.
+message AuditReportSummary {
+  int32         total_findings = 1;
+  int32         critical       = 2;
+  int32         high           = 3;
+  int32         medium         = 4;
+  int32         low            = 5;
+  int32         risk_score     = 6;
+  RiskSeverity  risk_severity  = 7;
+  bool          compliant      = 8;
+}
+
+// TriggerAuditRequest triggers a new audit.
+message TriggerAuditRequest {
+  string repository_id = 1;
+  string name          = 2;
+  AuditType audit_type = 3;
+}
+
+// TriggerAuditResponse is returned after triggering an audit.
+message TriggerAuditResponse {
+  string          audit_id    = 1;
+  AuditJobStatus  status      = 2;
+  string          workflow_id = 3;
+}
+
+// ListAuditsRequest lists audits with filtering and pagination.
+message ListAuditsRequest {
+  string repository_id = 1; // optional filter
+  string status        = 2; // optional filter by status name
+  int32  page          = 3;
+  int32  page_size     = 4;
+}
+
+// ListAuditsResponse returns a paginated list of audits.
+message ListAuditsResponse {
+  repeated AuditJobSummary items = 1;
+  int32                      total = 2;
+  int32                      page  = 3;
+  int32                      pages = 4;
+}
+
+// GetAuditRequest fetches a single audit by ID.
+message GetAuditRequest {
+  string audit_id = 1;
+}
+
+// GetAuditResponse returns audit details with findings.
+message GetAuditResponse {
+  AuditJob              audit      = 1;
+  repeated Finding      findings   = 2;
+}
+
+// PauseAuditRequest pauses a running audit.
+message PauseAuditRequest {
+  string audit_id = 1;
+}
+
+// PauseAuditResponse confirms the pause.
+message PauseAuditResponse {
+  bool           success = 1;
+  AuditJobStatus status  = 2;
+}
+
+// ResumeAuditRequest resumes a paused audit.
+message ResumeAuditRequest {
+  string audit_id  = 1;
+  bool   approved  = 2; // Whether the audit is approved after pause/high-risk check
+}
+
+// ResumeAuditResponse confirms the resume.
+message ResumeAuditResponse {
+  bool           success = 1;
+  AuditJobStatus status  = 2;
+}
+
+// GetAuditReportRequest fetches the full audit report.
+message GetAuditReportRequest {
+  string audit_id = 1;
+}
+
+// GetAuditReportResponse returns the report with grouped findings.
+message GetAuditReportResponse {
+  AuditJob                       audit         = 1;
+  repeated Finding               findings      = 2;
+  map<string, FindingGroup>      by_severity   = 3;
+  map<string, FindingGroup>      by_issue_type = 4;
+  AuditReportSummary             summary       = 5;
+}
+
+// FindingGroup groups findings by a key (severity or issue type).
+message FindingGroup {
+  repeated Finding findings = 1;
+}
+
+// GetAuditStatusRequest streams progress for an audit job.
+message GetAuditStatusRequest {
+  string audit_id = 1;
+}
+
+// GetAuditStatusResponse is a progress event.
+message GetAuditStatusResponse {
+  int32  percentage  = 1;
+  string step        = 2;
+  string message     = 3;
+  int64  timestamp   = 4;
+}
+
+// AuditService provides audit job management and reporting.
+service AuditService {
+  rpc ListAudits(ListAuditsRequest) returns (ListAuditsResponse) {
+    option (google.api.http) = { get: "/api/v1/audit-jobs" };
+  }
+
+  rpc TriggerAudit(TriggerAuditRequest) returns (TriggerAuditResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/audit-jobs/trigger"
+      body: "*"
+    };
+  }
+
+  rpc GetAudit(GetAuditRequest) returns (GetAuditResponse) {
+    option (google.api.http) = { get: "/api/v1/audit-jobs/{audit_id}" };
+  }
+
+  rpc PauseAudit(PauseAuditRequest) returns (PauseAuditResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/audit-jobs/{audit_id}/pause"
+      body: "*"
+    };
+  }
+
+  rpc ResumeAudit(ResumeAuditRequest) returns (ResumeAuditResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/audit-jobs/{audit_id}/resume"
+      body: "*"
+    };
+  }
+
+  rpc GetAuditReport(GetAuditReportRequest) returns (GetAuditReportResponse) {
+    option (google.api.http) = { get: "/api/v1/audit-jobs/{audit_id}/report" };
+  }
+
+  rpc GetAuditStatus(GetAuditStatusRequest) returns (stream GetAuditStatusResponse) {
+    option (google.api.http) = { get: "/api/v1/audit-jobs/{audit_id}/status" };
+  }
+}

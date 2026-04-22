@@ -1,0 +1,26 @@
+GRPC:
+  Port: 9088
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: postgres
+  Password: postgres
+  Database: sovereign
+  SSLMode: disable
+
+Temporal:
+  HostPort: localhost:7233
+  Namespace: default
+
+LLM:
+  Model: gpt-4
+  APIKey: ""
+  BaseURL: ""
+
+Clients:
+  DocAddr: localhost:9888
+  AuditAddr: localhost:9086
+  RAGAddr: localhost:9082
+  Insecure: true # local dev only; production must set tls_cert_file

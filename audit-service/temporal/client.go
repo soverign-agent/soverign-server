@@ -21,7 +21,7 @@ type Client struct {
 }
 
 // NewClient creates a new Temporal client and worker.
-func NewClient(cfg sharedconfig.TemporalConfig, repo repo.Repository, logic *logic.AuditLogic, calculator *scoring.Calculator) (*Client, error) {
+func NewClient(cfg sharedconfig.TemporalConfig, repo repo.Repository, logic *logic.AuditLogic, calculator *scoring.Calculator, notificationClient NotificationServiceClient) (*Client, error) {
 	// Create Temporal client
 	tc, err := client.NewClient(client.Options{
 		HostPort:  cfg.HostPort,
@@ -37,7 +37,7 @@ func NewClient(cfg sharedconfig.TemporalConfig, repo repo.Repository, logic *log
 	// Register workflow and activities
 	w.RegisterWorkflow(&ComplianceAuditWorkflow{})
 
-	activities := NewActivities(repo, logic, calculator, nil, nil)
+	activities := NewActivities(repo, logic, calculator, nil, notificationClient)
 	w.RegisterActivity(activities)
 
 	c := &Client{

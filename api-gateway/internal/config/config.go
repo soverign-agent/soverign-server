@@ -1,13 +1,13 @@
 // Package config holds the API gateway configuration.
 package config
 
-import "github.com/zeromicro/go-zero/rest"
-
 // Config defines the API gateway configuration.
 type Config struct {
-	rest.RestConf
+	Host            string
+	Port            int
 	Auth            AuthConfig
 	Upstream        UpstreamConfig
+	GRPCUpstream    GRPCUpstreamConfig `json:"grpc_upstream"`
 	PublicEndpoints []string
 }
 
@@ -24,6 +24,24 @@ type UpstreamConfig struct {
 	RAG          string
 	Doc          string
 	Audit        string
-	Agent        string
 	Notification string
+}
+
+// GRPCUpstreamConfig holds gRPC backend addresses and TLS settings.
+type GRPCUpstreamConfig struct {
+	Auth         string
+	AuthCert     string `json:"auth_cert_file"`
+	Org          string
+	OrgCert      string `json:"org_cert_file"`
+	Repo         string
+	RepoCert     string `json:"repo_cert_file"`
+	RAG          string
+	RAGCert      string `json:"rag_cert_file"`
+	Doc          string
+	DocCert      string `json:"doc_cert_file"`
+	Audit        string
+	AuditCert    string `json:"audit_cert_file"`
+	Notification string
+	NotifCert    string `json:"notif_cert_file"`
+	Insecure     bool   `json:"insecure"`
 }

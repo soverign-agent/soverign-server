@@ -1,0 +1,223 @@
+syntax = "proto3";
+
+package org.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/org/v1;orgv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// Tenant represents an organization.
+message Tenant {
+  string id         = 1;
+  string name       = 2;
+  string slug       = 3;
+  string domain     = 4;
+  string settings   = 5; // JSON string
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+// SafeUser is a user without sensitive fields.
+message SafeUser {
+  string id        = 1;
+  string tenant_id = 2;
+  string email     = 3;
+  string role      = 4;
+  bool   is_active = 5;
+  google.protobuf.Timestamp last_login = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// AISystem represents a managed AI system.
+message AISystem {
+  string id                  = 1;
+  string tenant_id           = 2;
+  string name                = 3;
+  string description         = 4;
+  string risk_classification = 5;
+  string status              = 6;
+  string metadata            = 7; // JSON string
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+// CompliancePolicy represents tenant compliance configuration.
+message CompliancePolicy {
+  string id          = 1;
+  string tenant_id   = 2;
+  string name        = 3;
+  string policy_type = 4;
+  string rules       = 5; // JSON string
+  bool   is_active   = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+// GetTenantRequest fetches the current tenant.
+message GetTenantRequest {}
+
+// UpdateTenantRequest updates tenant details.
+message UpdateTenantRequest {
+  string name     = 1;
+  string domain   = 2;
+  string settings = 3; // JSON string
+}
+
+// ListUsersRequest lists users for a tenant.
+message ListUsersRequest {}
+
+// ListUsersResponse returns the user list.
+message ListUsersResponse {
+  repeated SafeUser users = 1;
+}
+
+// InviteUserRequest invites a new user.
+message InviteUserRequest {
+  string email = 1;
+  string role  = 2;
+}
+
+// UpdateUserRoleRequest changes a user's role.
+message UpdateUserRoleRequest {
+  string user_id = 1;
+  string role    = 2;
+}
+
+// ToggleUserRequest activates or deactivates a user.
+message ToggleUserRequest {
+  string user_id = 1;
+  bool   is_active = 2;
+}
+
+// GetAISystemRequest fetches a single AI system.
+message GetAISystemRequest {
+  string system_id = 1;
+}
+
+// ListAISystemsRequest lists AI systems.
+message ListAISystemsRequest {}
+
+// ListAISystemsResponse returns AI systems.
+message ListAISystemsResponse {
+  repeated AISystem systems = 1;
+}
+
+// CreateAISystemRequest creates a new AI system.
+message CreateAISystemRequest {
+  string name                = 1;
+  string description         = 2;
+  string risk_classification = 3;
+  string status              = 4;
+  string metadata            = 5; // JSON string
+}
+
+// UpdateAISystemRequest updates an AI system.
+message UpdateAISystemRequest {
+  string system_id           = 1;
+  string name                = 2;
+  string description         = 3;
+  string risk_classification = 4;
+  string status              = 5;
+  string metadata            = 6; // JSON string
+}
+
+// DeleteAISystemRequest deletes an AI system.
+message DeleteAISystemRequest {
+  string system_id = 1;
+}
+
+// DeleteAISystemResponse confirms deletion.
+message DeleteAISystemResponse {
+  bool success = 1;
+}
+
+// GetActivePolicyRequest fetches the active compliance policy.
+message GetActivePolicyRequest {}
+
+// UpdatePolicyRequest updates the compliance policy.
+message UpdatePolicyRequest {
+  string name        = 1;
+  string policy_type = 2;
+  string rules       = 3; // JSON string
+}
+
+// OrgService provides tenant, user, AI system, and policy management.
+service OrgService {
+  rpc GetTenant(GetTenantRequest) returns (Tenant) {
+    option (google.api.http) = { get: "/api/org/tenant" };
+  }
+
+  rpc UpdateTenant(UpdateTenantRequest) returns (Tenant) {
+    option (google.api.http) = {
+      put: "/api/org/tenant"
+      body: "*"
+    };
+  }
+
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
+    option (google.api.http) = { get: "/api/org/users" };
+  }
+
+  rpc InviteUser(InviteUserRequest) returns (SafeUser) {
+    option (google.api.http) = {
+      post: "/api/org/users/invite"
+      body: "*"
+    };
+  }
+
+  rpc UpdateUserRole(UpdateUserRoleRequest) returns (SafeUser) {
+    option (google.api.http) = {
+      put: "/api/org/users/role"
+      body: "*"
+    };
+  }
+
+  rpc ToggleUser(ToggleUserRequest) returns (SafeUser) {
+    option (google.api.http) = {
+      put: "/api/org/users/toggle"
+      body: "*"
+    };
+  }
+
+  rpc ListAISystems(ListAISystemsRequest) returns (ListAISystemsResponse) {
+    option (google.api.http) = { get: "/api/org/ai-systems" };
+  }
+
+  rpc GetAISystem(GetAISystemRequest) returns (AISystem) {
+    option (google.api.http) = { get: "/api/org/ai-systems/{system_id}" };
+  }
+
+  rpc CreateAISystem(CreateAISystemRequest) returns (AISystem) {
+    option (google.api.http) = {
+      post: "/api/org/ai-systems"
+      body: "*"
+    };
+  }
+
+  rpc UpdateAISystem(UpdateAISystemRequest) returns (AISystem) {
+    option (google.api.http) = {
+      put: "/api/org/ai-systems"
+      body: "*"
+    };
+  }
+
+  rpc DeleteAISystem(DeleteAISystemRequest) returns (DeleteAISystemResponse) {
+    option (google.api.http) = {
+      delete: "/api/org/ai-systems"
+      body: "*"
+    };
+  }
+
+  rpc GetActivePolicy(GetActivePolicyRequest) returns (CompliancePolicy) {
+    option (google.api.http) = { get: "/api/org/policy" };
+  }
+
+  rpc UpdatePolicy(UpdatePolicyRequest) returns (CompliancePolicy) {
+    option (google.api.http) = {
+      put: "/api/org/policy"
+      body: "*"
+    };
+  }
+}

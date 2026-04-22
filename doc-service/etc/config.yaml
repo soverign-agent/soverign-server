@@ -1,7 +1,3 @@
-Name: doc-service
-Host: 0.0.0.0
-Port: 8888
-
 Database:
   Host: localhost
   Port: 5432
@@ -23,3 +19,13 @@ Export:
   OutputDir: ./exports
   DefaultFormat: pdf
   MaxFileSizeMB: 50
+
+GRPC:
+  Port: 9888
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
+
+Clients:
+  OrgAddr: localhost:9085
+  AuditAddr: localhost:9086
+  RAGAddr: localhost:9082
+  Insecure: true # local dev only

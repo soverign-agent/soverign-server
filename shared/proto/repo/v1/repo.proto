@@ -1,0 +1,195 @@
+syntax = "proto3";
+
+package repo.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/repo/v1;repov1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// Provider is the repository provider type.
+enum Provider {
+  PROVIDER_UNSPECIFIED = 0;
+  PROVIDER_GITHUB      = 1;
+  PROVIDER_GITLAB      = 2;
+  PROVIDER_SELF_HOSTED = 3;
+}
+
+// SafeRepository is a repository without sensitive fields.
+message SafeRepository {
+  string id             = 1;
+  string tenant_id      = 2;
+  string name           = 3;
+  string url            = 4;
+  Provider provider     = 5;
+  string webhook_id     = 6;
+  string default_branch = 7;
+  google.protobuf.Timestamp last_scanned_at = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+// ScanResult represents a static code analysis result.
+message ScanResult {
+  string id              = 1;
+  string repository_id   = 2;
+  string tenant_id       = 3;
+  string branch          = 4;
+  string commit_hash     = 5;
+  string ai_uses         = 6;        // JSON array
+  string data_flows      = 7;        // JSON array
+  string sensitive_data  = 8;        // JSON array
+  int32  total_files     = 9;
+  int32  scanned_files   = 10;
+  google.protobuf.Timestamp started_at   = 11;
+  google.protobuf.Timestamp completed_at = 12;
+  google.protobuf.Timestamp created_at   = 13;
+}
+
+// ListRepositoriesRequest lists repositories for a tenant.
+message ListRepositoriesRequest {}
+
+// ListRepositoriesResponse returns the repository list.
+message ListRepositoriesResponse {
+  repeated SafeRepository repositories = 1;
+}
+
+// CreateRepositoryRequest creates a new repository connection.
+message CreateRepositoryRequest {
+  string name           = 1;
+  string url            = 2;
+  Provider provider     = 3;
+  string username       = 4;
+  string token          = 5;
+  string webhook_secret = 6;
+  string default_branch = 7;
+}
+
+// CreateRepositoryResponse returns the created repository.
+message CreateRepositoryResponse {
+  SafeRepository repository = 1;
+}
+
+// DeleteRepositoryRequest deletes a repository.
+message DeleteRepositoryRequest {
+  string repository_id = 1;
+}
+
+// DeleteRepositoryResponse confirms deletion.
+message DeleteRepositoryResponse {
+  bool success = 1;
+}
+
+// TestConnectionRequest tests a repository connection.
+message TestConnectionRequest {
+  string repository_id = 1;
+}
+
+// TestConnectionResponse returns the test result.
+message TestConnectionResponse {
+  bool   success = 1;
+  string message = 2;
+}
+
+// TriggerScanRequest triggers a code scan.
+message TriggerScanRequest {
+  string repository_id = 1;
+  string branch        = 2; // optional, defaults to default_branch
+}
+
+// TriggerScanResponse returns scan info.
+message TriggerScanResponse {
+  string scan_id = 1;
+  string status  = 2;
+}
+
+// GetRepositoryRequest fetches a single repository.
+message GetRepositoryRequest {
+  string repository_id = 1;
+}
+
+// ProcessWebhookRequest handles an incoming webhook.
+message ProcessWebhookRequest {
+  string repository_id = 1;
+  bytes  payload       = 2; // raw webhook body
+}
+
+// ProcessWebhookResponse confirms webhook processing.
+message ProcessWebhookResponse {
+  bool   success = 1;
+  string message = 2;
+}
+
+// ListScanResultsRequest lists scans for a repository.
+message ListScanResultsRequest {
+  string repository_id = 1;
+}
+
+// ListScanResultsResponse returns scan results.
+message ListScanResultsResponse {
+  repeated ScanResult scan_results = 1;
+}
+
+// GetScanResultRequest fetches a single scan result.
+message GetScanResultRequest {
+  string scan_id = 1;
+}
+
+// RepoService provides repository and scan management.
+service RepoService {
+  rpc ListRepositories(ListRepositoriesRequest) returns (ListRepositoriesResponse) {
+    option (google.api.http) = { get: "/api/v1/repositories" };
+  }
+
+  rpc CreateRepository(CreateRepositoryRequest) returns (CreateRepositoryResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/repositories"
+      body: "*"
+    };
+  }
+
+  rpc DeleteRepository(DeleteRepositoryRequest) returns (DeleteRepositoryResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/repositories/{repository_id}"
+    };
+  }
+
+  rpc TestConnection(TestConnectionRequest) returns (TestConnectionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/repositories/{repository_id}/test"
+      body: "*"
+    };
+  }
+
+  rpc TriggerScan(TriggerScanRequest) returns (TriggerScanResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/repositories/{repository_id}/scan"
+      body: "*"
+    };
+  }
+
+  rpc ProcessWebhook(ProcessWebhookRequest) returns (ProcessWebhookResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/repository-webhooks/{repository_id}"
+      body: "*"
+    };
+  }
+
+  rpc ListScanResults(ListScanResultsRequest) returns (ListScanResultsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/repositories/{repository_id}/scans"
+    };
+  }
+
+  rpc GetScanResult(GetScanResultRequest) returns (ScanResult) {
+    option (google.api.http) = {
+      get: "/api/v1/repositories/scans/{scan_id}"
+    };
+  }
+
+  rpc GetRepository(GetRepositoryRequest) returns (SafeRepository) {
+    option (google.api.http) = {
+      get: "/api/v1/repositories/{repository_id}"
+    };
+  }
+}

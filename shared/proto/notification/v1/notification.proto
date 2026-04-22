@@ -1,0 +1,168 @@
+syntax = "proto3";
+
+package notification.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/notification/v1;notificationv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// NotificationChannel represents the delivery channel.
+enum NotificationChannel {
+  NOTIFICATION_CHANNEL_UNSPECIFIED = 0;
+  NOTIFICATION_CHANNEL_IN_APP      = 1;
+  NOTIFICATION_CHANNEL_EMAIL       = 2;
+  NOTIFICATION_CHANNEL_PUSH        = 3;
+  NOTIFICATION_CHANNEL_SMS         = 4;
+}
+
+// NotificationStatus represents the read state.
+enum NotificationStatus {
+  NOTIFICATION_STATUS_UNSPECIFIED = 0;
+  NOTIFICATION_STATUS_UNREAD      = 1;
+  NOTIFICATION_STATUS_READ        = 2;
+  NOTIFICATION_STATUS_ARCHIVED    = 3;
+}
+
+// NotificationPriority represents urgency.
+enum NotificationPriority {
+  NOTIFICATION_PRIORITY_UNSPECIFIED = 0;
+  NOTIFICATION_PRIORITY_LOW         = 1;
+  NOTIFICATION_PRIORITY_NORMAL      = 2;
+  NOTIFICATION_PRIORITY_HIGH        = 3;
+  NOTIFICATION_PRIORITY_URGENT      = 4;
+}
+
+// Notification represents a single notification.
+message Notification {
+  string                    id         = 1;
+  string                    tenant_id  = 2;
+  string                    user_id    = 3;
+  string                    title      = 4;
+  string                    body       = 5;
+  NotificationChannel       channel    = 6;
+  NotificationPriority      priority   = 7;
+  NotificationStatus        status     = 8;
+  string                    action_url = 9; // optional deep link
+  map<string, string>       metadata   = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp read_at    = 12;
+}
+
+// NotificationPreference controls per-channel settings for a user.
+message NotificationPreference {
+  string               user_id    = 1;
+  string               tenant_id  = 2;
+  NotificationChannel  channel    = 3;
+  bool                 enabled    = 4;
+  map<string, string>  settings   = 5; // channel-specific settings (e.g. email address, push token)
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+// SendNotificationRequest triggers sending a notification.
+message SendNotificationRequest {
+  string               user_id    = 1;
+  string               title      = 2;
+  string               body       = 3;
+  NotificationChannel  channel    = 4;
+  NotificationPriority priority   = 5;
+  string               action_url = 6;
+  map<string, string>  metadata   = 7;
+}
+
+// SendNotificationResponse confirms the notification was sent.
+message SendNotificationResponse {
+  string notification_id = 1;
+}
+
+// ListNotificationsRequest lists notifications for the current user.
+message ListNotificationsRequest {
+  string               status   = 1; // optional filter by status name
+  NotificationChannel  channel  = 2; // optional filter
+  int32                page     = 3;
+  int32                page_size = 4;
+}
+
+// ListNotificationsResponse returns paginated notifications.
+message ListNotificationsResponse {
+  repeated Notification items = 1;
+  int32                   total = 2;
+  int32                   page  = 3;
+  int32                   pages = 4;
+  int32                   unread_count = 5;
+}
+
+// MarkReadRequest marks one or all notifications as read.
+message MarkReadRequest {
+  string notification_id = 1; // if empty, marks all as read
+}
+
+// MarkReadResponse confirms the operation.
+message MarkReadResponse {
+  bool   success       = 1;
+  int32  marked_count  = 2;
+}
+
+// GetPreferencesRequest fetches notification preferences.
+message GetPreferencesRequest {}
+
+// GetPreferencesResponse returns per-channel preferences.
+message GetPreferencesResponse {
+  repeated NotificationPreference preferences = 1;
+}
+
+// UpdatePreferencesRequest updates notification preferences.
+message UpdatePreferencesRequest {
+  repeated NotificationPreference preferences = 1;
+}
+
+// UpdatePreferencesResponse confirms the update.
+message UpdatePreferencesResponse {
+  bool success = 1;
+}
+
+// SubscribeRequest starts a real-time notification stream.
+message SubscribeRequest {
+  string user_id = 1; // optional; if empty, uses authenticated user
+}
+
+// SubscribeEvent is a real-time push notification event.
+message SubscribeEvent {
+  Notification notification = 1;
+}
+
+// NotificationService provides notification management and delivery.
+service NotificationService {
+  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/notifications"
+      body: "*"
+    };
+  }
+
+  rpc ListNotifications(ListNotificationsRequest) returns (ListNotificationsResponse) {
+    option (google.api.http) = { get: "/api/v1/notifications" };
+  }
+
+  rpc MarkRead(MarkReadRequest) returns (MarkReadResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/notifications/read"
+      body: "*"
+    };
+  }
+
+  rpc GetPreferences(GetPreferencesRequest) returns (GetPreferencesResponse) {
+    option (google.api.http) = { get: "/api/v1/notifications/preferences" };
+  }
+
+  rpc UpdatePreferences(UpdatePreferencesRequest) returns (UpdatePreferencesResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/notifications/preferences"
+      body: "*"
+    };
+  }
+
+  rpc Subscribe(SubscribeRequest) returns (stream SubscribeEvent) {
+    option (google.api.http) = { get: "/api/v1/notifications/subscribe" };
+  }
+}

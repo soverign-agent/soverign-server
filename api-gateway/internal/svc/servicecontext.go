@@ -17,8 +17,8 @@ import (
 // ServiceContext holds the gateway runtime dependencies.
 type ServiceContext struct {
 	Config          config.Config
-	JWTAuth         func(http.HandlerFunc) http.HandlerFunc
-	Tenant          func(http.HandlerFunc) http.HandlerFunc
+	JWTAuth         func(http.Handler) http.Handler
+	Tenant          func(http.Handler) http.Handler
 	UpstreamProxies map[string]*httputil.ReverseProxy
 	Breakers        map[string]breaker.Breaker
 }
@@ -34,7 +34,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		"rag":          c.Upstream.RAG,
 		"doc":          c.Upstream.Doc,
 		"audit":        c.Upstream.Audit,
-		"agent":        c.Upstream.Agent,
 		"notification": c.Upstream.Notification,
 	}
 

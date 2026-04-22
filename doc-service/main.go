@@ -5,17 +5,26 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
+	"sovereign-ai-compliance/doc-service/internal/client"
 	"sovereign-ai-compliance/doc-service/internal/config"
-	"sovereign-ai-compliance/doc-service/internal/handler"
+	"sovereign-ai-compliance/doc-service/internal/generator"
+	"sovereign-ai-compliance/doc-service/internal/grpcserver"
 	"sovereign-ai-compliance/doc-service/internal/logic"
 	"sovereign-ai-compliance/doc-service/repo"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/reflection"
 	_ "github.com/lib/pq"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/rest"
 	"go.uber.org/zap"
 )
 
@@ -56,21 +65,59 @@ func main() {
 
 	// Wire dependencies
 	repository := repo.NewSQLRepository(db)
-	documentLogic := logic.NewDocumentLogic(repository, c.LLM, c.Export, logger)
+
+	clients, err := client.NewClients(c.Clients)
+	if err != nil {
+		logx.Must(fmt.Errorf("failed to create downstream clients: %w", err))
+	}
+	defer clients.Close()
+
+	downstreamClients := &generator.DownstreamClients{
+		OrgClient:   clients.OrgClient,
+		AuditClient: clients.AuditClient,
+		RAGClient:   clients.RAGClient,
+	}
+
+	documentLogic := logic.NewDocumentLogic(repository, c.LLM, c.Export, logger, downstreamClients)
 	versionLogic := logic.NewVersionLogic(repository, logger)
 	exportLogic := logic.NewExportLogic(repository, c.Export, logger)
 
-	// Create handlers
-	documentHandler := handler.NewDocumentHandler(documentLogic, versionLogic)
-	exportHandler := handler.NewExportHandler(exportLogic)
+	// Start gRPC server
+	grpcAddr := fmt.Sprintf(":%d", c.GRPC.Port)
+	lis, err := net.Listen("tcp", grpcAddr)
+	if err != nil {
+		logx.Must(fmt.Errorf("failed to listen on %s: %w", grpcAddr, err))
+	}
 
-	// Create server
-	server := rest.MustNewServer(c.RestConf)
-	defer server.Stop()
+	var grpcOpts []grpc.ServerOption
+	if c.GRPC.TLSCertFile != "" && c.GRPC.TLSKeyFile != "" {
+		creds, err := credentials.NewServerTLSFromFile(c.GRPC.TLSCertFile, c.GRPC.TLSKeyFile)
+		if err != nil {
+			logx.Must(fmt.Errorf("load TLS credentials: %w", err))
+		}
+		grpcOpts = append(grpcOpts, grpc.Creds(creds))
+	} else if !c.GRPC.Insecure {
+		logx.Must(fmt.Errorf("gRPC TLS config required; set tls_cert_file/tls_key_file or insecure=true for local dev"))
+	} else {
+		grpcOpts = append(grpcOpts, grpc.Creds(insecure.NewCredentials()))
+	}
+	grpcServer := grpc.NewServer(grpcOpts...)
+	grpcSrv := grpcserver.NewServer(documentLogic, versionLogic, exportLogic)
+	grpcSrv.Register(grpcServer)
+	reflection.Register(grpcServer)
 
-	// Register routes
-	handler.RegisterRoutes(server, documentHandler, exportHandler)
+	go func() {
+		logx.Infof("Starting doc-service gRPC server on %s", grpcAddr)
+		if err := grpcServer.Serve(lis); err != nil {
+			logx.Errorf("gRPC server error: %v", err)
+		}
+	}()
 
-	fmt.Printf("Starting doc-service at %s:%d...\n", c.Host, c.Port)
-	server.Start()
+	// Wait for interrupt signal
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logx.Info("Shutting down doc-service gRPC server...")
+	grpcServer.GracefulStop()
 }

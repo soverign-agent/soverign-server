@@ -37,3 +37,14 @@ docker-compose.override.yml
 # JWT certificates
 certs/private.pem
 certs/public.pem
+
+# Service binaries (match directory name)
+api-gateway/api-gateway
+auth-service/auth-service
+org-service/org-service
+repo-service/repo-service
+rag-service/rag-service
+audit-service/audit-service
+doc-service/doc-service
+agent-orchestrator/agent-orchestrator
+notification-service/notification-service
