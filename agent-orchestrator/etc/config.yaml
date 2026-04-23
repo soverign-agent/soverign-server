@@ -1,12 +1,14 @@
 GRPC:
   Port: 9088
+  TLSCertFile: ""
+  TLSKeyFile: ""
   Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
 
 Database:
   Host: localhost
   Port: 5432
-  User: postgres
-  Password: postgres
+  User: sovereign
+  Password: sovereign-dev-password
   Database: sovereign
   SSLMode: disable
 
@@ -15,12 +17,16 @@ Temporal:
   Namespace: default
 
 LLM:
+  Provider: openai
   Model: gpt-4
   APIKey: ""
   BaseURL: ""
+  Timeout: 120s
+  MaxTokens: 4096
+  Temperature: 0.7
 
 Clients:
-  DocAddr: localhost:9888
-  AuditAddr: localhost:9086
-  RAGAddr: localhost:9082
-  Insecure: true # local dev only; production must set tls_cert_file
+  doc_addr: localhost:9888
+  audit_addr: localhost:9086
+  rag_addr: localhost:9082
+  insecure: true # local dev only; production must set tls_cert_file

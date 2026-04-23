@@ -1,12 +1,14 @@
 GRPC:
   Port: 9086
+  TLSCertFile: ""
+  TLSKeyFile: ""
   Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
 
 Database:
   Host: localhost
   Port: 5432
-  User: postgres
-  Password: postgres
+  User: sovereign
+  Password: sovereign-dev-password
   Database: sovereign
   SSLMode: disable
 
@@ -15,9 +17,9 @@ Temporal:
   Namespace: default
 
 Risk:
-  CriticalThreshold: 70
-  HighThreshold: 40
-  MediumThreshold: 20
+  critical_threshold: 70
+  high_threshold: 40
+  medium_threshold: 20
 
 Notification:
   Addr: localhost:9087

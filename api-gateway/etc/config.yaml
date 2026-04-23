@@ -1,9 +1,8 @@
-Name: api-gateway
 Host: 0.0.0.0
 Port: 8080
 
 Auth:
-  PublicKeyPath: "certs/jwt-public.pem"
+  PublicKeyPath: "api-gateway/certs/jwt-public.pem"
 
 Upstream:
   Auth: "http://localhost:8001"
@@ -14,15 +13,22 @@ Upstream:
   Audit: "http://localhost:8006"
   Notification: "http://localhost:8008"
 
-GRPCUpstream:
-  Auth: "localhost:9081"
-  Org: "localhost:9085"
-  Repo: "localhost:9083"
-  RAG: "localhost:9082"
-  Doc: "localhost:9888"
-  Audit: "localhost:9086"
-  Notification: "localhost:9087"
-  Insecure: true
+grpc_upstream:
+  auth: "localhost:9081"
+  auth_cert_file: ""
+  org: "localhost:9085"
+  org_cert_file: ""
+  repo: "localhost:9083"
+  repo_cert_file: ""
+  rag: "localhost:9082"
+  rag_cert_file: ""
+  doc: "localhost:9888"
+  doc_cert_file: ""
+  audit: "localhost:9086"
+  audit_cert_file: ""
+  notification: "localhost:9087"
+  notif_cert_file: ""
+  insecure: true
 
 PublicEndpoints:
   - "/api/v1/auth/login"

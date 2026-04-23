@@ -35,7 +35,7 @@ func NewClient(cfg sharedconfig.TemporalConfig, repo repo.Repository, logic *log
 	w := worker.New(tc, "audit-task-queue", worker.Options{})
 
 	// Register workflow and activities
-	w.RegisterWorkflow(&ComplianceAuditWorkflow{})
+	w.RegisterWorkflow(new(ComplianceAuditWorkflow).Execute)
 
 	activities := NewActivities(repo, logic, calculator, nil, notificationClient)
 	w.RegisterActivity(activities)

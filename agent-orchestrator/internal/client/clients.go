@@ -29,8 +29,8 @@ type Config struct {
 	DocAddr     string `json:"doc_addr"`
 	AuditAddr   string `json:"audit_addr"`
 	RAGAddr     string `json:"rag_addr"`
-	TLSCertFile string `json:"tls_cert_file"`
-	TLSKeyFile  string `json:"tls_key_file"`
+	TLSCertFile string `json:"tls_cert_file,optional"`
+	TLSKeyFile  string `json:"tls_key_file,optional"`
 	Insecure    bool   `json:"insecure"`
 }
 

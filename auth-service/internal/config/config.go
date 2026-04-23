@@ -13,8 +13,8 @@ type Config struct {
 // GRPCConfig holds gRPC server configuration.
 type GRPCConfig struct {
 	Port        int    `json:"port"`
-	TLSCertFile string `json:"tls_cert_file"`
-	TLSKeyFile  string `json:"tls_key_file"`
+	TLSCertFile string `json:"tls_cert_file,optional"`
+	TLSKeyFile  string `json:"tls_key_file,optional"`
 	Insecure    bool   `json:"insecure"`
 }
 
