@@ -2,7 +2,7 @@ Host: 0.0.0.0
 Port: 8080
 
 Auth:
-  PublicKeyPath: "api-gateway/certs/jwt-public.pem"
+  PublicKeyPath: "certs/jwt-public.pem"
 
 Upstream:
   Auth: "http://localhost:8001"

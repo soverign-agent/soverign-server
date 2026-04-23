@@ -1,5 +1,5 @@
 Auth:
-  PrivateKeyPath: "./api-gateway/certs/jwt-private.pem"
+  PrivateKeyPath: "../api-gateway/certs/jwt-private.pem"
   AccessExpiry: 15m
   RefreshExpiry: 168h
   Issuer: "sovereign-ai-compliance"

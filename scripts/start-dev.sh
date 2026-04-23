@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/opt/homebrew/bin/bash
 # =============================================================================
 # start-dev.sh — Start all Sovereign AI backend services for local development
 #

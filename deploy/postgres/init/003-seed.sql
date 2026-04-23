@@ -1,6 +1,6 @@
 -- Seed data for development/testing
 -- Creates a default tenant and admin user for initial platform access.
--- Run this after init.sql.
+-- Run this after 002-init-schema.sql.
 
 -- =============================================================================
 -- 1. Default Tenant
