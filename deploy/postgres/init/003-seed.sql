@@ -34,3 +34,19 @@ VALUES (
     NOW()
 )
 ON CONFLICT (tenant_id, email) DO NOTHING;
+
+-- =============================================================================
+-- 3. Default Compliance Policy
+-- =============================================================================
+INSERT INTO compliance_policies (id, tenant_id, name, policy_type, rules, is_active, created_at, updated_at)
+VALUES (
+    '00000000-0000-0000-0000-000000000003',
+    '00000000-0000-0000-0000-000000000001',
+    'EU AI Act Default Policy',
+    'eu_ai_act',
+    '{"risk_levels":["unacceptable","high","limited","minimal"],"auto_scan":true,"require_human_review_for_high_risk":true}',
+    TRUE,
+    NOW(),
+    NOW()
+)
+ON CONFLICT (id) DO NOTHING;

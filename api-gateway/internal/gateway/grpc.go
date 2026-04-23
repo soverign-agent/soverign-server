@@ -51,8 +51,18 @@ func New(cfg config.Config) (*Mux, error) {
 		runtime.WithMetadata(func(ctx context.Context, r *http.Request) metadata.MD {
 			// Forward tenant context from request context (injected by gateway middleware)
 			// to gRPC outgoing metadata so downstream services receive x-tenant-id.
+			md := metadata.MD{}
 			if tenantID, ok := tenant.FromContext(r.Context()); ok && tenantID != "" {
-				return metadata.Pairs("x-tenant-id", tenantID)
+				md.Set("x-tenant-id", tenantID)
+			}
+			// Also forward user_id from JWT claims for endpoints like GetMe.
+			if claims := middleware.ClaimsFromContext(r.Context()); claims != nil {
+				if userID, ok := claims["user_id"].(string); ok && userID != "" {
+					md.Set("x-user-id", userID)
+				}
+			}
+			if len(md) > 0 {
+				return md
 			}
 			return nil
 		}),

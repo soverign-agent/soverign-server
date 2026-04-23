@@ -69,14 +69,25 @@ ensure_certs() {
   fi
 }
 
+# Extract gRPC port for a service from SERVICES array
+_service_port() {
+  local name="$1"
+  local entry="${SERVICES[$name]}"
+  echo "${entry##*:}"
+}
+
 # Start a Go service in the background
 start_service() {
-  local name="$1" dir="$2"
+  local name="$1"
+  local dir="$2"
   local logfile="$ROOT_DIR/logs/$name.log"
+  local port
+  port=$(_service_port "$name")
   mkdir -p "$ROOT_DIR/logs"
 
-  if pgrep -f "sovereign-ai-compliance/$name" > /dev/null 2>&1; then
-    info "$name is already running (pid: $(pgrep -f "sovereign-ai-compliance/$name"))"
+  # Check if port is already in use (more reliable than pgrep for go run binaries)
+  if lsof -ti :"$port" > /dev/null 2>&1; then
+    info "$name is already running on port $port"
     return 0
   fi
 
@@ -90,20 +101,31 @@ start_service() {
 
 # Stop a service
 stop_service() {
-  local name="$1" pidfile="$ROOT_DIR/logs/$name.pid"
+  local name="$1"
+  local port
+  port=$(_service_port "$name")
+  local pidfile="$ROOT_DIR/logs/$name.pid"
+
+  # Try pidfile first
   if [[ -f "$pidfile" ]]; then
     local pid
     pid=$(cat "$pidfile")
     if kill -0 "$pid" 2>/dev/null; then
       info "Stopping $name (pid: $pid)..."
       kill "$pid" 2>/dev/null || true
-      # Also try SIGTERM via pkill for orphaned processes
-      pkill -f "sovereign-ai-compliance/$name" 2>/dev/null || true
     fi
     rm -f "$pidfile"
-  else
-    # Fallback: kill by name
-    pkill -f "sovereign-ai-compliance/$name" 2>/dev/null || true
+  fi
+
+  # Fallback: kill by port (go run compiles to cache, path patterns don't match)
+  local pids
+  pids=$(lsof -ti :"$port" 2>/dev/null | tr '\n' ' ' || true)
+  if [[ -n "$pids" ]]; then
+    info "Killing $name processes on port $port: $pids"
+    for pid in $pids; do
+      kill -9 "$pid" 2>/dev/null || true
+    done
+    sleep 0.5
   fi
 }
 

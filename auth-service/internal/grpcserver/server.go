@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
 	"sovereign-ai-compliance/auth-service/internal/logic"
@@ -136,20 +137,35 @@ func (s *Server) ConfirmPasswordReset(ctx context.Context, req *authv1.ConfirmPa
 }
 
 // GetMe returns the current authenticated user.
+// It reads tenant_id and user_id from gRPC metadata (injected by the gateway)
+// and falls back to request fields for direct gRPC callers.
 func (s *Server) GetMe(ctx context.Context, req *authv1.GetMeRequest) (*authv1.SafeUser, error) {
-	if req.TenantId == "" {
+	tenantIDStr := req.TenantId
+	userIDStr := req.UserId
+
+	// Prefer metadata set by the API gateway over request fields.
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		if t := md.Get("x-tenant-id"); len(t) > 0 && t[0] != "" {
+			tenantIDStr = t[0]
+		}
+		if u := md.Get("x-user-id"); len(u) > 0 && u[0] != "" {
+			userIDStr = u[0]
+		}
+	}
+
+	if tenantIDStr == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "tenant_id is required")
 	}
-	if req.UserId == "" {
+	if userIDStr == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "user_id is required")
 	}
 
-	tenantID, err := uuid.Parse(req.TenantId)
+	tenantID, err := uuid.Parse(tenantIDStr)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid tenant_id: %v", err)
 	}
 
-	userID, err := uuid.Parse(req.UserId)
+	userID, err := uuid.Parse(userIDStr)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid user_id: %v", err)
 	}
