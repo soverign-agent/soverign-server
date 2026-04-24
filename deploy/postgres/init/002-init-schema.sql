@@ -126,6 +126,19 @@ CREATE TABLE IF NOT EXISTS audit_jobs (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- Trigger function to automatically update updated_at timestamp
+CREATE OR REPLACE FUNCTION set_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_audit_jobs_set_updated_at
+    BEFORE UPDATE ON audit_jobs
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
 CREATE TABLE IF NOT EXISTS audit_findings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
@@ -156,27 +169,21 @@ CREATE TABLE IF NOT EXISTS generated_documents (
 CREATE TABLE IF NOT EXISTS approval_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    request_type VARCHAR(100) NOT NULL,
-    entity_type VARCHAR(100) NOT NULL,
-    entity_id UUID NOT NULL,
-    requested_by UUID NOT NULL REFERENCES users(id),
-    reviewer_id UUID REFERENCES users(id),
-    status VARCHAR(50) NOT NULL DEFAULT 'pending',
-    reason TEXT,
-    metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    audit_job_id UUID NOT NULL REFERENCES audit_jobs(id) ON DELETE CASCADE,
+    requested_by TEXT NOT NULL,
+    assigned_to TEXT[] NOT NULL DEFAULT '{}',
+    title TEXT NOT NULL,
+    context_json JSONB NOT NULL DEFAULT '{}',
+    status TEXT NOT NULL DEFAULT 'pending', -- pending, approved, rejected
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    decided_at TIMESTAMPTZ,
+    decided_by TEXT
 );
 
-CREATE TABLE IF NOT EXISTS approval_history (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    approval_request_id UUID NOT NULL REFERENCES approval_requests(id) ON DELETE CASCADE,
-    action VARCHAR(50) NOT NULL,
-    actor_id UUID NOT NULL REFERENCES users(id),
-    comment TEXT,
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
+CREATE TRIGGER trigger_approval_requests_set_updated_at
+    BEFORE UPDATE ON approval_requests
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE IF NOT EXISTS compliance_policies (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -257,9 +264,6 @@ ALTER TABLE generated_documents FORCE ROW LEVEL SECURITY;
 
 ALTER TABLE approval_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE approval_requests FORCE ROW LEVEL SECURITY;
-
-ALTER TABLE approval_history ENABLE ROW LEVEL SECURITY;
-ALTER TABLE approval_history FORCE ROW LEVEL SECURITY;
 
 ALTER TABLE compliance_policies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE compliance_policies FORCE ROW LEVEL SECURITY;
@@ -354,12 +358,6 @@ CREATE POLICY tenant_isolation ON approval_requests
     USING (tenant_id = current_tenant_id())
     WITH CHECK (tenant_id = current_tenant_id());
 
--- Approval History policy
-CREATE POLICY tenant_isolation ON approval_history
-    FOR ALL
-    USING (tenant_id = current_tenant_id())
-    WITH CHECK (tenant_id = current_tenant_id());
-
 -- Compliance Policies policy
 CREATE POLICY tenant_isolation ON compliance_policies
     FOR ALL
@@ -415,8 +413,10 @@ CREATE INDEX IF NOT EXISTS idx_audit_findings_audit_job_id ON audit_findings(aud
 CREATE INDEX IF NOT EXISTS idx_audit_findings_issue_type ON audit_findings(issue_type);
 CREATE INDEX IF NOT EXISTS idx_audit_findings_severity ON audit_findings(severity);
 CREATE INDEX IF NOT EXISTS idx_generated_docs_tenant_system ON generated_documents(tenant_id, ai_system_id);
-CREATE INDEX IF NOT EXISTS idx_approval_requests_tenant_status ON approval_requests(tenant_id, status);
-CREATE INDEX IF NOT EXISTS idx_approval_history_tenant_request ON approval_history(tenant_id, approval_request_id);
+CREATE INDEX IF NOT EXISTS idx_approval_requests_tenant_id ON approval_requests(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_approval_requests_audit_job_id ON approval_requests(audit_job_id);
+CREATE INDEX IF NOT EXISTS idx_approval_requests_status ON approval_requests(status);
+CREATE INDEX IF NOT EXISTS idx_approval_requests_created_at ON approval_requests(created_at);
 CREATE INDEX IF NOT EXISTS idx_compliance_policies_tenant_type ON compliance_policies(tenant_id, policy_type);
 CREATE INDEX IF NOT EXISTS idx_notification_events_tenant_status ON notification_events(tenant_id, status);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user_hash ON refresh_tokens(user_id, token_hash);

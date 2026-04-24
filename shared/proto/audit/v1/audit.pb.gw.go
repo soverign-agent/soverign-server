@@ -294,6 +294,86 @@ func request_AuditService_GetAuditStatus_0(ctx context.Context, marshaler runtim
 	return stream, metadata, nil
 }
 
+var filter_AuditService_ListPendingApprovals_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_AuditService_ListPendingApprovals_0(ctx context.Context, marshaler runtime.Marshaler, client AuditServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ListPendingApprovalsRequest
+		metadata runtime.ServerMetadata
+	)
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_AuditService_ListPendingApprovals_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.ListPendingApprovals(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_AuditService_ListPendingApprovals_0(ctx context.Context, marshaler runtime.Marshaler, server AuditServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ListPendingApprovalsRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_AuditService_ListPendingApprovals_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.ListPendingApprovals(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_AuditService_DecideApproval_0(ctx context.Context, marshaler runtime.Marshaler, client AuditServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DecideApprovalRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if req.Body != nil {
+		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["approval_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "approval_id")
+	}
+	protoReq.ApprovalId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "approval_id", err)
+	}
+	msg, err := client.DecideApproval(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_AuditService_DecideApproval_0(ctx context.Context, marshaler runtime.Marshaler, server AuditServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DecideApprovalRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["approval_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "approval_id")
+	}
+	protoReq.ApprovalId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "approval_id", err)
+	}
+	msg, err := server.DecideApproval(ctx, &protoReq)
+	return msg, metadata, err
+}
+
 // RegisterAuditServiceHandlerServer registers the http handlers for service AuditService to "mux".
 // UnaryRPC     :call AuditServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -426,6 +506,46 @@ func RegisterAuditServiceHandlerServer(ctx context.Context, mux *runtime.ServeMu
 		_, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 		return
+	})
+	mux.Handle(http.MethodGet, pattern_AuditService_ListPendingApprovals_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/audit.v1.AuditService/ListPendingApprovals", runtime.WithHTTPPathPattern("/api/v1/approvals/pending"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_AuditService_ListPendingApprovals_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_AuditService_ListPendingApprovals_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_AuditService_DecideApproval_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/audit.v1.AuditService/DecideApproval", runtime.WithHTTPPathPattern("/api/v1/approvals/{approval_id}/decide"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_AuditService_DecideApproval_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_AuditService_DecideApproval_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -586,25 +706,63 @@ func RegisterAuditServiceHandlerClient(ctx context.Context, mux *runtime.ServeMu
 		}
 		forward_AuditService_GetAuditStatus_0(annotatedContext, mux, outboundMarshaler, w, req, func() (proto.Message, error) { return resp.Recv() }, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_AuditService_ListPendingApprovals_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/audit.v1.AuditService/ListPendingApprovals", runtime.WithHTTPPathPattern("/api/v1/approvals/pending"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_AuditService_ListPendingApprovals_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_AuditService_ListPendingApprovals_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_AuditService_DecideApproval_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/audit.v1.AuditService/DecideApproval", runtime.WithHTTPPathPattern("/api/v1/approvals/{approval_id}/decide"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_AuditService_DecideApproval_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_AuditService_DecideApproval_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	return nil
 }
 
 var (
-	pattern_AuditService_ListAudits_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "audit-jobs"}, ""))
-	pattern_AuditService_TriggerAudit_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "audit-jobs", "trigger"}, ""))
-	pattern_AuditService_GetAudit_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "audit-jobs", "audit_id"}, ""))
-	pattern_AuditService_PauseAudit_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "audit-jobs", "audit_id", "pause"}, ""))
-	pattern_AuditService_ResumeAudit_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "audit-jobs", "audit_id", "resume"}, ""))
-	pattern_AuditService_GetAuditReport_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "audit-jobs", "audit_id", "report"}, ""))
-	pattern_AuditService_GetAuditStatus_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "audit-jobs", "audit_id", "status"}, ""))
+	pattern_AuditService_ListAudits_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "audit-jobs"}, ""))
+	pattern_AuditService_TriggerAudit_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "audit-jobs", "trigger"}, ""))
+	pattern_AuditService_GetAudit_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"api", "v1", "audit-jobs", "audit_id"}, ""))
+	pattern_AuditService_PauseAudit_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "audit-jobs", "audit_id", "pause"}, ""))
+	pattern_AuditService_ResumeAudit_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "audit-jobs", "audit_id", "resume"}, ""))
+	pattern_AuditService_GetAuditReport_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "audit-jobs", "audit_id", "report"}, ""))
+	pattern_AuditService_GetAuditStatus_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "audit-jobs", "audit_id", "status"}, ""))
+	pattern_AuditService_ListPendingApprovals_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "approvals", "pending"}, ""))
+	pattern_AuditService_DecideApproval_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "approvals", "approval_id", "decide"}, ""))
 )
 
 var (
-	forward_AuditService_ListAudits_0     = runtime.ForwardResponseMessage
-	forward_AuditService_TriggerAudit_0   = runtime.ForwardResponseMessage
-	forward_AuditService_GetAudit_0       = runtime.ForwardResponseMessage
-	forward_AuditService_PauseAudit_0     = runtime.ForwardResponseMessage
-	forward_AuditService_ResumeAudit_0    = runtime.ForwardResponseMessage
-	forward_AuditService_GetAuditReport_0 = runtime.ForwardResponseMessage
-	forward_AuditService_GetAuditStatus_0 = runtime.ForwardResponseStream
+	forward_AuditService_ListAudits_0           = runtime.ForwardResponseMessage
+	forward_AuditService_TriggerAudit_0         = runtime.ForwardResponseMessage
+	forward_AuditService_GetAudit_0             = runtime.ForwardResponseMessage
+	forward_AuditService_PauseAudit_0           = runtime.ForwardResponseMessage
+	forward_AuditService_ResumeAudit_0          = runtime.ForwardResponseMessage
+	forward_AuditService_GetAuditReport_0       = runtime.ForwardResponseMessage
+	forward_AuditService_GetAuditStatus_0       = runtime.ForwardResponseStream
+	forward_AuditService_ListPendingApprovals_0 = runtime.ForwardResponseMessage
+	forward_AuditService_DecideApproval_0       = runtime.ForwardResponseMessage
 )

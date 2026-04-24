@@ -19,13 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AuditService_ListAudits_FullMethodName     = "/audit.v1.AuditService/ListAudits"
-	AuditService_TriggerAudit_FullMethodName   = "/audit.v1.AuditService/TriggerAudit"
-	AuditService_GetAudit_FullMethodName       = "/audit.v1.AuditService/GetAudit"
-	AuditService_PauseAudit_FullMethodName     = "/audit.v1.AuditService/PauseAudit"
-	AuditService_ResumeAudit_FullMethodName    = "/audit.v1.AuditService/ResumeAudit"
-	AuditService_GetAuditReport_FullMethodName = "/audit.v1.AuditService/GetAuditReport"
-	AuditService_GetAuditStatus_FullMethodName = "/audit.v1.AuditService/GetAuditStatus"
+	AuditService_ListAudits_FullMethodName           = "/audit.v1.AuditService/ListAudits"
+	AuditService_TriggerAudit_FullMethodName         = "/audit.v1.AuditService/TriggerAudit"
+	AuditService_GetAudit_FullMethodName             = "/audit.v1.AuditService/GetAudit"
+	AuditService_PauseAudit_FullMethodName           = "/audit.v1.AuditService/PauseAudit"
+	AuditService_ResumeAudit_FullMethodName          = "/audit.v1.AuditService/ResumeAudit"
+	AuditService_GetAuditReport_FullMethodName       = "/audit.v1.AuditService/GetAuditReport"
+	AuditService_GetAuditStatus_FullMethodName       = "/audit.v1.AuditService/GetAuditStatus"
+	AuditService_ListPendingApprovals_FullMethodName = "/audit.v1.AuditService/ListPendingApprovals"
+	AuditService_DecideApproval_FullMethodName       = "/audit.v1.AuditService/DecideApproval"
 )
 
 // AuditServiceClient is the client API for AuditService service.
@@ -41,6 +43,8 @@ type AuditServiceClient interface {
 	ResumeAudit(ctx context.Context, in *ResumeAuditRequest, opts ...grpc.CallOption) (*ResumeAuditResponse, error)
 	GetAuditReport(ctx context.Context, in *GetAuditReportRequest, opts ...grpc.CallOption) (*GetAuditReportResponse, error)
 	GetAuditStatus(ctx context.Context, in *GetAuditStatusRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[GetAuditStatusResponse], error)
+	ListPendingApprovals(ctx context.Context, in *ListPendingApprovalsRequest, opts ...grpc.CallOption) (*ListPendingApprovalsResponse, error)
+	DecideApproval(ctx context.Context, in *DecideApprovalRequest, opts ...grpc.CallOption) (*DecideApprovalResponse, error)
 }
 
 type auditServiceClient struct {
@@ -130,6 +134,26 @@ func (c *auditServiceClient) GetAuditStatus(ctx context.Context, in *GetAuditSta
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type AuditService_GetAuditStatusClient = grpc.ServerStreamingClient[GetAuditStatusResponse]
 
+func (c *auditServiceClient) ListPendingApprovals(ctx context.Context, in *ListPendingApprovalsRequest, opts ...grpc.CallOption) (*ListPendingApprovalsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPendingApprovalsResponse)
+	err := c.cc.Invoke(ctx, AuditService_ListPendingApprovals_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *auditServiceClient) DecideApproval(ctx context.Context, in *DecideApprovalRequest, opts ...grpc.CallOption) (*DecideApprovalResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DecideApprovalResponse)
+	err := c.cc.Invoke(ctx, AuditService_DecideApproval_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuditServiceServer is the server API for AuditService service.
 // All implementations must embed UnimplementedAuditServiceServer
 // for forward compatibility.
@@ -143,6 +167,8 @@ type AuditServiceServer interface {
 	ResumeAudit(context.Context, *ResumeAuditRequest) (*ResumeAuditResponse, error)
 	GetAuditReport(context.Context, *GetAuditReportRequest) (*GetAuditReportResponse, error)
 	GetAuditStatus(*GetAuditStatusRequest, grpc.ServerStreamingServer[GetAuditStatusResponse]) error
+	ListPendingApprovals(context.Context, *ListPendingApprovalsRequest) (*ListPendingApprovalsResponse, error)
+	DecideApproval(context.Context, *DecideApprovalRequest) (*DecideApprovalResponse, error)
 	mustEmbedUnimplementedAuditServiceServer()
 }
 
@@ -173,6 +199,12 @@ func (UnimplementedAuditServiceServer) GetAuditReport(context.Context, *GetAudit
 }
 func (UnimplementedAuditServiceServer) GetAuditStatus(*GetAuditStatusRequest, grpc.ServerStreamingServer[GetAuditStatusResponse]) error {
 	return status.Errorf(codes.Unimplemented, "method GetAuditStatus not implemented")
+}
+func (UnimplementedAuditServiceServer) ListPendingApprovals(context.Context, *ListPendingApprovalsRequest) (*ListPendingApprovalsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPendingApprovals not implemented")
+}
+func (UnimplementedAuditServiceServer) DecideApproval(context.Context, *DecideApprovalRequest) (*DecideApprovalResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DecideApproval not implemented")
 }
 func (UnimplementedAuditServiceServer) mustEmbedUnimplementedAuditServiceServer() {}
 func (UnimplementedAuditServiceServer) testEmbeddedByValue()                      {}
@@ -314,6 +346,42 @@ func _AuditService_GetAuditStatus_Handler(srv interface{}, stream grpc.ServerStr
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type AuditService_GetAuditStatusServer = grpc.ServerStreamingServer[GetAuditStatusResponse]
 
+func _AuditService_ListPendingApprovals_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPendingApprovalsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuditServiceServer).ListPendingApprovals(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuditService_ListPendingApprovals_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuditServiceServer).ListPendingApprovals(ctx, req.(*ListPendingApprovalsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuditService_DecideApproval_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DecideApprovalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuditServiceServer).DecideApproval(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuditService_DecideApproval_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuditServiceServer).DecideApproval(ctx, req.(*DecideApprovalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuditService_ServiceDesc is the grpc.ServiceDesc for AuditService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -344,6 +412,14 @@ var AuditService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAuditReport",
 			Handler:    _AuditService_GetAuditReport_Handler,
+		},
+		{
+			MethodName: "ListPendingApprovals",
+			Handler:    _AuditService_ListPendingApprovals_Handler,
+		},
+		{
+			MethodName: "DecideApproval",
+			Handler:    _AuditService_DecideApproval_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{

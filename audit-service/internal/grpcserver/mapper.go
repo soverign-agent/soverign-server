@@ -230,3 +230,37 @@ func toProtoFindingGroup(findings []model.Finding) *auditv1.FindingGroup {
 	}
 	return &auditv1.FindingGroup{Findings: items}
 }
+
+// approvalStatusToProto converts string approval status to proto ApprovalStatus.
+func approvalStatusToProto(s string) auditv1.ApprovalStatus {
+	switch s {
+	case model.ApprovalStatusPending:
+		return auditv1.ApprovalStatus_APPROVAL_STATUS_PENDING
+	case model.ApprovalStatusApproved:
+		return auditv1.ApprovalStatus_APPROVAL_STATUS_APPROVED
+	case model.ApprovalStatusRejected:
+		return auditv1.ApprovalStatus_APPROVAL_STATUS_REJECTED
+	default:
+		return auditv1.ApprovalStatus_APPROVAL_STATUS_UNSPECIFIED
+	}
+}
+
+// toProtoApprovalRequest converts model.ApprovalRequest to proto.
+func toProtoApprovalRequest(a *model.ApprovalRequest) *auditv1.ApprovalRequest {
+	if a == nil {
+		return nil
+	}
+	return &auditv1.ApprovalRequest{
+		Id:          a.ID.String(),
+		TenantId:    a.TenantID.String(),
+		AuditJobId:  a.AuditJobID.String(),
+		RequestedBy: a.RequestedBy,
+		AssignedTo:  a.AssignedTo,
+		Title:       a.Title,
+		ContextJson: a.ContextJSON,
+		Status:      approvalStatusToProto(a.Status),
+		CreatedAt:   timestamppb.New(a.CreatedAt),
+		DecidedAt:   timeToProto(a.DecidedAt),
+		DecidedBy:   pointerString(a.DecidedBy),
+	}
+}

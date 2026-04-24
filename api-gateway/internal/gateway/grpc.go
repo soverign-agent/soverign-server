@@ -195,6 +195,7 @@ func ShouldHandle(path string) bool {
 		"/api/v1/export-jobs/",
 		"/api/v1/audit-jobs/",
 		"/api/v1/notifications/",
+		"/api/v1/approvals/",
 	}
 	for _, p := range prefixes {
 		if strings.HasPrefix(path, p) {

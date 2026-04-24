@@ -1,6 +1,7 @@
 package grpcserver
 
 import (
+	"encoding/json"
 	"time"
 
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -48,6 +49,17 @@ func toProtoAISystem(s *model.AISystem) *orgv1.AISystem {
 	if s == nil {
 		return nil
 	}
+
+	var repoURL string
+	if s.Metadata != "" {
+		var meta map[string]interface{}
+		if err := json.Unmarshal([]byte(s.Metadata), &meta); err == nil {
+			if v, ok := meta["repository_url"].(string); ok {
+				repoURL = v
+			}
+		}
+	}
+
 	return &orgv1.AISystem{
 		Id:                 s.ID.String(),
 		TenantId:           s.TenantID.String(),
@@ -56,6 +68,7 @@ func toProtoAISystem(s *model.AISystem) *orgv1.AISystem {
 		RiskClassification: s.RiskClassification,
 		Status:             s.Status,
 		Metadata:           s.Metadata,
+		RepositoryUrl:      repoURL,
 		CreatedAt:          timestamppb.New(s.CreatedAt),
 		UpdatedAt:          timestamppb.New(s.UpdatedAt),
 	}

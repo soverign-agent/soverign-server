@@ -325,6 +325,62 @@ func (s *Server) GetAuditStatus(req *auditv1.GetAuditStatusRequest, stream audit
 	}
 }
 
+// ListPendingApprovals lists approval requests with optional status filter.
+func (s *Server) ListPendingApprovals(ctx context.Context, req *auditv1.ListPendingApprovalsRequest) (*auditv1.ListPendingApprovalsResponse, error) {
+	ctx = withTenant(ctx)
+
+	requests, err := s.logic.ListApprovalRequests(ctx, req.Status)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "list approvals: %v", err)
+	}
+
+	protoItems := make([]*auditv1.ApprovalRequest, len(requests))
+	for i, r := range requests {
+		protoItems[i] = toProtoApprovalRequest(&r)
+	}
+
+	return &auditv1.ListPendingApprovalsResponse{
+		Items: protoItems,
+		Total: int32(len(requests)),
+	}, nil
+}
+
+// DecideApproval submits an approval decision and resumes the audit if approved.
+func (s *Server) DecideApproval(ctx context.Context, req *auditv1.DecideApprovalRequest) (*auditv1.DecideApprovalResponse, error) {
+	ctx = withTenant(ctx)
+
+	approvalID, err := uuid.Parse(req.ApprovalId)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid approval_id: %v", err)
+	}
+
+	if req.Decision != "approved" && req.Decision != "rejected" {
+		return nil, status.Errorf(codes.InvalidArgument, "decision must be 'approved' or 'rejected'")
+	}
+
+	// Extract decided_by from JWT claims via context metadata if available
+	decidedBy := ""
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		if vals := md.Get("x-user-id"); len(vals) > 0 {
+			decidedBy = vals[0]
+		}
+	}
+
+	if err := s.logic.DecideApproval(ctx, approvalID, req.Decision, decidedBy); err != nil {
+		return nil, status.Errorf(codes.Internal, "decide approval: %v", err)
+	}
+
+	statusProto := auditv1.ApprovalStatus_APPROVAL_STATUS_APPROVED
+	if req.Decision == "rejected" {
+		statusProto = auditv1.ApprovalStatus_APPROVAL_STATUS_REJECTED
+	}
+
+	return &auditv1.DecideApprovalResponse{
+		Success: true,
+		Status:  statusProto,
+	}, nil
+}
+
 func strPtr(s string) *string {
 	if s == "" {
 		return nil

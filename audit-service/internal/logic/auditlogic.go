@@ -200,3 +200,75 @@ func (l *AuditLogic) UpdateWorkflowID(ctx context.Context, auditID uuid.UUID, wo
 	}
 	return nil
 }
+
+// ListApprovalRequests lists approval requests filtered by status.
+func (l *AuditLogic) ListApprovalRequests(ctx context.Context, status string) ([]model.ApprovalRequest, error) {
+	requests, err := l.repo.ListApprovalRequests(ctx, status)
+	if err != nil {
+		return nil, fmt.Errorf("list approval requests: %w", err)
+	}
+	return requests, nil
+}
+
+// GetApprovalRequest gets an approval request by ID.
+func (l *AuditLogic) GetApprovalRequest(ctx context.Context, id uuid.UUID) (*model.ApprovalRequest, error) {
+	req, err := l.repo.GetApprovalRequest(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("get approval request: %w", err)
+	}
+	return req, nil
+}
+
+// CreateApprovalRequest creates a new approval request.
+func (l *AuditLogic) CreateApprovalRequest(ctx context.Context, req *model.ApprovalRequest) error {
+	tenantID, ok := tenant.FromContext(ctx)
+	if !ok {
+		return fmt.Errorf("tenant context required")
+	}
+
+	tenantUUID, err := uuid.Parse(tenantID)
+	if err != nil {
+		return fmt.Errorf("invalid tenant ID: %w", err)
+	}
+
+	req.ID = uuid.New()
+	req.TenantID = tenantUUID
+	req.Status = model.ApprovalStatusPending
+
+	if err := l.repo.CreateApprovalRequest(ctx, req); err != nil {
+		return fmt.Errorf("create approval request: %w", err)
+	}
+	return nil
+}
+
+// DecideApproval updates the approval status and resumes the audit if approved.
+func (l *AuditLogic) DecideApproval(ctx context.Context, id uuid.UUID, decision, decidedBy string) error {
+	req, err := l.repo.GetApprovalRequest(ctx, id)
+	if err != nil {
+		return fmt.Errorf("get approval request: %w", err)
+	}
+	if req == nil {
+		return fmt.Errorf("approval request not found")
+	}
+	if req.Status != model.ApprovalStatusPending {
+		return fmt.Errorf("approval request already decided")
+	}
+
+	status := model.ApprovalStatusApproved
+	if decision == "rejected" {
+		status = model.ApprovalStatusRejected
+	}
+
+	if err := l.repo.UpdateApprovalStatus(ctx, id, status, decidedBy); err != nil {
+		return fmt.Errorf("update approval status: %w", err)
+	}
+
+	// Resume the audit job if approved
+	if status == model.ApprovalStatusApproved {
+		if err := l.ResumeAudit(ctx, req.AuditJobID); err != nil {
+			return fmt.Errorf("resume audit: %w", err)
+		}
+	}
+
+	return nil
+}
