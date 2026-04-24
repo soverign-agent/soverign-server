@@ -203,6 +203,53 @@ message GetAuditStatusResponse {
   int64  timestamp   = 4;
 }
 
+// ApprovalStatus represents the status of an approval request.
+enum ApprovalStatus {
+  APPROVAL_STATUS_UNSPECIFIED = 0;
+  APPROVAL_STATUS_PENDING     = 1;
+  APPROVAL_STATUS_APPROVED    = 2;
+  APPROVAL_STATUS_REJECTED    = 3;
+}
+
+// ApprovalRequest represents a human-in-the-loop approval item.
+message ApprovalRequest {
+  string                    id           = 1;
+  string                    tenant_id    = 2;
+  string                    audit_job_id = 3;
+  string                    requested_by = 4;
+  repeated string           assigned_to  = 5;
+  string                    title        = 6;
+  string                    context_json = 7;
+  ApprovalStatus            status       = 8;
+  google.protobuf.Timestamp created_at   = 9;
+  google.protobuf.Timestamp decided_at   = 10;
+  string                    decided_by   = 11;
+}
+
+// ListPendingApprovalsRequest filters pending approvals.
+message ListPendingApprovalsRequest {
+  string status = 1; // optional filter: pending, approved, rejected
+}
+
+// ListPendingApprovalsResponse returns approval items.
+message ListPendingApprovalsResponse {
+  repeated ApprovalRequest items = 1;
+  int32                    total = 2;
+}
+
+// DecideApprovalRequest submits an approval decision.
+message DecideApprovalRequest {
+  string approval_id = 1;
+  string decision    = 2; // "approved" or "rejected"
+  string comment     = 3;
+}
+
+// DecideApprovalResponse confirms the decision.
+message DecideApprovalResponse {
+  bool           success = 1;
+  ApprovalStatus status  = 2;
+}
+
 // AuditService provides audit job management and reporting.
 service AuditService {
   rpc ListAudits(ListAuditsRequest) returns (ListAuditsResponse) {
@@ -240,5 +287,16 @@ service AuditService {
 
   rpc GetAuditStatus(GetAuditStatusRequest) returns (stream GetAuditStatusResponse) {
     option (google.api.http) = { get: "/api/v1/audit-jobs/{audit_id}/status" };
+  }
+
+  rpc ListPendingApprovals(ListPendingApprovalsRequest) returns (ListPendingApprovalsResponse) {
+    option (google.api.http) = { get: "/api/v1/approvals/pending" };
+  }
+
+  rpc DecideApproval(DecideApprovalRequest) returns (DecideApprovalResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/approvals/{approval_id}/decide"
+      body: "*"
+    };
   }
 }

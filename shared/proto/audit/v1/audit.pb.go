@@ -253,6 +253,59 @@ func (IssueType) EnumDescriptor() ([]byte, []int) {
 	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{3}
 }
 
+// ApprovalStatus represents the status of an approval request.
+type ApprovalStatus int32
+
+const (
+	ApprovalStatus_APPROVAL_STATUS_UNSPECIFIED ApprovalStatus = 0
+	ApprovalStatus_APPROVAL_STATUS_PENDING     ApprovalStatus = 1
+	ApprovalStatus_APPROVAL_STATUS_APPROVED    ApprovalStatus = 2
+	ApprovalStatus_APPROVAL_STATUS_REJECTED    ApprovalStatus = 3
+)
+
+// Enum value maps for ApprovalStatus.
+var (
+	ApprovalStatus_name = map[int32]string{
+		0: "APPROVAL_STATUS_UNSPECIFIED",
+		1: "APPROVAL_STATUS_PENDING",
+		2: "APPROVAL_STATUS_APPROVED",
+		3: "APPROVAL_STATUS_REJECTED",
+	}
+	ApprovalStatus_value = map[string]int32{
+		"APPROVAL_STATUS_UNSPECIFIED": 0,
+		"APPROVAL_STATUS_PENDING":     1,
+		"APPROVAL_STATUS_APPROVED":    2,
+		"APPROVAL_STATUS_REJECTED":    3,
+	}
+)
+
+func (x ApprovalStatus) Enum() *ApprovalStatus {
+	p := new(ApprovalStatus)
+	*p = x
+	return p
+}
+
+func (x ApprovalStatus) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ApprovalStatus) Descriptor() protoreflect.EnumDescriptor {
+	return file_shared_proto_audit_v1_audit_proto_enumTypes[4].Descriptor()
+}
+
+func (ApprovalStatus) Type() protoreflect.EnumType {
+	return &file_shared_proto_audit_v1_audit_proto_enumTypes[4]
+}
+
+func (x ApprovalStatus) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ApprovalStatus.Descriptor instead.
+func (ApprovalStatus) EnumDescriptor() ([]byte, []int) {
+	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{4}
+}
+
 // AuditJob represents an audit job.
 type AuditJob struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
@@ -1612,6 +1665,343 @@ func (x *GetAuditStatusResponse) GetTimestamp() int64 {
 	return 0
 }
 
+// ApprovalRequest represents a human-in-the-loop approval item.
+type ApprovalRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TenantId      string                 `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	AuditJobId    string                 `protobuf:"bytes,3,opt,name=audit_job_id,json=auditJobId,proto3" json:"audit_job_id,omitempty"`
+	RequestedBy   string                 `protobuf:"bytes,4,opt,name=requested_by,json=requestedBy,proto3" json:"requested_by,omitempty"`
+	AssignedTo    []string               `protobuf:"bytes,5,rep,name=assigned_to,json=assignedTo,proto3" json:"assigned_to,omitempty"`
+	Title         string                 `protobuf:"bytes,6,opt,name=title,proto3" json:"title,omitempty"`
+	ContextJson   string                 `protobuf:"bytes,7,opt,name=context_json,json=contextJson,proto3" json:"context_json,omitempty"`
+	Status        ApprovalStatus         `protobuf:"varint,8,opt,name=status,proto3,enum=audit.v1.ApprovalStatus" json:"status,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	DecidedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=decided_at,json=decidedAt,proto3" json:"decided_at,omitempty"`
+	DecidedBy     string                 `protobuf:"bytes,11,opt,name=decided_by,json=decidedBy,proto3" json:"decided_by,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApprovalRequest) Reset() {
+	*x = ApprovalRequest{}
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApprovalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApprovalRequest) ProtoMessage() {}
+
+func (x *ApprovalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApprovalRequest.ProtoReflect.Descriptor instead.
+func (*ApprovalRequest) Descriptor() ([]byte, []int) {
+	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ApprovalRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ApprovalRequest) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *ApprovalRequest) GetAuditJobId() string {
+	if x != nil {
+		return x.AuditJobId
+	}
+	return ""
+}
+
+func (x *ApprovalRequest) GetRequestedBy() string {
+	if x != nil {
+		return x.RequestedBy
+	}
+	return ""
+}
+
+func (x *ApprovalRequest) GetAssignedTo() []string {
+	if x != nil {
+		return x.AssignedTo
+	}
+	return nil
+}
+
+func (x *ApprovalRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ApprovalRequest) GetContextJson() string {
+	if x != nil {
+		return x.ContextJson
+	}
+	return ""
+}
+
+func (x *ApprovalRequest) GetStatus() ApprovalStatus {
+	if x != nil {
+		return x.Status
+	}
+	return ApprovalStatus_APPROVAL_STATUS_UNSPECIFIED
+}
+
+func (x *ApprovalRequest) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *ApprovalRequest) GetDecidedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.DecidedAt
+	}
+	return nil
+}
+
+func (x *ApprovalRequest) GetDecidedBy() string {
+	if x != nil {
+		return x.DecidedBy
+	}
+	return ""
+}
+
+// ListPendingApprovalsRequest filters pending approvals.
+type ListPendingApprovalsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"` // optional filter: pending, approved, rejected
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPendingApprovalsRequest) Reset() {
+	*x = ListPendingApprovalsRequest{}
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPendingApprovalsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPendingApprovalsRequest) ProtoMessage() {}
+
+func (x *ListPendingApprovalsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPendingApprovalsRequest.ProtoReflect.Descriptor instead.
+func (*ListPendingApprovalsRequest) Descriptor() ([]byte, []int) {
+	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListPendingApprovalsRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+// ListPendingApprovalsResponse returns approval items.
+type ListPendingApprovalsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Items         []*ApprovalRequest     `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPendingApprovalsResponse) Reset() {
+	*x = ListPendingApprovalsResponse{}
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPendingApprovalsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPendingApprovalsResponse) ProtoMessage() {}
+
+func (x *ListPendingApprovalsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPendingApprovalsResponse.ProtoReflect.Descriptor instead.
+func (*ListPendingApprovalsResponse) Descriptor() ([]byte, []int) {
+	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ListPendingApprovalsResponse) GetItems() []*ApprovalRequest {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *ListPendingApprovalsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+// DecideApprovalRequest submits an approval decision.
+type DecideApprovalRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ApprovalId    string                 `protobuf:"bytes,1,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
+	Decision      string                 `protobuf:"bytes,2,opt,name=decision,proto3" json:"decision,omitempty"` // "approved" or "rejected"
+	Comment       string                 `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DecideApprovalRequest) Reset() {
+	*x = DecideApprovalRequest{}
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DecideApprovalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DecideApprovalRequest) ProtoMessage() {}
+
+func (x *DecideApprovalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DecideApprovalRequest.ProtoReflect.Descriptor instead.
+func (*DecideApprovalRequest) Descriptor() ([]byte, []int) {
+	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *DecideApprovalRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
+}
+
+func (x *DecideApprovalRequest) GetDecision() string {
+	if x != nil {
+		return x.Decision
+	}
+	return ""
+}
+
+func (x *DecideApprovalRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+// DecideApprovalResponse confirms the decision.
+type DecideApprovalResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Status        ApprovalStatus         `protobuf:"varint,2,opt,name=status,proto3,enum=audit.v1.ApprovalStatus" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DecideApprovalResponse) Reset() {
+	*x = DecideApprovalResponse{}
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DecideApprovalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DecideApprovalResponse) ProtoMessage() {}
+
+func (x *DecideApprovalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DecideApprovalResponse.ProtoReflect.Descriptor instead.
+func (*DecideApprovalResponse) Descriptor() ([]byte, []int) {
+	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *DecideApprovalResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *DecideApprovalResponse) GetStatus() ApprovalStatus {
+	if x != nil {
+		return x.Status
+	}
+	return ApprovalStatus_APPROVAL_STATUS_UNSPECIFIED
+}
+
 var File_shared_proto_audit_v1_audit_proto protoreflect.FileDescriptor
 
 const file_shared_proto_audit_v1_audit_proto_rawDesc = "" +
@@ -1744,7 +2134,38 @@ const file_shared_proto_audit_v1_audit_proto_rawDesc = "" +
 	"percentage\x12\x12\n" +
 	"\x04step\x18\x02 \x01(\tR\x04step\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12\x1c\n" +
-	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp*\xe8\x01\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\"\xa4\x03\n" +
+	"\x0fApprovalRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
+	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12 \n" +
+	"\faudit_job_id\x18\x03 \x01(\tR\n" +
+	"auditJobId\x12!\n" +
+	"\frequested_by\x18\x04 \x01(\tR\vrequestedBy\x12\x1f\n" +
+	"\vassigned_to\x18\x05 \x03(\tR\n" +
+	"assignedTo\x12\x14\n" +
+	"\x05title\x18\x06 \x01(\tR\x05title\x12!\n" +
+	"\fcontext_json\x18\a \x01(\tR\vcontextJson\x120\n" +
+	"\x06status\x18\b \x01(\x0e2\x18.audit.v1.ApprovalStatusR\x06status\x129\n" +
+	"\n" +
+	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"decided_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tdecidedAt\x12\x1d\n" +
+	"\n" +
+	"decided_by\x18\v \x01(\tR\tdecidedBy\"5\n" +
+	"\x1bListPendingApprovalsRequest\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\tR\x06status\"e\n" +
+	"\x1cListPendingApprovalsResponse\x12/\n" +
+	"\x05items\x18\x01 \x03(\v2\x19.audit.v1.ApprovalRequestR\x05items\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\"n\n" +
+	"\x15DecideApprovalRequest\x12\x1f\n" +
+	"\vapproval_id\x18\x01 \x01(\tR\n" +
+	"approvalId\x12\x1a\n" +
+	"\bdecision\x18\x02 \x01(\tR\bdecision\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\"d\n" +
+	"\x16DecideApprovalResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x120\n" +
+	"\x06status\x18\x02 \x01(\x0e2\x18.audit.v1.ApprovalStatusR\x06status*\xe8\x01\n" +
 	"\x0eAuditJobStatus\x12 \n" +
 	"\x1cAUDIT_JOB_STATUS_UNSPECIFIED\x10\x00\x12\x1c\n" +
 	"\x18AUDIT_JOB_STATUS_PENDING\x10\x01\x12\x1c\n" +
@@ -1770,7 +2191,12 @@ const file_shared_proto_audit_v1_audit_proto_rawDesc = "" +
 	"\x1aISSUE_TYPE_HUMAN_OVERSIGHT\x10\x03\x12\x17\n" +
 	"\x13ISSUE_TYPE_ACCURACY\x10\x04\x12\x17\n" +
 	"\x13ISSUE_TYPE_SECURITY\x10\x05\x12\x1d\n" +
-	"\x19ISSUE_TYPE_RECORD_KEEPING\x10\x062\xd3\x06\n" +
+	"\x19ISSUE_TYPE_RECORD_KEEPING\x10\x06*\x8a\x01\n" +
+	"\x0eApprovalStatus\x12\x1f\n" +
+	"\x1bAPPROVAL_STATUS_UNSPECIFIED\x10\x00\x12\x1b\n" +
+	"\x17APPROVAL_STATUS_PENDING\x10\x01\x12\x1c\n" +
+	"\x18APPROVAL_STATUS_APPROVED\x10\x02\x12\x1c\n" +
+	"\x18APPROVAL_STATUS_REJECTED\x10\x032\xe7\b\n" +
 	"\fAuditService\x12c\n" +
 	"\n" +
 	"ListAudits\x12\x1b.audit.v1.ListAuditsRequest\x1a\x1c.audit.v1.ListAuditsResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/audit-jobs\x12t\n" +
@@ -1780,7 +2206,9 @@ const file_shared_proto_audit_v1_audit_proto_rawDesc = "" +
 	"PauseAudit\x12\x1b.audit.v1.PauseAuditRequest\x1a\x1c.audit.v1.PauseAuditResponse\".\x82\xd3\xe4\x93\x02(:\x01*\"#/api/v1/audit-jobs/{audit_id}/pause\x12{\n" +
 	"\vResumeAudit\x12\x1c.audit.v1.ResumeAuditRequest\x1a\x1d.audit.v1.ResumeAuditResponse\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/audit-jobs/{audit_id}/resume\x12\x81\x01\n" +
 	"\x0eGetAuditReport\x12\x1f.audit.v1.GetAuditReportRequest\x1a .audit.v1.GetAuditReportResponse\",\x82\xd3\xe4\x93\x02&\x12$/api/v1/audit-jobs/{audit_id}/report\x12\x83\x01\n" +
-	"\x0eGetAuditStatus\x12\x1f.audit.v1.GetAuditStatusRequest\x1a .audit.v1.GetAuditStatusResponse\",\x82\xd3\xe4\x93\x02&\x12$/api/v1/audit-jobs/{audit_id}/status0\x01B7Z5sovereign-ai-compliance/shared/proto/audit/v1;auditv1b\x06proto3"
+	"\x0eGetAuditStatus\x12\x1f.audit.v1.GetAuditStatusRequest\x1a .audit.v1.GetAuditStatusResponse\",\x82\xd3\xe4\x93\x02&\x12$/api/v1/audit-jobs/{audit_id}/status0\x01\x12\x88\x01\n" +
+	"\x14ListPendingApprovals\x12%.audit.v1.ListPendingApprovalsRequest\x1a&.audit.v1.ListPendingApprovalsResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/approvals/pending\x12\x86\x01\n" +
+	"\x0eDecideApproval\x12\x1f.audit.v1.DecideApprovalRequest\x1a .audit.v1.DecideApprovalResponse\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/api/v1/approvals/{approval_id}/decideB7Z5sovereign-ai-compliance/shared/proto/audit/v1;auditv1b\x06proto3"
 
 var (
 	file_shared_proto_audit_v1_audit_proto_rawDescOnce sync.Once
@@ -1794,86 +2222,101 @@ func file_shared_proto_audit_v1_audit_proto_rawDescGZIP() []byte {
 	return file_shared_proto_audit_v1_audit_proto_rawDescData
 }
 
-var file_shared_proto_audit_v1_audit_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_shared_proto_audit_v1_audit_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_shared_proto_audit_v1_audit_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
+var file_shared_proto_audit_v1_audit_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_shared_proto_audit_v1_audit_proto_goTypes = []any{
-	(AuditJobStatus)(0),            // 0: audit.v1.AuditJobStatus
-	(AuditType)(0),                 // 1: audit.v1.AuditType
-	(RiskSeverity)(0),              // 2: audit.v1.RiskSeverity
-	(IssueType)(0),                 // 3: audit.v1.IssueType
-	(*AuditJob)(nil),               // 4: audit.v1.AuditJob
-	(*AuditJobSummary)(nil),        // 5: audit.v1.AuditJobSummary
-	(*Finding)(nil),                // 6: audit.v1.Finding
-	(*AuditReportSummary)(nil),     // 7: audit.v1.AuditReportSummary
-	(*TriggerAuditRequest)(nil),    // 8: audit.v1.TriggerAuditRequest
-	(*TriggerAuditResponse)(nil),   // 9: audit.v1.TriggerAuditResponse
-	(*ListAuditsRequest)(nil),      // 10: audit.v1.ListAuditsRequest
-	(*ListAuditsResponse)(nil),     // 11: audit.v1.ListAuditsResponse
-	(*GetAuditRequest)(nil),        // 12: audit.v1.GetAuditRequest
-	(*GetAuditResponse)(nil),       // 13: audit.v1.GetAuditResponse
-	(*PauseAuditRequest)(nil),      // 14: audit.v1.PauseAuditRequest
-	(*PauseAuditResponse)(nil),     // 15: audit.v1.PauseAuditResponse
-	(*ResumeAuditRequest)(nil),     // 16: audit.v1.ResumeAuditRequest
-	(*ResumeAuditResponse)(nil),    // 17: audit.v1.ResumeAuditResponse
-	(*GetAuditReportRequest)(nil),  // 18: audit.v1.GetAuditReportRequest
-	(*GetAuditReportResponse)(nil), // 19: audit.v1.GetAuditReportResponse
-	(*FindingGroup)(nil),           // 20: audit.v1.FindingGroup
-	(*GetAuditStatusRequest)(nil),  // 21: audit.v1.GetAuditStatusRequest
-	(*GetAuditStatusResponse)(nil), // 22: audit.v1.GetAuditStatusResponse
-	nil,                            // 23: audit.v1.GetAuditReportResponse.BySeverityEntry
-	nil,                            // 24: audit.v1.GetAuditReportResponse.ByIssueTypeEntry
-	(*timestamppb.Timestamp)(nil),  // 25: google.protobuf.Timestamp
+	(AuditJobStatus)(0),                  // 0: audit.v1.AuditJobStatus
+	(AuditType)(0),                       // 1: audit.v1.AuditType
+	(RiskSeverity)(0),                    // 2: audit.v1.RiskSeverity
+	(IssueType)(0),                       // 3: audit.v1.IssueType
+	(ApprovalStatus)(0),                  // 4: audit.v1.ApprovalStatus
+	(*AuditJob)(nil),                     // 5: audit.v1.AuditJob
+	(*AuditJobSummary)(nil),              // 6: audit.v1.AuditJobSummary
+	(*Finding)(nil),                      // 7: audit.v1.Finding
+	(*AuditReportSummary)(nil),           // 8: audit.v1.AuditReportSummary
+	(*TriggerAuditRequest)(nil),          // 9: audit.v1.TriggerAuditRequest
+	(*TriggerAuditResponse)(nil),         // 10: audit.v1.TriggerAuditResponse
+	(*ListAuditsRequest)(nil),            // 11: audit.v1.ListAuditsRequest
+	(*ListAuditsResponse)(nil),           // 12: audit.v1.ListAuditsResponse
+	(*GetAuditRequest)(nil),              // 13: audit.v1.GetAuditRequest
+	(*GetAuditResponse)(nil),             // 14: audit.v1.GetAuditResponse
+	(*PauseAuditRequest)(nil),            // 15: audit.v1.PauseAuditRequest
+	(*PauseAuditResponse)(nil),           // 16: audit.v1.PauseAuditResponse
+	(*ResumeAuditRequest)(nil),           // 17: audit.v1.ResumeAuditRequest
+	(*ResumeAuditResponse)(nil),          // 18: audit.v1.ResumeAuditResponse
+	(*GetAuditReportRequest)(nil),        // 19: audit.v1.GetAuditReportRequest
+	(*GetAuditReportResponse)(nil),       // 20: audit.v1.GetAuditReportResponse
+	(*FindingGroup)(nil),                 // 21: audit.v1.FindingGroup
+	(*GetAuditStatusRequest)(nil),        // 22: audit.v1.GetAuditStatusRequest
+	(*GetAuditStatusResponse)(nil),       // 23: audit.v1.GetAuditStatusResponse
+	(*ApprovalRequest)(nil),              // 24: audit.v1.ApprovalRequest
+	(*ListPendingApprovalsRequest)(nil),  // 25: audit.v1.ListPendingApprovalsRequest
+	(*ListPendingApprovalsResponse)(nil), // 26: audit.v1.ListPendingApprovalsResponse
+	(*DecideApprovalRequest)(nil),        // 27: audit.v1.DecideApprovalRequest
+	(*DecideApprovalResponse)(nil),       // 28: audit.v1.DecideApprovalResponse
+	nil,                                  // 29: audit.v1.GetAuditReportResponse.BySeverityEntry
+	nil,                                  // 30: audit.v1.GetAuditReportResponse.ByIssueTypeEntry
+	(*timestamppb.Timestamp)(nil),        // 31: google.protobuf.Timestamp
 }
 var file_shared_proto_audit_v1_audit_proto_depIdxs = []int32{
 	1,  // 0: audit.v1.AuditJob.audit_type:type_name -> audit.v1.AuditType
 	0,  // 1: audit.v1.AuditJob.status:type_name -> audit.v1.AuditJobStatus
 	2,  // 2: audit.v1.AuditJob.risk_severity:type_name -> audit.v1.RiskSeverity
-	25, // 3: audit.v1.AuditJob.started_at:type_name -> google.protobuf.Timestamp
-	25, // 4: audit.v1.AuditJob.completed_at:type_name -> google.protobuf.Timestamp
-	25, // 5: audit.v1.AuditJob.created_at:type_name -> google.protobuf.Timestamp
-	25, // 6: audit.v1.AuditJob.updated_at:type_name -> google.protobuf.Timestamp
+	31, // 3: audit.v1.AuditJob.started_at:type_name -> google.protobuf.Timestamp
+	31, // 4: audit.v1.AuditJob.completed_at:type_name -> google.protobuf.Timestamp
+	31, // 5: audit.v1.AuditJob.created_at:type_name -> google.protobuf.Timestamp
+	31, // 6: audit.v1.AuditJob.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 7: audit.v1.AuditJobSummary.audit_type:type_name -> audit.v1.AuditType
 	0,  // 8: audit.v1.AuditJobSummary.status:type_name -> audit.v1.AuditJobStatus
 	2,  // 9: audit.v1.AuditJobSummary.risk_severity:type_name -> audit.v1.RiskSeverity
-	25, // 10: audit.v1.AuditJobSummary.created_at:type_name -> google.protobuf.Timestamp
+	31, // 10: audit.v1.AuditJobSummary.created_at:type_name -> google.protobuf.Timestamp
 	3,  // 11: audit.v1.Finding.issue_type:type_name -> audit.v1.IssueType
 	2,  // 12: audit.v1.Finding.severity:type_name -> audit.v1.RiskSeverity
-	25, // 13: audit.v1.Finding.created_at:type_name -> google.protobuf.Timestamp
+	31, // 13: audit.v1.Finding.created_at:type_name -> google.protobuf.Timestamp
 	2,  // 14: audit.v1.AuditReportSummary.risk_severity:type_name -> audit.v1.RiskSeverity
 	1,  // 15: audit.v1.TriggerAuditRequest.audit_type:type_name -> audit.v1.AuditType
 	0,  // 16: audit.v1.TriggerAuditResponse.status:type_name -> audit.v1.AuditJobStatus
-	5,  // 17: audit.v1.ListAuditsResponse.items:type_name -> audit.v1.AuditJobSummary
-	4,  // 18: audit.v1.GetAuditResponse.audit:type_name -> audit.v1.AuditJob
-	6,  // 19: audit.v1.GetAuditResponse.findings:type_name -> audit.v1.Finding
+	6,  // 17: audit.v1.ListAuditsResponse.items:type_name -> audit.v1.AuditJobSummary
+	5,  // 18: audit.v1.GetAuditResponse.audit:type_name -> audit.v1.AuditJob
+	7,  // 19: audit.v1.GetAuditResponse.findings:type_name -> audit.v1.Finding
 	0,  // 20: audit.v1.PauseAuditResponse.status:type_name -> audit.v1.AuditJobStatus
 	0,  // 21: audit.v1.ResumeAuditResponse.status:type_name -> audit.v1.AuditJobStatus
-	4,  // 22: audit.v1.GetAuditReportResponse.audit:type_name -> audit.v1.AuditJob
-	6,  // 23: audit.v1.GetAuditReportResponse.findings:type_name -> audit.v1.Finding
-	23, // 24: audit.v1.GetAuditReportResponse.by_severity:type_name -> audit.v1.GetAuditReportResponse.BySeverityEntry
-	24, // 25: audit.v1.GetAuditReportResponse.by_issue_type:type_name -> audit.v1.GetAuditReportResponse.ByIssueTypeEntry
-	7,  // 26: audit.v1.GetAuditReportResponse.summary:type_name -> audit.v1.AuditReportSummary
-	6,  // 27: audit.v1.FindingGroup.findings:type_name -> audit.v1.Finding
-	20, // 28: audit.v1.GetAuditReportResponse.BySeverityEntry.value:type_name -> audit.v1.FindingGroup
-	20, // 29: audit.v1.GetAuditReportResponse.ByIssueTypeEntry.value:type_name -> audit.v1.FindingGroup
-	10, // 30: audit.v1.AuditService.ListAudits:input_type -> audit.v1.ListAuditsRequest
-	8,  // 31: audit.v1.AuditService.TriggerAudit:input_type -> audit.v1.TriggerAuditRequest
-	12, // 32: audit.v1.AuditService.GetAudit:input_type -> audit.v1.GetAuditRequest
-	14, // 33: audit.v1.AuditService.PauseAudit:input_type -> audit.v1.PauseAuditRequest
-	16, // 34: audit.v1.AuditService.ResumeAudit:input_type -> audit.v1.ResumeAuditRequest
-	18, // 35: audit.v1.AuditService.GetAuditReport:input_type -> audit.v1.GetAuditReportRequest
-	21, // 36: audit.v1.AuditService.GetAuditStatus:input_type -> audit.v1.GetAuditStatusRequest
-	11, // 37: audit.v1.AuditService.ListAudits:output_type -> audit.v1.ListAuditsResponse
-	9,  // 38: audit.v1.AuditService.TriggerAudit:output_type -> audit.v1.TriggerAuditResponse
-	13, // 39: audit.v1.AuditService.GetAudit:output_type -> audit.v1.GetAuditResponse
-	15, // 40: audit.v1.AuditService.PauseAudit:output_type -> audit.v1.PauseAuditResponse
-	17, // 41: audit.v1.AuditService.ResumeAudit:output_type -> audit.v1.ResumeAuditResponse
-	19, // 42: audit.v1.AuditService.GetAuditReport:output_type -> audit.v1.GetAuditReportResponse
-	22, // 43: audit.v1.AuditService.GetAuditStatus:output_type -> audit.v1.GetAuditStatusResponse
-	37, // [37:44] is the sub-list for method output_type
-	30, // [30:37] is the sub-list for method input_type
-	30, // [30:30] is the sub-list for extension type_name
-	30, // [30:30] is the sub-list for extension extendee
-	0,  // [0:30] is the sub-list for field type_name
+	5,  // 22: audit.v1.GetAuditReportResponse.audit:type_name -> audit.v1.AuditJob
+	7,  // 23: audit.v1.GetAuditReportResponse.findings:type_name -> audit.v1.Finding
+	29, // 24: audit.v1.GetAuditReportResponse.by_severity:type_name -> audit.v1.GetAuditReportResponse.BySeverityEntry
+	30, // 25: audit.v1.GetAuditReportResponse.by_issue_type:type_name -> audit.v1.GetAuditReportResponse.ByIssueTypeEntry
+	8,  // 26: audit.v1.GetAuditReportResponse.summary:type_name -> audit.v1.AuditReportSummary
+	7,  // 27: audit.v1.FindingGroup.findings:type_name -> audit.v1.Finding
+	4,  // 28: audit.v1.ApprovalRequest.status:type_name -> audit.v1.ApprovalStatus
+	31, // 29: audit.v1.ApprovalRequest.created_at:type_name -> google.protobuf.Timestamp
+	31, // 30: audit.v1.ApprovalRequest.decided_at:type_name -> google.protobuf.Timestamp
+	24, // 31: audit.v1.ListPendingApprovalsResponse.items:type_name -> audit.v1.ApprovalRequest
+	4,  // 32: audit.v1.DecideApprovalResponse.status:type_name -> audit.v1.ApprovalStatus
+	21, // 33: audit.v1.GetAuditReportResponse.BySeverityEntry.value:type_name -> audit.v1.FindingGroup
+	21, // 34: audit.v1.GetAuditReportResponse.ByIssueTypeEntry.value:type_name -> audit.v1.FindingGroup
+	11, // 35: audit.v1.AuditService.ListAudits:input_type -> audit.v1.ListAuditsRequest
+	9,  // 36: audit.v1.AuditService.TriggerAudit:input_type -> audit.v1.TriggerAuditRequest
+	13, // 37: audit.v1.AuditService.GetAudit:input_type -> audit.v1.GetAuditRequest
+	15, // 38: audit.v1.AuditService.PauseAudit:input_type -> audit.v1.PauseAuditRequest
+	17, // 39: audit.v1.AuditService.ResumeAudit:input_type -> audit.v1.ResumeAuditRequest
+	19, // 40: audit.v1.AuditService.GetAuditReport:input_type -> audit.v1.GetAuditReportRequest
+	22, // 41: audit.v1.AuditService.GetAuditStatus:input_type -> audit.v1.GetAuditStatusRequest
+	25, // 42: audit.v1.AuditService.ListPendingApprovals:input_type -> audit.v1.ListPendingApprovalsRequest
+	27, // 43: audit.v1.AuditService.DecideApproval:input_type -> audit.v1.DecideApprovalRequest
+	12, // 44: audit.v1.AuditService.ListAudits:output_type -> audit.v1.ListAuditsResponse
+	10, // 45: audit.v1.AuditService.TriggerAudit:output_type -> audit.v1.TriggerAuditResponse
+	14, // 46: audit.v1.AuditService.GetAudit:output_type -> audit.v1.GetAuditResponse
+	16, // 47: audit.v1.AuditService.PauseAudit:output_type -> audit.v1.PauseAuditResponse
+	18, // 48: audit.v1.AuditService.ResumeAudit:output_type -> audit.v1.ResumeAuditResponse
+	20, // 49: audit.v1.AuditService.GetAuditReport:output_type -> audit.v1.GetAuditReportResponse
+	23, // 50: audit.v1.AuditService.GetAuditStatus:output_type -> audit.v1.GetAuditStatusResponse
+	26, // 51: audit.v1.AuditService.ListPendingApprovals:output_type -> audit.v1.ListPendingApprovalsResponse
+	28, // 52: audit.v1.AuditService.DecideApproval:output_type -> audit.v1.DecideApprovalResponse
+	44, // [44:53] is the sub-list for method output_type
+	35, // [35:44] is the sub-list for method input_type
+	35, // [35:35] is the sub-list for extension type_name
+	35, // [35:35] is the sub-list for extension extendee
+	0,  // [0:35] is the sub-list for field type_name
 }
 
 func init() { file_shared_proto_audit_v1_audit_proto_init() }
@@ -1886,8 +2329,8 @@ func file_shared_proto_audit_v1_audit_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_shared_proto_audit_v1_audit_proto_rawDesc), len(file_shared_proto_audit_v1_audit_proto_rawDesc)),
-			NumEnums:      4,
-			NumMessages:   21,
+			NumEnums:      5,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

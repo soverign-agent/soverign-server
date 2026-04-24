@@ -3,6 +3,7 @@ package grpcserver
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -237,6 +238,19 @@ func (s *Server) GetAISystem(ctx context.Context, req *orgv1.GetAISystemRequest)
 	return toProtoAISystem(system), nil
 }
 
+// buildMetadataJSON constructs a valid JSON metadata string from repository_url and existing metadata.
+func buildMetadataJSON(existingMeta, repositoryURL string) string {
+	meta := make(map[string]interface{})
+	if existingMeta != "" {
+		_ = json.Unmarshal([]byte(existingMeta), &meta)
+	}
+	if repositoryURL != "" {
+		meta["repository_url"] = repositoryURL
+	}
+	b, _ := json.Marshal(meta)
+	return string(b)
+}
+
 // CreateAISystem creates a new AI system.
 func (s *Server) CreateAISystem(ctx context.Context, req *orgv1.CreateAISystemRequest) (*orgv1.AISystem, error) {
 	ctx = withTenant(ctx)
@@ -250,7 +264,17 @@ func (s *Server) CreateAISystem(ctx context.Context, req *orgv1.CreateAISystemRe
 		return nil, status.Errorf(codes.InvalidArgument, "name is required")
 	}
 
-	system, err := s.logic.CreateAISystem(ctx, tenantID, req.Name, req.Description, req.RiskClassification, req.Status, req.Metadata)
+	riskClass := req.RiskClassification
+	if riskClass == "" {
+		riskClass = "limited"
+	}
+	statusStr := req.Status
+	if statusStr == "" {
+		statusStr = "draft"
+	}
+	metadata := buildMetadataJSON(req.Metadata, req.RepositoryUrl)
+
+	system, err := s.logic.CreateAISystem(ctx, tenantID, req.Name, req.Description, riskClass, statusStr, metadata)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "create ai system: %v", err)
 	}
@@ -272,7 +296,9 @@ func (s *Server) UpdateAISystem(ctx context.Context, req *orgv1.UpdateAISystemRe
 		return nil, status.Errorf(codes.InvalidArgument, "invalid system_id: %v", err)
 	}
 
-	system, err := s.logic.UpdateAISystem(ctx, tenantID, systemID, req.Name, req.Description, req.RiskClassification, req.Status, req.Metadata)
+	metadata := buildMetadataJSON(req.Metadata, req.RepositoryUrl)
+
+	system, err := s.logic.UpdateAISystem(ctx, tenantID, systemID, req.Name, req.Description, req.RiskClassification, req.Status, metadata)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "update ai system: %v", err)
 	}

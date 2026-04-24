@@ -287,6 +287,137 @@ func (r *SQLRepository) GetFindingsForAudit(ctx context.Context, auditID uuid.UU
 	return findings, tx.Commit()
 }
 
+// ListApprovalRequests lists approval requests for the current tenant filtered by status.
+func (r *SQLRepository) ListApprovalRequests(ctx context.Context, status string) ([]model.ApprovalRequest, error) {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return nil, fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	query := `
+		SELECT id, tenant_id, audit_job_id, requested_by, assigned_to, title, context_json, status, created_at, updated_at, decided_at, decided_by
+		FROM approval_requests`
+	var args []interface{}
+	if status != "" {
+		query += " WHERE status = $1"
+		args = append(args, status)
+	}
+	query += " ORDER BY created_at DESC"
+
+	rows, err := tx.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, fmt.Errorf("query approval requests: %w", err)
+	}
+	defer rows.Close()
+
+	var requests []model.ApprovalRequest
+	for rows.Next() {
+		var req model.ApprovalRequest
+		var decidedAt sql.NullTime
+		var decidedBy sql.NullString
+		err := rows.Scan(
+			&req.ID, &req.TenantID, &req.AuditJobID, &req.RequestedBy, &req.AssignedTo,
+			&req.Title, &req.ContextJSON, &req.Status, &req.CreatedAt, &req.UpdatedAt,
+			&decidedAt, &decidedBy,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("scan approval request: %w", err)
+		}
+		if decidedAt.Valid {
+			req.DecidedAt = &decidedAt.Time
+		}
+		if decidedBy.Valid {
+			req.DecidedBy = &decidedBy.String
+		}
+		requests = append(requests, req)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration: %w", err)
+	}
+
+	return requests, tx.Commit()
+}
+
+// GetApprovalRequest retrieves an approval request by ID.
+func (r *SQLRepository) GetApprovalRequest(ctx context.Context, id uuid.UUID) (*model.ApprovalRequest, error) {
+	query := `
+		SELECT id, tenant_id, audit_job_id, requested_by, assigned_to, title, context_json, status, created_at, updated_at, decided_at, decided_by
+		FROM approval_requests
+		WHERE id = $1`
+
+	var req model.ApprovalRequest
+	var decidedAt sql.NullTime
+	var decidedBy sql.NullString
+	err := r.base.DB().QueryRowContext(ctx, query, id).Scan(
+		&req.ID, &req.TenantID, &req.AuditJobID, &req.RequestedBy, &req.AssignedTo,
+		&req.Title, &req.ContextJSON, &req.Status, &req.CreatedAt, &req.UpdatedAt,
+		&decidedAt, &decidedBy,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get approval request: %w", err)
+	}
+
+	if decidedAt.Valid {
+		req.DecidedAt = &decidedAt.Time
+	}
+	if decidedBy.Valid {
+		req.DecidedBy = &decidedBy.String
+	}
+
+	return &req, nil
+}
+
+// CreateApprovalRequest creates a new approval request.
+func (r *SQLRepository) CreateApprovalRequest(ctx context.Context, req *model.ApprovalRequest) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	query := `
+		INSERT INTO approval_requests (id, tenant_id, audit_job_id, requested_by, assigned_to, title, context_json, status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING created_at, updated_at`
+
+	err = tx.QueryRowContext(
+		ctx, query,
+		req.ID, req.TenantID, req.AuditJobID, req.RequestedBy, req.AssignedTo,
+		req.Title, req.ContextJSON, req.Status,
+	).Scan(&req.CreatedAt, &req.UpdatedAt)
+
+	if err != nil {
+		return fmt.Errorf("insert approval request: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// UpdateApprovalStatus updates the status of an approval request.
+func (r *SQLRepository) UpdateApprovalStatus(ctx context.Context, id uuid.UUID, status, decidedBy string) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx,
+		`UPDATE approval_requests SET status = $1, decided_by = $2, decided_at = NOW(), updated_at = NOW() WHERE id = $3`,
+		status, decidedBy, id,
+	)
+	if err != nil {
+		return fmt.Errorf("update approval status: %w", err)
+	}
+
+	return tx.Commit()
+}
+
 // CountFindingsBySeverity counts findings by severity for an audit.
 func (r *SQLRepository) CountFindingsBySeverity(ctx context.Context, auditID uuid.UUID) (critical, high, medium, low int, err error) {
 	tx, err := r.base.BeginTenantTx(ctx, nil)

@@ -41,6 +41,18 @@ type Repository interface {
 
 	// CountFindingsBySeverity counts findings by severity for an audit.
 	CountFindingsBySeverity(ctx context.Context, auditID uuid.UUID) (critical, high, medium, low int, err error)
+
+	// ListApprovalRequests lists approval requests for the current tenant.
+	ListApprovalRequests(ctx context.Context, status string) ([]model.ApprovalRequest, error)
+
+	// GetApprovalRequest retrieves an approval request by ID.
+	GetApprovalRequest(ctx context.Context, id uuid.UUID) (*model.ApprovalRequest, error)
+
+	// CreateApprovalRequest creates a new approval request.
+	CreateApprovalRequest(ctx context.Context, req *model.ApprovalRequest) error
+
+	// UpdateApprovalStatus updates the status of an approval request.
+	UpdateApprovalStatus(ctx context.Context, id uuid.UUID, status, decidedBy string) error
 }
 
 // SQLRepository implements the audit repository with PostgreSQL and RLS.
