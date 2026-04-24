@@ -35,6 +35,9 @@ func TestGenerateTokenPair(t *testing.T) {
 	if pair.AccessToken == "" || pair.RefreshToken == "" {
 		t.Fatal("expected non-empty tokens")
 	}
+	if pair.AccessToken == pair.RefreshToken {
+		t.Fatal("access_token and refresh_token must be different")
+	}
 	if pair.AccessExpiry.Before(time.Now()) || pair.RefreshExpiry.Before(time.Now()) {
 		t.Fatal("expected future expiry times")
 	}
