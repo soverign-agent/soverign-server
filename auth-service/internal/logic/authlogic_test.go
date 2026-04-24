@@ -157,6 +157,9 @@ func TestLogin_Success(t *testing.T) {
 	if pair.AccessToken == "" || pair.RefreshToken == "" {
 		t.Fatal("expected tokens")
 	}
+	if pair.AccessToken == pair.RefreshToken {
+		t.Fatal("access_token and refresh_token must be different")
+	}
 	if safeUser.Email != "test@example.com" {
 		t.Errorf("expected test@example.com, got %s", safeUser.Email)
 	}
@@ -229,6 +232,9 @@ func TestRefreshToken_Success(t *testing.T) {
 	}
 	if newPair.AccessToken == "" || newPair.RefreshToken == "" {
 		t.Fatal("expected new tokens")
+	}
+	if newPair.AccessToken == newPair.RefreshToken {
+		t.Fatal("access_token and refresh_token must be different")
 	}
 	// Old refresh token should be revoked after rotation
 	_, err = auth.RefreshToken(context.Background(), pair.RefreshToken)
