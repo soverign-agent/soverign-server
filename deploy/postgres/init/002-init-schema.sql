@@ -82,51 +82,62 @@ CREATE TABLE IF NOT EXISTS repository_scan_results (
 CREATE TABLE IF NOT EXISTS documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    title VARCHAR(500) NOT NULL,
-    content TEXT,
-    source VARCHAR(100),
-    doc_type VARCHAR(100),
-    metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    file_type TEXT NOT NULL,
+    file_size BIGINT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    error_msg TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    processed_at TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS embeddings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
-    chunk_index INT NOT NULL DEFAULT 0,
-    chunk_text TEXT,
-    embedding VECTOR(1536),
-    metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    document_id UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+    chunk_index INTEGER NOT NULL,
+    text TEXT NOT NULL,
+    embedding VECTOR(1536) NOT NULL,
+    checksum BYTEA NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS audit_jobs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    ai_system_id UUID REFERENCES ai_systems(id) ON DELETE SET NULL,
-    status VARCHAR(50) NOT NULL DEFAULT 'queued',
-    progress INT NOT NULL DEFAULT 0,
-    result JSONB DEFAULT '{}',
+    repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    audit_type TEXT NOT NULL DEFAULT 'full',
+    status TEXT NOT NULL DEFAULT 'pending',
+    risk_score INTEGER NOT NULL DEFAULT 0,
+    risk_severity TEXT NOT NULL DEFAULT 'low',
+    progress_percentage INTEGER NOT NULL DEFAULT 0,
+    findings_count INTEGER NOT NULL DEFAULT 0,
+    critical_findings INTEGER NOT NULL DEFAULT 0,
+    high_findings INTEGER NOT NULL DEFAULT 0,
+    medium_findings INTEGER NOT NULL DEFAULT 0,
+    low_findings INTEGER NOT NULL DEFAULT 0,
+    workflow_id TEXT,
     started_at TIMESTAMPTZ,
     completed_at TIMESTAMPTZ,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS audit_findings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     audit_job_id UUID NOT NULL REFERENCES audit_jobs(id) ON DELETE CASCADE,
-    severity VARCHAR(50) NOT NULL DEFAULT 'medium',
-    category VARCHAR(100),
-    description TEXT,
+    file_path TEXT NOT NULL,
+    line_number INTEGER,
+    issue_type TEXT NOT NULL,
+    severity TEXT NOT NULL DEFAULT 'medium',
+    title TEXT NOT NULL,
+    description TEXT NOT NULL,
     remediation TEXT,
-    status VARCHAR(50) NOT NULL DEFAULT 'open',
-    metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS generated_documents (
@@ -387,10 +398,22 @@ CREATE INDEX IF NOT EXISTS idx_users_tenant_email ON users(tenant_id, email);
 CREATE INDEX IF NOT EXISTS idx_ai_systems_tenant_status ON ai_systems(tenant_id, status);
 CREATE INDEX IF NOT EXISTS idx_repositories_tenant_provider ON repositories(tenant_id, provider);
 CREATE INDEX IF NOT EXISTS idx_repository_scans_tenant_repo ON repository_scan_results(tenant_id, repository_id);
-CREATE INDEX IF NOT EXISTS idx_documents_tenant_type ON documents(tenant_id, doc_type);
-CREATE INDEX IF NOT EXISTS idx_embeddings_tenant_doc ON embeddings(tenant_id, document_id);
-CREATE INDEX IF NOT EXISTS idx_audit_jobs_tenant_system ON audit_jobs(tenant_id, ai_system_id);
-CREATE INDEX IF NOT EXISTS idx_audit_findings_tenant_job ON audit_findings(tenant_id, audit_job_id);
+CREATE INDEX IF NOT EXISTS idx_documents_tenant_id ON documents(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_documents_status ON documents(status);
+CREATE INDEX IF NOT EXISTS idx_documents_created_at ON documents(created_at);
+CREATE INDEX IF NOT EXISTS idx_embeddings_tenant_id ON embeddings(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_embeddings_document_id ON embeddings(document_id);
+CREATE INDEX IF NOT EXISTS idx_embeddings_checksum ON embeddings(checksum);
+CREATE INDEX IF NOT EXISTS idx_embeddings_vector ON embeddings USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 64);
+CREATE INDEX IF NOT EXISTS idx_audit_jobs_tenant_id ON audit_jobs(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_audit_jobs_repository_id ON audit_jobs(repository_id);
+CREATE INDEX IF NOT EXISTS idx_audit_jobs_status ON audit_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_audit_jobs_created_at ON audit_jobs(created_at);
+CREATE INDEX IF NOT EXISTS idx_audit_jobs_risk_severity ON audit_jobs(risk_severity);
+CREATE INDEX IF NOT EXISTS idx_audit_findings_tenant_id ON audit_findings(tenant_id);
+CREATE INDEX IF NOT EXISTS idx_audit_findings_audit_job_id ON audit_findings(audit_job_id);
+CREATE INDEX IF NOT EXISTS idx_audit_findings_issue_type ON audit_findings(issue_type);
+CREATE INDEX IF NOT EXISTS idx_audit_findings_severity ON audit_findings(severity);
 CREATE INDEX IF NOT EXISTS idx_generated_docs_tenant_system ON generated_documents(tenant_id, ai_system_id);
 CREATE INDEX IF NOT EXISTS idx_approval_requests_tenant_status ON approval_requests(tenant_id, status);
 CREATE INDEX IF NOT EXISTS idx_approval_history_tenant_request ON approval_history(tenant_id, approval_request_id);

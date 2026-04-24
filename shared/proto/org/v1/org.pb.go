@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        v3.19.4
-// source: shared/proto/org/v1/org.proto
+// source: org/v1/org.proto
 
 package orgv1
 
@@ -39,7 +39,7 @@ type Tenant struct {
 
 func (x *Tenant) Reset() {
 	*x = Tenant{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[0]
+	mi := &file_org_v1_org_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -51,7 +51,7 @@ func (x *Tenant) String() string {
 func (*Tenant) ProtoMessage() {}
 
 func (x *Tenant) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[0]
+	mi := &file_org_v1_org_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -64,7 +64,7 @@ func (x *Tenant) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Tenant.ProtoReflect.Descriptor instead.
 func (*Tenant) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{0}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Tenant) GetId() string {
@@ -133,7 +133,7 @@ type SafeUser struct {
 
 func (x *SafeUser) Reset() {
 	*x = SafeUser{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[1]
+	mi := &file_org_v1_org_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -145,7 +145,7 @@ func (x *SafeUser) String() string {
 func (*SafeUser) ProtoMessage() {}
 
 func (x *SafeUser) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[1]
+	mi := &file_org_v1_org_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -158,7 +158,7 @@ func (x *SafeUser) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SafeUser.ProtoReflect.Descriptor instead.
 func (*SafeUser) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{1}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *SafeUser) GetId() string {
@@ -235,7 +235,7 @@ type AISystem struct {
 
 func (x *AISystem) Reset() {
 	*x = AISystem{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[2]
+	mi := &file_org_v1_org_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -247,7 +247,7 @@ func (x *AISystem) String() string {
 func (*AISystem) ProtoMessage() {}
 
 func (x *AISystem) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[2]
+	mi := &file_org_v1_org_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -260,7 +260,7 @@ func (x *AISystem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AISystem.ProtoReflect.Descriptor instead.
 func (*AISystem) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{2}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *AISystem) GetId() string {
@@ -343,7 +343,7 @@ type CompliancePolicy struct {
 
 func (x *CompliancePolicy) Reset() {
 	*x = CompliancePolicy{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[3]
+	mi := &file_org_v1_org_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -355,7 +355,7 @@ func (x *CompliancePolicy) String() string {
 func (*CompliancePolicy) ProtoMessage() {}
 
 func (x *CompliancePolicy) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[3]
+	mi := &file_org_v1_org_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -368,7 +368,7 @@ func (x *CompliancePolicy) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompliancePolicy.ProtoReflect.Descriptor instead.
 func (*CompliancePolicy) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{3}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *CompliancePolicy) GetId() string {
@@ -436,7 +436,7 @@ type GetTenantRequest struct {
 
 func (x *GetTenantRequest) Reset() {
 	*x = GetTenantRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[4]
+	mi := &file_org_v1_org_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -448,7 +448,7 @@ func (x *GetTenantRequest) String() string {
 func (*GetTenantRequest) ProtoMessage() {}
 
 func (x *GetTenantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[4]
+	mi := &file_org_v1_org_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -461,7 +461,7 @@ func (x *GetTenantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetTenantRequest.ProtoReflect.Descriptor instead.
 func (*GetTenantRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{4}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{4}
 }
 
 // UpdateTenantRequest updates tenant details.
@@ -476,7 +476,7 @@ type UpdateTenantRequest struct {
 
 func (x *UpdateTenantRequest) Reset() {
 	*x = UpdateTenantRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[5]
+	mi := &file_org_v1_org_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -488,7 +488,7 @@ func (x *UpdateTenantRequest) String() string {
 func (*UpdateTenantRequest) ProtoMessage() {}
 
 func (x *UpdateTenantRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[5]
+	mi := &file_org_v1_org_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -501,7 +501,7 @@ func (x *UpdateTenantRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateTenantRequest.ProtoReflect.Descriptor instead.
 func (*UpdateTenantRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{5}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *UpdateTenantRequest) GetName() string {
@@ -534,7 +534,7 @@ type ListUsersRequest struct {
 
 func (x *ListUsersRequest) Reset() {
 	*x = ListUsersRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[6]
+	mi := &file_org_v1_org_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -546,7 +546,7 @@ func (x *ListUsersRequest) String() string {
 func (*ListUsersRequest) ProtoMessage() {}
 
 func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[6]
+	mi := &file_org_v1_org_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -559,7 +559,7 @@ func (x *ListUsersRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUsersRequest.ProtoReflect.Descriptor instead.
 func (*ListUsersRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{6}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{6}
 }
 
 // ListUsersResponse returns the user list.
@@ -572,7 +572,7 @@ type ListUsersResponse struct {
 
 func (x *ListUsersResponse) Reset() {
 	*x = ListUsersResponse{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[7]
+	mi := &file_org_v1_org_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -584,7 +584,7 @@ func (x *ListUsersResponse) String() string {
 func (*ListUsersResponse) ProtoMessage() {}
 
 func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[7]
+	mi := &file_org_v1_org_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -597,7 +597,7 @@ func (x *ListUsersResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUsersResponse.ProtoReflect.Descriptor instead.
 func (*ListUsersResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{7}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListUsersResponse) GetUsers() []*SafeUser {
@@ -618,7 +618,7 @@ type InviteUserRequest struct {
 
 func (x *InviteUserRequest) Reset() {
 	*x = InviteUserRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[8]
+	mi := &file_org_v1_org_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -630,7 +630,7 @@ func (x *InviteUserRequest) String() string {
 func (*InviteUserRequest) ProtoMessage() {}
 
 func (x *InviteUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[8]
+	mi := &file_org_v1_org_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -643,7 +643,7 @@ func (x *InviteUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use InviteUserRequest.ProtoReflect.Descriptor instead.
 func (*InviteUserRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{8}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *InviteUserRequest) GetEmail() string {
@@ -671,7 +671,7 @@ type UpdateUserRoleRequest struct {
 
 func (x *UpdateUserRoleRequest) Reset() {
 	*x = UpdateUserRoleRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[9]
+	mi := &file_org_v1_org_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -683,7 +683,7 @@ func (x *UpdateUserRoleRequest) String() string {
 func (*UpdateUserRoleRequest) ProtoMessage() {}
 
 func (x *UpdateUserRoleRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[9]
+	mi := &file_org_v1_org_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -696,7 +696,7 @@ func (x *UpdateUserRoleRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateUserRoleRequest.ProtoReflect.Descriptor instead.
 func (*UpdateUserRoleRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{9}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UpdateUserRoleRequest) GetUserId() string {
@@ -724,7 +724,7 @@ type ToggleUserRequest struct {
 
 func (x *ToggleUserRequest) Reset() {
 	*x = ToggleUserRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[10]
+	mi := &file_org_v1_org_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -736,7 +736,7 @@ func (x *ToggleUserRequest) String() string {
 func (*ToggleUserRequest) ProtoMessage() {}
 
 func (x *ToggleUserRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[10]
+	mi := &file_org_v1_org_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -749,7 +749,7 @@ func (x *ToggleUserRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ToggleUserRequest.ProtoReflect.Descriptor instead.
 func (*ToggleUserRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{10}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ToggleUserRequest) GetUserId() string {
@@ -776,7 +776,7 @@ type GetAISystemRequest struct {
 
 func (x *GetAISystemRequest) Reset() {
 	*x = GetAISystemRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[11]
+	mi := &file_org_v1_org_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -788,7 +788,7 @@ func (x *GetAISystemRequest) String() string {
 func (*GetAISystemRequest) ProtoMessage() {}
 
 func (x *GetAISystemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[11]
+	mi := &file_org_v1_org_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -801,7 +801,7 @@ func (x *GetAISystemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAISystemRequest.ProtoReflect.Descriptor instead.
 func (*GetAISystemRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{11}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *GetAISystemRequest) GetSystemId() string {
@@ -820,7 +820,7 @@ type ListAISystemsRequest struct {
 
 func (x *ListAISystemsRequest) Reset() {
 	*x = ListAISystemsRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[12]
+	mi := &file_org_v1_org_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -832,7 +832,7 @@ func (x *ListAISystemsRequest) String() string {
 func (*ListAISystemsRequest) ProtoMessage() {}
 
 func (x *ListAISystemsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[12]
+	mi := &file_org_v1_org_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -845,7 +845,7 @@ func (x *ListAISystemsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAISystemsRequest.ProtoReflect.Descriptor instead.
 func (*ListAISystemsRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{12}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{12}
 }
 
 // ListAISystemsResponse returns AI systems.
@@ -858,7 +858,7 @@ type ListAISystemsResponse struct {
 
 func (x *ListAISystemsResponse) Reset() {
 	*x = ListAISystemsResponse{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[13]
+	mi := &file_org_v1_org_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -870,7 +870,7 @@ func (x *ListAISystemsResponse) String() string {
 func (*ListAISystemsResponse) ProtoMessage() {}
 
 func (x *ListAISystemsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[13]
+	mi := &file_org_v1_org_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -883,7 +883,7 @@ func (x *ListAISystemsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAISystemsResponse.ProtoReflect.Descriptor instead.
 func (*ListAISystemsResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{13}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ListAISystemsResponse) GetSystems() []*AISystem {
@@ -907,7 +907,7 @@ type CreateAISystemRequest struct {
 
 func (x *CreateAISystemRequest) Reset() {
 	*x = CreateAISystemRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[14]
+	mi := &file_org_v1_org_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -919,7 +919,7 @@ func (x *CreateAISystemRequest) String() string {
 func (*CreateAISystemRequest) ProtoMessage() {}
 
 func (x *CreateAISystemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[14]
+	mi := &file_org_v1_org_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -932,7 +932,7 @@ func (x *CreateAISystemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAISystemRequest.ProtoReflect.Descriptor instead.
 func (*CreateAISystemRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{14}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *CreateAISystemRequest) GetName() string {
@@ -985,7 +985,7 @@ type UpdateAISystemRequest struct {
 
 func (x *UpdateAISystemRequest) Reset() {
 	*x = UpdateAISystemRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[15]
+	mi := &file_org_v1_org_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -997,7 +997,7 @@ func (x *UpdateAISystemRequest) String() string {
 func (*UpdateAISystemRequest) ProtoMessage() {}
 
 func (x *UpdateAISystemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[15]
+	mi := &file_org_v1_org_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1010,7 +1010,7 @@ func (x *UpdateAISystemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateAISystemRequest.ProtoReflect.Descriptor instead.
 func (*UpdateAISystemRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{15}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *UpdateAISystemRequest) GetSystemId() string {
@@ -1065,7 +1065,7 @@ type DeleteAISystemRequest struct {
 
 func (x *DeleteAISystemRequest) Reset() {
 	*x = DeleteAISystemRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[16]
+	mi := &file_org_v1_org_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1077,7 +1077,7 @@ func (x *DeleteAISystemRequest) String() string {
 func (*DeleteAISystemRequest) ProtoMessage() {}
 
 func (x *DeleteAISystemRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[16]
+	mi := &file_org_v1_org_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1090,7 +1090,7 @@ func (x *DeleteAISystemRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteAISystemRequest.ProtoReflect.Descriptor instead.
 func (*DeleteAISystemRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{16}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *DeleteAISystemRequest) GetSystemId() string {
@@ -1110,7 +1110,7 @@ type DeleteAISystemResponse struct {
 
 func (x *DeleteAISystemResponse) Reset() {
 	*x = DeleteAISystemResponse{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[17]
+	mi := &file_org_v1_org_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1122,7 +1122,7 @@ func (x *DeleteAISystemResponse) String() string {
 func (*DeleteAISystemResponse) ProtoMessage() {}
 
 func (x *DeleteAISystemResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[17]
+	mi := &file_org_v1_org_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1135,7 +1135,7 @@ func (x *DeleteAISystemResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteAISystemResponse.ProtoReflect.Descriptor instead.
 func (*DeleteAISystemResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{17}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *DeleteAISystemResponse) GetSuccess() bool {
@@ -1154,7 +1154,7 @@ type GetActivePolicyRequest struct {
 
 func (x *GetActivePolicyRequest) Reset() {
 	*x = GetActivePolicyRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[18]
+	mi := &file_org_v1_org_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1166,7 +1166,7 @@ func (x *GetActivePolicyRequest) String() string {
 func (*GetActivePolicyRequest) ProtoMessage() {}
 
 func (x *GetActivePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[18]
+	mi := &file_org_v1_org_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1179,7 +1179,7 @@ func (x *GetActivePolicyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetActivePolicyRequest.ProtoReflect.Descriptor instead.
 func (*GetActivePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{18}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{18}
 }
 
 // UpdatePolicyRequest updates the compliance policy.
@@ -1194,7 +1194,7 @@ type UpdatePolicyRequest struct {
 
 func (x *UpdatePolicyRequest) Reset() {
 	*x = UpdatePolicyRequest{}
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[19]
+	mi := &file_org_v1_org_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1206,7 +1206,7 @@ func (x *UpdatePolicyRequest) String() string {
 func (*UpdatePolicyRequest) ProtoMessage() {}
 
 func (x *UpdatePolicyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_org_v1_org_proto_msgTypes[19]
+	mi := &file_org_v1_org_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1219,7 +1219,7 @@ func (x *UpdatePolicyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePolicyRequest.ProtoReflect.Descriptor instead.
 func (*UpdatePolicyRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_org_v1_org_proto_rawDescGZIP(), []int{19}
+	return file_org_v1_org_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *UpdatePolicyRequest) GetName() string {
@@ -1243,11 +1243,11 @@ func (x *UpdatePolicyRequest) GetRules() string {
 	return ""
 }
 
-var File_shared_proto_org_v1_org_proto protoreflect.FileDescriptor
+var File_org_v1_org_proto protoreflect.FileDescriptor
 
-const file_shared_proto_org_v1_org_proto_rawDesc = "" +
+const file_org_v1_org_proto_rawDesc = "" +
 	"\n" +
-	"\x1dshared/proto/org/v1/org.proto\x12\x06org.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xea\x01\n" +
+	"\x10org/v1/org.proto\x12\x06org.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xea\x01\n" +
 	"\x06Tenant\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -1338,39 +1338,40 @@ const file_shared_proto_org_v1_org_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
 	"\vpolicy_type\x18\x02 \x01(\tR\n" +
 	"policyType\x12\x14\n" +
-	"\x05rules\x18\x03 \x01(\tR\x05rules2\xfd\t\n" +
+	"\x05rules\x18\x03 \x01(\tR\x05rules2\xa4\n" +
 	"\n" +
-	"OrgService\x12N\n" +
-	"\tGetTenant\x12\x18.org.v1.GetTenantRequest\x1a\x0e.org.v1.Tenant\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/org/tenant\x12W\n" +
-	"\fUpdateTenant\x12\x1b.org.v1.UpdateTenantRequest\x1a\x0e.org.v1.Tenant\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\x1a\x0f/api/org/tenant\x12X\n" +
-	"\tListUsers\x12\x18.org.v1.ListUsersRequest\x1a\x19.org.v1.ListUsersResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/api/org/users\x12[\n" +
 	"\n" +
-	"InviteUser\x12\x19.org.v1.InviteUserRequest\x1a\x10.org.v1.SafeUser\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/org/users/invite\x12a\n" +
-	"\x0eUpdateUserRole\x12\x1d.org.v1.UpdateUserRoleRequest\x1a\x10.org.v1.SafeUser\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/api/org/users/role\x12[\n" +
+	"OrgService\x12Q\n" +
+	"\tGetTenant\x12\x18.org.v1.GetTenantRequest\x1a\x0e.org.v1.Tenant\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/org/tenant\x12Z\n" +
+	"\fUpdateTenant\x12\x1b.org.v1.UpdateTenantRequest\x1a\x0e.org.v1.Tenant\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\x1a\x12/api/v1/org/tenant\x12[\n" +
+	"\tListUsers\x12\x18.org.v1.ListUsersRequest\x1a\x19.org.v1.ListUsersResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/api/v1/org/users\x12^\n" +
 	"\n" +
-	"ToggleUser\x12\x19.org.v1.ToggleUserRequest\x1a\x10.org.v1.SafeUser\" \x82\xd3\xe4\x93\x02\x1a:\x01*\x1a\x15/api/org/users/toggle\x12i\n" +
-	"\rListAISystems\x12\x1c.org.v1.ListAISystemsRequest\x1a\x1d.org.v1.ListAISystemsResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/api/org/ai-systems\x12d\n" +
-	"\vGetAISystem\x12\x1a.org.v1.GetAISystemRequest\x1a\x10.org.v1.AISystem\"'\x82\xd3\xe4\x93\x02!\x12\x1f/api/org/ai-systems/{system_id}\x12a\n" +
-	"\x0eCreateAISystem\x12\x1d.org.v1.CreateAISystemRequest\x1a\x10.org.v1.AISystem\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/org/ai-systems\x12a\n" +
-	"\x0eUpdateAISystem\x12\x1d.org.v1.UpdateAISystemRequest\x1a\x10.org.v1.AISystem\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/api/org/ai-systems\x12o\n" +
-	"\x0eDeleteAISystem\x12\x1d.org.v1.DeleteAISystemRequest\x1a\x1e.org.v1.DeleteAISystemResponse\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01**\x13/api/org/ai-systems\x12d\n" +
-	"\x0fGetActivePolicy\x12\x1e.org.v1.GetActivePolicyRequest\x1a\x18.org.v1.CompliancePolicy\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/org/policy\x12a\n" +
-	"\fUpdatePolicy\x12\x1b.org.v1.UpdatePolicyRequest\x1a\x18.org.v1.CompliancePolicy\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\x1a\x0f/api/org/policyB3Z1sovereign-ai-compliance/shared/proto/org/v1;orgv1b\x06proto3"
+	"InviteUser\x12\x19.org.v1.InviteUserRequest\x1a\x10.org.v1.SafeUser\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/org/users/invite\x12d\n" +
+	"\x0eUpdateUserRole\x12\x1d.org.v1.UpdateUserRoleRequest\x1a\x10.org.v1.SafeUser\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\x1a\x16/api/v1/org/users/role\x12^\n" +
+	"\n" +
+	"ToggleUser\x12\x19.org.v1.ToggleUserRequest\x1a\x10.org.v1.SafeUser\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\x1a\x18/api/v1/org/users/toggle\x12l\n" +
+	"\rListAISystems\x12\x1c.org.v1.ListAISystemsRequest\x1a\x1d.org.v1.ListAISystemsResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\x12\x16/api/v1/org/ai-systems\x12g\n" +
+	"\vGetAISystem\x12\x1a.org.v1.GetAISystemRequest\x1a\x10.org.v1.AISystem\"*\x82\xd3\xe4\x93\x02$\x12\"/api/v1/org/ai-systems/{system_id}\x12d\n" +
+	"\x0eCreateAISystem\x12\x1d.org.v1.CreateAISystemRequest\x1a\x10.org.v1.AISystem\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/api/v1/org/ai-systems\x12d\n" +
+	"\x0eUpdateAISystem\x12\x1d.org.v1.UpdateAISystemRequest\x1a\x10.org.v1.AISystem\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\x1a\x16/api/v1/org/ai-systems\x12r\n" +
+	"\x0eDeleteAISystem\x12\x1d.org.v1.DeleteAISystemRequest\x1a\x1e.org.v1.DeleteAISystemResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01**\x16/api/v1/org/ai-systems\x12g\n" +
+	"\x0fGetActivePolicy\x12\x1e.org.v1.GetActivePolicyRequest\x1a\x18.org.v1.CompliancePolicy\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/api/v1/org/policy\x12d\n" +
+	"\fUpdatePolicy\x12\x1b.org.v1.UpdatePolicyRequest\x1a\x18.org.v1.CompliancePolicy\"\x1d\x82\xd3\xe4\x93\x02\x17:\x01*\x1a\x12/api/v1/org/policyB3Z1sovereign-ai-compliance/shared/proto/org/v1;orgv1b\x06proto3"
 
 var (
-	file_shared_proto_org_v1_org_proto_rawDescOnce sync.Once
-	file_shared_proto_org_v1_org_proto_rawDescData []byte
+	file_org_v1_org_proto_rawDescOnce sync.Once
+	file_org_v1_org_proto_rawDescData []byte
 )
 
-func file_shared_proto_org_v1_org_proto_rawDescGZIP() []byte {
-	file_shared_proto_org_v1_org_proto_rawDescOnce.Do(func() {
-		file_shared_proto_org_v1_org_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_shared_proto_org_v1_org_proto_rawDesc), len(file_shared_proto_org_v1_org_proto_rawDesc)))
+func file_org_v1_org_proto_rawDescGZIP() []byte {
+	file_org_v1_org_proto_rawDescOnce.Do(func() {
+		file_org_v1_org_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_org_v1_org_proto_rawDesc), len(file_org_v1_org_proto_rawDesc)))
 	})
-	return file_shared_proto_org_v1_org_proto_rawDescData
+	return file_org_v1_org_proto_rawDescData
 }
 
-var file_shared_proto_org_v1_org_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
-var file_shared_proto_org_v1_org_proto_goTypes = []any{
+var file_org_v1_org_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_org_v1_org_proto_goTypes = []any{
 	(*Tenant)(nil),                 // 0: org.v1.Tenant
 	(*SafeUser)(nil),               // 1: org.v1.SafeUser
 	(*AISystem)(nil),               // 2: org.v1.AISystem
@@ -1393,7 +1394,7 @@ var file_shared_proto_org_v1_org_proto_goTypes = []any{
 	(*UpdatePolicyRequest)(nil),    // 19: org.v1.UpdatePolicyRequest
 	(*timestamppb.Timestamp)(nil),  // 20: google.protobuf.Timestamp
 }
-var file_shared_proto_org_v1_org_proto_depIdxs = []int32{
+var file_org_v1_org_proto_depIdxs = []int32{
 	20, // 0: org.v1.Tenant.created_at:type_name -> google.protobuf.Timestamp
 	20, // 1: org.v1.Tenant.updated_at:type_name -> google.protobuf.Timestamp
 	20, // 2: org.v1.SafeUser.last_login:type_name -> google.protobuf.Timestamp
@@ -1438,26 +1439,26 @@ var file_shared_proto_org_v1_org_proto_depIdxs = []int32{
 	0,  // [0:11] is the sub-list for field type_name
 }
 
-func init() { file_shared_proto_org_v1_org_proto_init() }
-func file_shared_proto_org_v1_org_proto_init() {
-	if File_shared_proto_org_v1_org_proto != nil {
+func init() { file_org_v1_org_proto_init() }
+func file_org_v1_org_proto_init() {
+	if File_org_v1_org_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_shared_proto_org_v1_org_proto_rawDesc), len(file_shared_proto_org_v1_org_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_org_v1_org_proto_rawDesc), len(file_org_v1_org_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   20,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_shared_proto_org_v1_org_proto_goTypes,
-		DependencyIndexes: file_shared_proto_org_v1_org_proto_depIdxs,
-		MessageInfos:      file_shared_proto_org_v1_org_proto_msgTypes,
+		GoTypes:           file_org_v1_org_proto_goTypes,
+		DependencyIndexes: file_org_v1_org_proto_depIdxs,
+		MessageInfos:      file_org_v1_org_proto_msgTypes,
 	}.Build()
-	File_shared_proto_org_v1_org_proto = out.File
-	file_shared_proto_org_v1_org_proto_goTypes = nil
-	file_shared_proto_org_v1_org_proto_depIdxs = nil
+	File_org_v1_org_proto = out.File
+	file_org_v1_org_proto_goTypes = nil
+	file_org_v1_org_proto_depIdxs = nil
 }

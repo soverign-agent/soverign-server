@@ -1,14 +1,4 @@
-.PHONY: all build test lint proto proto-check clean
-
-# Proto generation settings
-PROTO_DIR := shared/proto
-PROTO_FILES := $(shell find $(PROTO_DIR) -name '*.proto' -not -path '$(PROTO_DIR)/google/*')
-GO_OUT := .
-PROTOC_OPTS := \
-	-I=. -I=$(PROTO_DIR) \
-	--go_out=$(GO_OUT) --go_opt=paths=source_relative \
-	--go-grpc_out=$(GO_OUT) --go-grpc_opt=paths=source_relative \
-	--grpc-gateway_out=$(GO_OUT) --grpc-gateway_opt=paths=source_relative --grpc-gateway_opt=allow_delete_body=true
+.PHONY: all build test lint proto proto-check clean start-dev
 
 all: proto build test
 
@@ -31,3 +21,18 @@ proto-check:
 
 clean:
 	find $(PROTO_DIR) -name '*.pb.go' -delete
+
+start-dev:
+	./scripts/start-dev.sh
+
+infra:
+	./scripts/start-dev.sh --infra
+
+stop-dev:
+	./scripts/start-dev.sh --stop
+
+logs-dev:
+	./scripts/start-dev.sh --logs
+
+status-dev:
+	./scripts/start-dev.sh --status

@@ -8,20 +8,22 @@ Database:
 
 LLM:
   Provider: openai
-  APIKey: ${OPENAI_API_KEY}
+  APIKey: ""
   BaseURL: ""
   Model: gpt-4o
-  Timeout: 120
+  Timeout: 120s
   MaxTokens: 4096
   Temperature: 0.7
 
 Export:
-  OutputDir: ./exports
-  DefaultFormat: pdf
-  MaxFileSizeMB: 50
+  output_dir: ./exports
+  default_format: pdf
+  max_file_size_mb: 50
 
 GRPC:
   Port: 9888
+  TLSCertFile: ""
+  TLSKeyFile: ""
   Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
 
 Clients:

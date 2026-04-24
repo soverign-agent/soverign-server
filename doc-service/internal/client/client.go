@@ -32,8 +32,8 @@ type Config struct {
 	OrgAddr     string
 	AuditAddr   string
 	RAGAddr     string
-	TLSCertFile string
-	TLSKeyFile  string
+	TLSCertFile string `json:",optional"`
+	TLSKeyFile  string `json:",optional"`
 	Insecure    bool
 }
 

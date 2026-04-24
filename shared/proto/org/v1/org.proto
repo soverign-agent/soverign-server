@@ -146,77 +146,77 @@ message UpdatePolicyRequest {
 // OrgService provides tenant, user, AI system, and policy management.
 service OrgService {
   rpc GetTenant(GetTenantRequest) returns (Tenant) {
-    option (google.api.http) = { get: "/api/org/tenant" };
+    option (google.api.http) = { get: "/api/v1/org/tenant" };
   }
 
   rpc UpdateTenant(UpdateTenantRequest) returns (Tenant) {
     option (google.api.http) = {
-      put: "/api/org/tenant"
+      put: "/api/v1/org/tenant"
       body: "*"
     };
   }
 
   rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {
-    option (google.api.http) = { get: "/api/org/users" };
+    option (google.api.http) = { get: "/api/v1/org/users" };
   }
 
   rpc InviteUser(InviteUserRequest) returns (SafeUser) {
     option (google.api.http) = {
-      post: "/api/org/users/invite"
+      post: "/api/v1/org/users/invite"
       body: "*"
     };
   }
 
   rpc UpdateUserRole(UpdateUserRoleRequest) returns (SafeUser) {
     option (google.api.http) = {
-      put: "/api/org/users/role"
+      put: "/api/v1/org/users/role"
       body: "*"
     };
   }
 
   rpc ToggleUser(ToggleUserRequest) returns (SafeUser) {
     option (google.api.http) = {
-      put: "/api/org/users/toggle"
+      put: "/api/v1/org/users/toggle"
       body: "*"
     };
   }
 
   rpc ListAISystems(ListAISystemsRequest) returns (ListAISystemsResponse) {
-    option (google.api.http) = { get: "/api/org/ai-systems" };
+    option (google.api.http) = { get: "/api/v1/org/ai-systems" };
   }
 
   rpc GetAISystem(GetAISystemRequest) returns (AISystem) {
-    option (google.api.http) = { get: "/api/org/ai-systems/{system_id}" };
+    option (google.api.http) = { get: "/api/v1/org/ai-systems/{system_id}" };
   }
 
   rpc CreateAISystem(CreateAISystemRequest) returns (AISystem) {
     option (google.api.http) = {
-      post: "/api/org/ai-systems"
+      post: "/api/v1/org/ai-systems"
       body: "*"
     };
   }
 
   rpc UpdateAISystem(UpdateAISystemRequest) returns (AISystem) {
     option (google.api.http) = {
-      put: "/api/org/ai-systems"
+      put: "/api/v1/org/ai-systems"
       body: "*"
     };
   }
 
   rpc DeleteAISystem(DeleteAISystemRequest) returns (DeleteAISystemResponse) {
     option (google.api.http) = {
-      delete: "/api/org/ai-systems"
+      delete: "/api/v1/org/ai-systems"
       body: "*"
     };
   }
 
   rpc GetActivePolicy(GetActivePolicyRequest) returns (CompliancePolicy) {
-    option (google.api.http) = { get: "/api/org/policy" };
+    option (google.api.http) = { get: "/api/v1/org/policy" };
   }
 
   rpc UpdatePolicy(UpdatePolicyRequest) returns (CompliancePolicy) {
     option (google.api.http) = {
-      put: "/api/org/policy"
+      put: "/api/v1/org/policy"
       body: "*"
     };
   }

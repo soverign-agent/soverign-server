@@ -1,8 +1,8 @@
 Database:
   Host: localhost
   Port: 5432
-  User: postgres
-  Password: postgres
+  User: sovereign
+  Password: sovereign-dev-password
   Database: sovereign
   SSLMode: disable
 
@@ -21,4 +21,6 @@ Chunking:
 
 GRPC:
   Port: 9082
+  TLSCertFile: ""
+  TLSKeyFile: ""
   Insecure: true # local dev only; production must set tls_cert_file and tls_key_file

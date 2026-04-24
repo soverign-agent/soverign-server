@@ -1,7 +1,7 @@
 -- Audit jobs table stores audit lifecycle
 CREATE TABLE IF NOT EXISTS audit_jobs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     audit_type TEXT NOT NULL, -- 'full' or 'incremental'
@@ -39,7 +39,7 @@ CREATE POLICY tenant_isolation ON audit_jobs
 -- Audit findings table stores individual issues found during audit
 CREATE TABLE IF NOT EXISTS audit_findings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
     audit_job_id UUID NOT NULL REFERENCES audit_jobs(id) ON DELETE CASCADE,
     file_path TEXT NOT NULL,
     line_number INTEGER,

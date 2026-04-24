@@ -38,7 +38,8 @@ func (r *BaseRepository) BeginTenantTx(ctx context.Context, opts *sql.TxOptions)
 		return nil, fmt.Errorf("failed to begin transaction: %w", err)
 	}
 
-	if _, err := tx.ExecContext(ctx, "SET LOCAL app.current_tenant = $1", tenantID); err != nil {
+	// SET LOCAL does not support parameterized queries; interpolate the validated UUID.
+	if _, err := tx.ExecContext(ctx, fmt.Sprintf("SET LOCAL app.current_tenant = '%s'", tenantID)); err != nil {
 		_ = tx.Rollback()
 		return nil, fmt.Errorf("failed to set tenant RLS context: %w", err)
 	}
@@ -64,7 +65,8 @@ func SetTenantContext(ctx context.Context, tx *sql.Tx) error {
 		return fmt.Errorf("tenant context required to set RLS context on transaction")
 	}
 
-	if _, err := tx.ExecContext(ctx, "SET LOCAL app.current_tenant = $1", tenantID); err != nil {
+	// SET LOCAL does not support parameterized queries; interpolate the validated UUID.
+	if _, err := tx.ExecContext(ctx, fmt.Sprintf("SET LOCAL app.current_tenant = '%s'", tenantID)); err != nil {
 		return fmt.Errorf("failed to set tenant RLS context: %w", err)
 	}
 	return nil

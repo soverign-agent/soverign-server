@@ -15,7 +15,7 @@ type Config struct {
 // NotificationConfig holds notification-service gRPC client settings.
 type NotificationConfig struct {
 	Addr        string `json:"addr"`
-	TLSCertFile string `json:"tls_cert_file"`
+	TLSCertFile string `json:"tls_cert_file,optional"`
 	Insecure    bool   `json:"insecure"`
 }
 
@@ -30,8 +30,8 @@ type RiskConfig struct {
 // GRPCConfig holds gRPC server configuration.
 type GRPCConfig struct {
 	Port       int    `json:"port"`        // gRPC server port, e.g. 9086
-	TLSCertFile string `json:"tls_cert_file"` // Path to TLS certificate (production)
-	TLSKeyFile  string `json:"tls_key_file"`  // Path to TLS key (production)
+	TLSCertFile string `json:"tls_cert_file,optional"` // Path to TLS certificate (production)
+	TLSKeyFile  string `json:"tls_key_file,optional"`  // Path to TLS key (production)
 	Insecure    bool   `json:"insecure"`    // Allow insecure connections (local dev only)
 }
 

@@ -23,17 +23,32 @@ func NewSQLRepository(db *sql.DB) Repository {
 }
 
 // GetUserByEmail looks up a user by email within a tenant.
+// If tenantID is empty, lookup falls back to email only (used for login before tenant is known).
 func (r *sqlRepository) GetUserByEmail(ctx context.Context, tenantID uuid.UUID, email string) (*model.User, error) {
 	var user model.User
 	var lastLogin sql.NullTime
-	err := r.db.QueryRowContext(ctx,
-		`SELECT id, tenant_id, email, password_hash, role, is_active, last_login, created_at, updated_at
-		 FROM users WHERE tenant_id = $1 AND email = $2`,
-		tenantID, email,
-	).Scan(
-		&user.ID, &user.TenantID, &user.Email, &user.PasswordHash,
-		&user.Role, &user.IsActive, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
-	)
+	var err error
+
+	if tenantID == uuid.Nil {
+		err = r.db.QueryRowContext(ctx,
+			`SELECT id, tenant_id, email, password_hash, role, is_active, last_login, created_at, updated_at
+			 FROM users WHERE email = $1`,
+			email,
+		).Scan(
+			&user.ID, &user.TenantID, &user.Email, &user.PasswordHash,
+			&user.Role, &user.IsActive, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
+		)
+	} else {
+		err = r.db.QueryRowContext(ctx,
+			`SELECT id, tenant_id, email, password_hash, role, is_active, last_login, created_at, updated_at
+			 FROM users WHERE tenant_id = $1 AND email = $2`,
+			tenantID, email,
+		).Scan(
+			&user.ID, &user.TenantID, &user.Email, &user.PasswordHash,
+			&user.Role, &user.IsActive, &lastLogin, &user.CreatedAt, &user.UpdatedAt,
+		)
+	}
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("user not found")
