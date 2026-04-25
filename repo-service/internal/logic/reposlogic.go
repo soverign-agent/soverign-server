@@ -52,6 +52,12 @@ func (l *RepositoryLogic) Create(ctx context.Context, tenantID uuid.UUID, req *t
 	repoID := uuid.New()
 	now := time.Now()
 
+	// Prevent duplicate repositories for the same tenant + URL
+	existing, err := l.repo.GetByURL(ctx, tenantID, req.URL)
+	if err == nil && existing != nil {
+		return nil, fmt.Errorf("repository already exists: %s", req.URL)
+	}
+
 	repository := &model.Repository{
 		ID:            repoID,
 		TenantID:      tenantID,
