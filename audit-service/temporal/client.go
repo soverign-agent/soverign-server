@@ -69,14 +69,15 @@ func (c *Client) Client() client.Client {
 }
 
 // StartAuditWorkflow starts a new compliance audit workflow.
-func (c *Client) StartAuditWorkflow(ctx context.Context, auditID string) (client.WorkflowRun, error) {
+func (c *Client) StartAuditWorkflow(ctx context.Context, auditID string, auditType string) (client.WorkflowRun, error) {
 	options := client.StartWorkflowOptions{
 		ID:        auditID,
 		TaskQueue: "audit-task-queue",
 	}
 
 	workflowParams := ComplianceAuditWorkflowParams{
-		AuditID: auditID,
+		AuditID:   auditID,
+		AuditType: auditType,
 	}
 
 	return c.temporalClient.ExecuteWorkflow(ctx, options, new(ComplianceAuditWorkflow).Execute, workflowParams)

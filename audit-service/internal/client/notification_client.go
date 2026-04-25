@@ -70,18 +70,18 @@ func (n *NotificationClient) SendAuditCompletedNotification(ctx context.Context,
 	userID := audit.TenantID.String()
 
 	_, err = n.client.SendNotification(ctx, &notificationv1.SendNotificationRequest{
-		UserId:   userID,
-		Title:    title,
-		Body:     body,
-		Channel:  notificationv1.NotificationChannel_NOTIFICATION_CHANNEL_IN_APP,
-		Priority: priority,
+		UserId:    userID,
+		Title:     title,
+		Body:      body,
+		Channel:   notificationv1.NotificationChannel_NOTIFICATION_CHANNEL_IN_APP,
+		Priority:  priority,
 		ActionUrl: fmt.Sprintf("/audits/%s", auditID.String()),
 		Metadata: map[string]string{
-			"audit_id":    auditID.String(),
-			"audit_name":  audit.Name,
-			"risk_score":  fmt.Sprintf("%d", audit.RiskScore),
-			"risk_level":  audit.RiskSeverity,
-			"event_type":  "audit_completed",
+			"audit_id":   auditID.String(),
+			"audit_name": audit.Name,
+			"risk_score": fmt.Sprintf("%d", audit.RiskScore),
+			"risk_level": audit.RiskSeverity,
+			"event_type": "audit_completed",
 		},
 	})
 	if err != nil {

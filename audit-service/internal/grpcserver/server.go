@@ -126,7 +126,7 @@ func (s *Server) TriggerAudit(ctx context.Context, req *auditv1.TriggerAuditRequ
 
 	// Start Temporal workflow in background; do not fail request if workflow start fails.
 	go func() {
-		workflowRun, err := s.temporal.StartAuditWorkflow(context.Background(), audit.ID.String())
+		workflowRun, err := s.temporal.StartAuditWorkflow(context.Background(), audit.ID.String(), audit.AuditType)
 		if err != nil {
 			return
 		}

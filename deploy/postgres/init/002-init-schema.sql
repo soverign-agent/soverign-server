@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS audit_jobs (
     repository_id UUID NOT NULL REFERENCES repositories(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     audit_type TEXT NOT NULL DEFAULT 'full',
+    previous_audit_id UUID REFERENCES audit_jobs(id) ON DELETE SET NULL,
     status TEXT NOT NULL DEFAULT 'pending',
     risk_score INTEGER NOT NULL DEFAULT 0,
     risk_severity TEXT NOT NULL DEFAULT 'low',

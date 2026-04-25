@@ -46,6 +46,7 @@ type AuditJob struct {
 	HighFindings       int        `json:"high_findings"`
 	MediumFindings     int        `json:"medium_findings"`
 	LowFindings        int        `json:"low_findings"`
+	PreviousAuditID    *uuid.UUID `json:"previous_audit_id,omitempty"`
 	WorkflowID         *string    `json:"workflow_id,omitempty"`
 	StartedAt          *time.Time `json:"started_at,omitempty"`
 	CompletedAt        *time.Time `json:"completed_at,omitempty"`
