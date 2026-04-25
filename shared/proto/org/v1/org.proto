@@ -208,8 +208,7 @@ service OrgService {
 
   rpc DeleteAISystem(DeleteAISystemRequest) returns (DeleteAISystemResponse) {
     option (google.api.http) = {
-      delete: "/api/v1/org/ai-systems"
-      body: "*"
+      delete: "/api/v1/org/ai-systems/{system_id}"
     };
   }
 

@@ -586,7 +586,7 @@ func RegisterOrgServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux,
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/org.v1.OrgService/DeleteAISystem", runtime.WithHTTPPathPattern("/api/v1/org/ai-systems"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/org.v1.OrgService/DeleteAISystem", runtime.WithHTTPPathPattern("/api/v1/org/ai-systems/{system_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -854,7 +854,7 @@ func RegisterOrgServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux,
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/org.v1.OrgService/DeleteAISystem", runtime.WithHTTPPathPattern("/api/v1/org/ai-systems"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/org.v1.OrgService/DeleteAISystem", runtime.WithHTTPPathPattern("/api/v1/org/ai-systems/{system_id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -915,7 +915,7 @@ var (
 	pattern_OrgService_GetAISystem_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "org", "ai-systems", "system_id"}, ""))
 	pattern_OrgService_CreateAISystem_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "org", "ai-systems"}, ""))
 	pattern_OrgService_UpdateAISystem_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "org", "ai-systems"}, ""))
-	pattern_OrgService_DeleteAISystem_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "org", "ai-systems"}, ""))
+	pattern_OrgService_DeleteAISystem_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "org", "ai-systems", "system_id"}, ""))
 	pattern_OrgService_GetActivePolicy_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "org", "policy"}, ""))
 	pattern_OrgService_UpdatePolicy_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "org", "policy"}, ""))
 )
