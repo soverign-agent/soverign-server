@@ -49,3 +49,5 @@ doc-service/doc-service
 agent-orchestrator/agent-orchestrator
 notification-service/notification-service
 logs/
+
+.DS_Store
