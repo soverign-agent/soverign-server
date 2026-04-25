@@ -117,15 +117,15 @@ stop_service() {
     rm -f "$pidfile"
   fi
 
-  # Fallback: kill by port (go run compiles to cache, path patterns don't match)
+  # Fallback: gracefully terminate by port (go run compiles to cache, path patterns don't match)
   local pids
   pids=$(lsof -ti :"$port" 2>/dev/null | tr '\n' ' ' || true)
   if [[ -n "$pids" ]]; then
-    info "Killing $name processes on port $port: $pids"
+    info "Gracefully stopping $name processes on port $port: $pids"
     for pid in $pids; do
-      kill -9 "$pid" 2>/dev/null || true
+      kill "$pid" 2>/dev/null || true
     done
-    sleep 0.5
+    sleep 1
   fi
 }
 

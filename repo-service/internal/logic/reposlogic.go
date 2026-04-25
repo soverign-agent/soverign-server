@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -180,12 +179,8 @@ func (l *RepositoryLogic) TestConnection(ctx context.Context, tenantID, repoID u
 		cloneOptions.Auth = auth
 	}
 
-	// Create filesystem
-	fs := osfs.New(testDir)
-
-	// Clone - we don't need context since git.Clone doesn't accept it
-	// The clone will complete quickly with depth 1
-	_, err = git.Clone(nil, fs, cloneOptions)
+	// PlainClone handles directory creation safely; avoid git.Clone with nil storer
+	_, err = git.PlainClone(testDir, false, cloneOptions)
 	if err != nil {
 		return false, fmt.Sprintf("clone failed: %v", err), nil
 	}
@@ -350,12 +345,9 @@ func (l *RepositoryLogic) PullCode(ctx context.Context, repository *model.Reposi
 
 	// Create unique temp directory for this clone
 	cloneDir := filepath.Join(l.tempDir, fmt.Sprintf("scan-%s", uuid.New().String()))
-	if err := os.MkdirAll(cloneDir, 0700); err != nil {
-		return "", fmt.Errorf("create clone directory: %w", err)
+	if err := os.MkdirAll(l.tempDir, 0700); err != nil {
+		return "", fmt.Errorf("create temp directory: %w", err)
 	}
-
-	// Check if this repository already exists - if so, do incremental pull
-	fs := osfs.New(cloneDir)
 
 	var cloneOptions *git.CloneOptions
 	if branch != "" {
@@ -380,8 +372,8 @@ func (l *RepositoryLogic) PullCode(ctx context.Context, repository *model.Reposi
 		cloneOptions.Auth = auth
 	}
 
-	// Do the clone
-	_, err := git.Clone(nil, fs, cloneOptions)
+	// PlainClone handles directory creation safely; avoid git.Clone with nil storer
+	_, err := git.PlainClone(cloneDir, false, cloneOptions)
 	if err != nil {
 		// Cleanup on failure
 		_ = os.RemoveAll(cloneDir)
