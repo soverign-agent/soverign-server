@@ -21,6 +21,9 @@ type Repository interface {
 	// GetAuditByID retrieves an audit job by ID.
 	GetAuditByID(ctx context.Context, id uuid.UUID) (*model.AuditJob, error)
 
+	// GetPreviousCompletedAudit gets the most recent completed audit for a repository (excluding the given audit ID).
+	GetPreviousCompletedAudit(ctx context.Context, repositoryID, excludeAuditID uuid.UUID) (*model.AuditJob, error)
+
 	// ListAudits lists audit jobs for the current tenant with filtering.
 	ListAudits(ctx context.Context, repoID *uuid.UUID, status *string, page, pageSize int) ([]model.AuditJobSummary, int, error)
 
@@ -35,6 +38,9 @@ type Repository interface {
 
 	// CreateFinding creates a new audit finding.
 	CreateFinding(ctx context.Context, finding *model.Finding) error
+
+	// FindingExistsByLocation checks whether a finding already exists at the same file location for an audit.
+	FindingExistsByLocation(ctx context.Context, auditID uuid.UUID, filePath string, lineNumber *int, issueType string) (bool, error)
 
 	// GetFindingsForAudit gets all findings for an audit job.
 	GetFindingsForAudit(ctx context.Context, auditID uuid.UUID) ([]model.Finding, error)

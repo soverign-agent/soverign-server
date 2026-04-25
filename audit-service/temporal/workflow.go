@@ -10,7 +10,8 @@ import (
 
 // ComplianceAuditWorkflowParams parameters for the compliance audit workflow.
 type ComplianceAuditWorkflowParams struct {
-	AuditID string `json:"audit_id"`
+	AuditID   string `json:"audit_id"`
+	AuditType string `json:"audit_type"`
 }
 
 // ApproveAuditSignal signal for approval when paused at approval gate.
@@ -36,16 +37,33 @@ type ComplianceAuditWorkflow struct {
 func (w *ComplianceAuditWorkflow) Execute(ctx workflow.Context, params ComplianceAuditWorkflowParams) error {
 	logger := workflow.GetLogger(ctx)
 
+	isIncremental := params.AuditType == model.AuditTypeIncremental
+
 	// Workflow steps with progress tracking
-	steps := []string{
-		"initialize",
-		"fetch_repository",
-		"run_static_analysis",
-		"generate_findings",
-		"calculate_risk_score",
-		"check_approval_gate",
-		"generate_report",
-		"notify_completion",
+	var steps []string
+	if isIncremental {
+		steps = []string{
+			"initialize",
+			"load_previous_findings",
+			"fetch_repository",
+			"run_static_analysis",
+			"generate_findings",
+			"calculate_risk_score",
+			"check_approval_gate",
+			"generate_report",
+			"notify_completion",
+		}
+	} else {
+		steps = []string{
+			"initialize",
+			"fetch_repository",
+			"run_static_analysis",
+			"generate_findings",
+			"calculate_risk_score",
+			"check_approval_gate",
+			"generate_report",
+			"notify_completion",
+		}
 	}
 
 	currentStep := 0
@@ -59,6 +77,18 @@ func (w *ComplianceAuditWorkflow) Execute(ctx workflow.Context, params Complianc
 	}
 	currentStep++
 	progress = (currentStep * 100) / len(steps)
+
+	// For incremental audits, carry forward findings from the previous completed audit
+	if isIncremental {
+		err = workflow.ExecuteActivity(ctx, a.LoadPreviousFindings, params.AuditID).Get(ctx, nil)
+		if err != nil {
+			logger.Error("Failed to load previous findings", "error", err)
+			_ = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusFailed, progress, steps[currentStep-1])
+			return err
+		}
+		currentStep++
+		progress = (currentStep * 100) / len(steps)
+	}
 
 	// Fetch repository from repo-service
 	err = workflow.ExecuteActivity(ctx, a.FetchRepository, params.AuditID).Get(ctx, nil)
@@ -165,7 +195,7 @@ func (w *ComplianceAuditWorkflow) Execute(ctx workflow.Context, params Complianc
 		return err
 	}
 
-	logger.Info("Audit completed successfully", "audit_id", params.AuditID)
+	logger.Info("Audit completed successfully", "audit_id", params.AuditID, "audit_type", params.AuditType)
 	return nil
 }
 

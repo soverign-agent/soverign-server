@@ -56,6 +56,17 @@ func (l *AuditLogic) TriggerAudit(ctx context.Context, req *types.TriggerAuditRe
 		LowFindings:        0,
 	}
 
+	// For incremental audits, link to the most recent completed audit for the same repository
+	if req.AuditType == model.AuditTypeIncremental {
+		prevAudit, err := l.repo.GetPreviousCompletedAudit(ctx, req.RepositoryID, audit.ID)
+		if err != nil {
+			return nil, fmt.Errorf("find previous audit: %w", err)
+		}
+		if prevAudit != nil {
+			audit.PreviousAuditID = &prevAudit.ID
+		}
+	}
+
 	if err := l.repo.CreateAudit(ctx, audit); err != nil {
 		return nil, fmt.Errorf("create audit: %w", err)
 	}

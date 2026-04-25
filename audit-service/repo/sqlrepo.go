@@ -19,14 +19,14 @@ func (r *SQLRepository) CreateAudit(ctx context.Context, audit *model.AuditJob) 
 	defer tx.Rollback()
 
 	query := `
-		INSERT INTO audit_jobs (id, tenant_id, repository_id, name, audit_type, status, risk_score, risk_severity)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		INSERT INTO audit_jobs (id, tenant_id, repository_id, name, audit_type, previous_audit_id, status, risk_score, risk_severity)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 		RETURNING created_at, updated_at`
 
 	err = tx.QueryRowContext(
 		ctx, query,
 		audit.ID, audit.TenantID, audit.RepositoryID, audit.Name,
-		audit.AuditType, audit.Status, audit.RiskScore, audit.RiskSeverity,
+		audit.AuditType, audit.PreviousAuditID, audit.Status, audit.RiskScore, audit.RiskSeverity,
 	).Scan(&audit.CreatedAt, &audit.UpdatedAt)
 
 	if err != nil {
@@ -47,17 +47,18 @@ func (r *SQLRepository) GetAuditByID(ctx context.Context, id uuid.UUID) (*model.
 		SELECT id, tenant_id, repository_id, name, audit_type, status,
 		       risk_score, risk_severity, progress_percentage, findings_count,
 		       critical_findings, high_findings, medium_findings, low_findings,
-		       workflow_id, started_at, completed_at, created_at, updated_at
+		       previous_audit_id, workflow_id, started_at, completed_at, created_at, updated_at
 		FROM audit_jobs
 		WHERE id = $1`
 
 	var audit model.AuditJob
+	var prevAuditID sql.NullString
 	err := r.base.DB().QueryRowContext(ctx, query, id).Scan(
 		&audit.ID, &audit.TenantID, &audit.RepositoryID, &audit.Name,
 		&audit.AuditType, &audit.Status, &audit.RiskScore, &audit.RiskSeverity,
 		&audit.ProgressPercentage, &audit.FindingsCount, &audit.CriticalFindings,
 		&audit.HighFindings, &audit.MediumFindings, &audit.LowFindings,
-		&audit.WorkflowID, &audit.StartedAt, &audit.CompletedAt,
+		&prevAuditID, &audit.WorkflowID, &audit.StartedAt, &audit.CompletedAt,
 		&audit.CreatedAt, &audit.UpdatedAt,
 	)
 
@@ -71,6 +72,58 @@ func (r *SQLRepository) GetAuditByID(ctx context.Context, id uuid.UUID) (*model.
 	// Double-check tenant access (RLS should already handle this)
 	if audit.TenantID.String() != tenantID {
 		return nil, nil
+	}
+
+	if prevAuditID.Valid {
+		pid, err := uuid.Parse(prevAuditID.String)
+		if err == nil {
+			audit.PreviousAuditID = &pid
+		}
+	}
+
+	return &audit, nil
+}
+
+// GetPreviousCompletedAudit returns the most recent completed audit for a repository, excluding the given audit ID.
+func (r *SQLRepository) GetPreviousCompletedAudit(ctx context.Context, repositoryID, excludeAuditID uuid.UUID) (*model.AuditJob, error) {
+	tenantID, ok := tenant.FromContext(ctx)
+	if !ok {
+		return nil, fmt.Errorf("tenant context required")
+	}
+
+	query := `
+		SELECT id, tenant_id, repository_id, name, audit_type, status,
+		       risk_score, risk_severity, progress_percentage, findings_count,
+		       critical_findings, high_findings, medium_findings, low_findings,
+		       previous_audit_id, workflow_id, started_at, completed_at, created_at, updated_at
+		FROM audit_jobs
+		WHERE repository_id = $1 AND status = $2 AND id != $3 AND tenant_id = $4
+		ORDER BY completed_at DESC NULLS LAST, created_at DESC
+		LIMIT 1`
+
+	var audit model.AuditJob
+	var prevAuditID sql.NullString
+	err := r.base.DB().QueryRowContext(ctx, query, repositoryID, model.AuditJobStatusCompleted, excludeAuditID, tenantID).Scan(
+		&audit.ID, &audit.TenantID, &audit.RepositoryID, &audit.Name,
+		&audit.AuditType, &audit.Status, &audit.RiskScore, &audit.RiskSeverity,
+		&audit.ProgressPercentage, &audit.FindingsCount, &audit.CriticalFindings,
+		&audit.HighFindings, &audit.MediumFindings, &audit.LowFindings,
+		&prevAuditID, &audit.WorkflowID, &audit.StartedAt, &audit.CompletedAt,
+		&audit.CreatedAt, &audit.UpdatedAt,
+	)
+
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("get previous completed audit: %w", err)
+	}
+
+	if prevAuditID.Valid {
+		pid, err := uuid.Parse(prevAuditID.String)
+		if err == nil {
+			audit.PreviousAuditID = &pid
+		}
 	}
 
 	return &audit, nil
@@ -243,6 +296,41 @@ func (r *SQLRepository) CreateFinding(ctx context.Context, finding *model.Findin
 	}
 
 	return tx.Commit()
+}
+
+// FindingExistsByLocation checks whether a finding already exists at the same file location for an audit.
+func (r *SQLRepository) FindingExistsByLocation(ctx context.Context, auditID uuid.UUID, filePath string, lineNumber *int, issueType string) (bool, error) {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return false, fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	var query string
+	var args []interface{}
+	if lineNumber != nil {
+		query = `
+			SELECT EXISTS(
+				SELECT 1 FROM audit_findings
+				WHERE audit_job_id = $1 AND file_path = $2 AND line_number = $3 AND issue_type = $4
+			)`
+		args = []interface{}{auditID, filePath, *lineNumber, issueType}
+	} else {
+		query = `
+			SELECT EXISTS(
+				SELECT 1 FROM audit_findings
+				WHERE audit_job_id = $1 AND file_path = $2 AND line_number IS NULL AND issue_type = $3
+			)`
+		args = []interface{}{auditID, filePath, issueType}
+	}
+
+	var exists bool
+	err = tx.QueryRowContext(ctx, query, args...).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("check finding existence: %w", err)
+	}
+
+	return exists, tx.Commit()
 }
 
 // GetFindingsForAudit gets all findings for an audit job.

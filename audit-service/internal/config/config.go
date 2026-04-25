@@ -29,10 +29,10 @@ type RiskConfig struct {
 
 // GRPCConfig holds gRPC server configuration.
 type GRPCConfig struct {
-	Port       int    `json:"port"`        // gRPC server port, e.g. 9086
+	Port        int    `json:"port"`                   // gRPC server port, e.g. 9086
 	TLSCertFile string `json:"tls_cert_file,optional"` // Path to TLS certificate (production)
 	TLSKeyFile  string `json:"tls_key_file,optional"`  // Path to TLS key (production)
-	Insecure    bool   `json:"insecure"`    // Allow insecure connections (local dev only)
+	Insecure    bool   `json:"insecure"`               // Allow insecure connections (local dev only)
 }
 
 // DefaultRiskConfig returns the default risk configuration.

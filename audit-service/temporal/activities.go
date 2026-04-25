@@ -3,6 +3,7 @@ package temporal
 import (
 	"context"
 	"fmt"
+
 	"github.com/google/uuid"
 	"sovereign-ai-compliance/audit-service/internal/logic"
 	"sovereign-ai-compliance/audit-service/model"
@@ -42,11 +43,11 @@ type NotificationServiceClient interface {
 
 // Activities contains all activities for the compliance audit workflow.
 type Activities struct {
-	repo                 repo.Repository
-	logic                *logic.AuditLogic
-	calculator            *scoring.Calculator
-	repoServiceClient    RepoServiceClient
-	notificationClient   NotificationServiceClient
+	repo               repo.Repository
+	logic              *logic.AuditLogic
+	calculator         *scoring.Calculator
+	repoServiceClient  RepoServiceClient
+	notificationClient NotificationServiceClient
 }
 
 // NewActivities creates a new Activities instance.
@@ -58,11 +59,11 @@ func NewActivities(
 	notificationClient NotificationServiceClient,
 ) *Activities {
 	return &Activities{
-		repo:                 repo,
-		logic:                logic,
-		calculator:            calculator,
-		repoServiceClient:    repoServiceClient,
-		notificationClient:   notificationClient,
+		repo:               repo,
+		logic:              logic,
+		calculator:         calculator,
+		repoServiceClient:  repoServiceClient,
+		notificationClient: notificationClient,
 	}
 }
 
@@ -100,6 +101,55 @@ func (a *Activities) InitializeAudit(ctx context.Context, auditID string) error 
 	}
 
 	return tx.Commit()
+}
+
+// LoadPreviousFindings copies findings from the previous completed audit into the current audit.
+// This is the foundational step that makes incremental audits different from full audits:
+// instead of starting with a blank slate, we carry forward the baseline of known issues.
+func (a *Activities) LoadPreviousFindings(ctx context.Context, auditID string) error {
+	auditUUID, err := uuid.Parse(auditID)
+	if err != nil {
+		return fmt.Errorf("invalid audit ID: %w", err)
+	}
+
+	audit, err := a.repo.GetAuditByID(ctx, auditUUID)
+	if err != nil {
+		return fmt.Errorf("get audit: %w", err)
+	}
+	if audit == nil {
+		return fmt.Errorf("audit not found: %s", auditID)
+	}
+
+	if audit.PreviousAuditID == nil {
+		// No previous audit to carry forward from; this is fine for the first incremental audit
+		return nil
+	}
+
+	prevFindings, err := a.repo.GetFindingsForAudit(ctx, *audit.PreviousAuditID)
+	if err != nil {
+		return fmt.Errorf("get previous findings: %w", err)
+	}
+
+	for _, pf := range prevFindings {
+		newFinding := &model.Finding{
+			ID:          uuid.New(),
+			TenantID:    pf.TenantID,
+			AuditJobID:  auditUUID,
+			FilePath:    pf.FilePath,
+			LineNumber:  pf.LineNumber,
+			IssueType:   pf.IssueType,
+			Severity:    pf.Severity,
+			Title:       pf.Title,
+			Description: pf.Description,
+			Remediation: pf.Remediation,
+			CreatedAt:   time.Now(),
+		}
+		if err := a.repo.CreateFinding(ctx, newFinding); err != nil {
+			return fmt.Errorf("copy finding %s: %w", pf.ID, err)
+		}
+	}
+
+	return nil
 }
 
 // FetchRepository fetches the repository code from repo-service.
@@ -152,6 +202,8 @@ func (a *Activities) RunStaticAnalysis(ctx context.Context, auditID string) erro
 }
 
 // GenerateFindings generates findings from the static analysis results.
+// For incremental audits, it deduplicates against findings already carried forward
+// from the previous audit so that only new or changed issues are added.
 func (a *Activities) GenerateFindings(ctx context.Context, auditID string) error {
 	if a.repoServiceClient == nil {
 		// No client configured - skip finding generation to allow workflow to continue
@@ -177,6 +229,24 @@ func (a *Activities) GenerateFindings(ctx context.Context, auditID string) error
 	}
 
 	for _, af := range findings {
+		lineNumPtr := func(n int) *int {
+			if n > 0 {
+				return &n
+			}
+			return nil
+		}(af.LineNumber)
+
+		// For incremental audits, skip findings that already exist from the previous audit
+		if audit.AuditType == model.AuditTypeIncremental {
+			exists, err := a.repo.FindingExistsByLocation(ctx, auditUUID, af.FilePath, lineNumPtr, normalizeIssueType(af.IssueType))
+			if err != nil {
+				return fmt.Errorf("check finding existence for %s: %w", af.FilePath, err)
+			}
+			if exists {
+				continue
+			}
+		}
+
 		finding := &model.Finding{
 			ID:          uuid.New(),
 			TenantID:    audit.TenantID,

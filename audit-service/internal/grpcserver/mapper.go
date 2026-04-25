@@ -132,39 +132,39 @@ func toProtoAuditJob(a *model.AuditJob) *auditv1.AuditJob {
 		return nil
 	}
 	return &auditv1.AuditJob{
-		Id:                  a.ID.String(),
-		TenantId:            a.TenantID.String(),
-		RepositoryId:        a.RepositoryID.String(),
-		Name:                a.Name,
-		AuditType:           auditTypeToProto(a.AuditType),
-		Status:              statusToProto(a.Status),
-		RiskScore:           int32(a.RiskScore),
-		RiskSeverity:        severityToProto(a.RiskSeverity),
-		ProgressPercentage:  int32(a.ProgressPercentage),
-		FindingsCount:       int32(a.FindingsCount),
-		CriticalFindings:    int32(a.CriticalFindings),
-		HighFindings:        int32(a.HighFindings),
-		MediumFindings:      int32(a.MediumFindings),
-		LowFindings:         int32(a.LowFindings),
-		WorkflowId:          pointerString(a.WorkflowID),
-		StartedAt:           timeToProto(a.StartedAt),
-		CompletedAt:         timeToProto(a.CompletedAt),
-		CreatedAt:           timestamppb.New(a.CreatedAt),
-		UpdatedAt:           timestamppb.New(a.UpdatedAt),
+		Id:                 a.ID.String(),
+		TenantId:           a.TenantID.String(),
+		RepositoryId:       a.RepositoryID.String(),
+		Name:               a.Name,
+		AuditType:          auditTypeToProto(a.AuditType),
+		Status:             statusToProto(a.Status),
+		RiskScore:          int32(a.RiskScore),
+		RiskSeverity:       severityToProto(a.RiskSeverity),
+		ProgressPercentage: int32(a.ProgressPercentage),
+		FindingsCount:      int32(a.FindingsCount),
+		CriticalFindings:   int32(a.CriticalFindings),
+		HighFindings:       int32(a.HighFindings),
+		MediumFindings:     int32(a.MediumFindings),
+		LowFindings:        int32(a.LowFindings),
+		WorkflowId:         pointerString(a.WorkflowID),
+		StartedAt:          timeToProto(a.StartedAt),
+		CompletedAt:        timeToProto(a.CompletedAt),
+		CreatedAt:          timestamppb.New(a.CreatedAt),
+		UpdatedAt:          timestamppb.New(a.UpdatedAt),
 	}
 }
 
 // toProtoAuditJobSummary converts model.AuditJobSummary to proto.
 func toProtoAuditJobSummary(a model.AuditJobSummary) *auditv1.AuditJobSummary {
 	return &auditv1.AuditJobSummary{
-		Id:             a.ID.String(),
-		Name:           a.Name,
-		AuditType:      auditTypeToProto(a.AuditType),
-		Status:         statusToProto(a.Status),
-		RiskScore:      int32(a.RiskScore),
-		RiskSeverity:   severityToProto(a.RiskSeverity),
-		FindingsCount:  int32(a.FindingsCount),
-		CreatedAt:      timestamppb.New(a.CreatedAt),
+		Id:            a.ID.String(),
+		Name:          a.Name,
+		AuditType:     auditTypeToProto(a.AuditType),
+		Status:        statusToProto(a.Status),
+		RiskScore:     int32(a.RiskScore),
+		RiskSeverity:  severityToProto(a.RiskSeverity),
+		FindingsCount: int32(a.FindingsCount),
+		CreatedAt:     timestamppb.New(a.CreatedAt),
 	}
 }
 
