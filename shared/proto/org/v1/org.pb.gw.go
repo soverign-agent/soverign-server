@@ -303,12 +303,18 @@ func request_OrgService_DeleteAISystem_0(ctx context.Context, marshaler runtime.
 	var (
 		protoReq DeleteAISystemRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	if req.Body != nil {
 		_, _ = io.Copy(io.Discard, req.Body)
+	}
+	val, ok := pathParams["system_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "system_id")
+	}
+	protoReq.SystemId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "system_id", err)
 	}
 	msg, err := client.DeleteAISystem(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -318,9 +324,15 @@ func local_request_OrgService_DeleteAISystem_0(ctx context.Context, marshaler ru
 	var (
 		protoReq DeleteAISystemRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok := pathParams["system_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "system_id")
+	}
+	protoReq.SystemId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "system_id", err)
 	}
 	msg, err := server.DeleteAISystem(ctx, &protoReq)
 	return msg, metadata, err
