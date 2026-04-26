@@ -46,6 +46,8 @@ func (r *SQLRepository) GetAuditByID(ctx context.Context, id uuid.UUID) (*model.
 
 	query := `
 		SELECT id, tenant_id, repository_id, name, audit_type, status,
+		       COALESCE(current_step, '') AS current_step,
+		       COALESCE(error_message, '') AS error_message,
 		       risk_score, risk_severity, progress_percentage, findings_count,
 		       critical_findings, high_findings, medium_findings, low_findings,
 		       previous_audit_id, workflow_id, started_at, completed_at, created_at, updated_at
@@ -56,7 +58,8 @@ func (r *SQLRepository) GetAuditByID(ctx context.Context, id uuid.UUID) (*model.
 	var prevAuditID sql.NullString
 	err := r.base.DB().QueryRowContext(ctx, query, id).Scan(
 		&audit.ID, &audit.TenantID, &audit.RepositoryID, &audit.Name,
-		&audit.AuditType, &audit.Status, &audit.RiskScore, &audit.RiskSeverity,
+		&audit.AuditType, &audit.Status, &audit.CurrentStep, &audit.ErrorMessage,
+		&audit.RiskScore, &audit.RiskSeverity,
 		&audit.ProgressPercentage, &audit.FindingsCount, &audit.CriticalFindings,
 		&audit.HighFindings, &audit.MediumFindings, &audit.LowFindings,
 		&prevAuditID, &audit.WorkflowID, &audit.StartedAt, &audit.CompletedAt,
@@ -94,6 +97,8 @@ func (r *SQLRepository) GetPreviousCompletedAudit(ctx context.Context, repositor
 
 	query := `
 		SELECT id, tenant_id, repository_id, name, audit_type, status,
+		       COALESCE(current_step, '') AS current_step,
+		       COALESCE(error_message, '') AS error_message,
 		       risk_score, risk_severity, progress_percentage, findings_count,
 		       critical_findings, high_findings, medium_findings, low_findings,
 		       previous_audit_id, workflow_id, started_at, completed_at, created_at, updated_at
@@ -106,7 +111,8 @@ func (r *SQLRepository) GetPreviousCompletedAudit(ctx context.Context, repositor
 	var prevAuditID sql.NullString
 	err := r.base.DB().QueryRowContext(ctx, query, repositoryID, model.AuditJobStatusCompleted, excludeAuditID, tenantID).Scan(
 		&audit.ID, &audit.TenantID, &audit.RepositoryID, &audit.Name,
-		&audit.AuditType, &audit.Status, &audit.RiskScore, &audit.RiskSeverity,
+		&audit.AuditType, &audit.Status, &audit.CurrentStep, &audit.ErrorMessage,
+		&audit.RiskScore, &audit.RiskSeverity,
 		&audit.ProgressPercentage, &audit.FindingsCount, &audit.CriticalFindings,
 		&audit.HighFindings, &audit.MediumFindings, &audit.LowFindings,
 		&prevAuditID, &audit.WorkflowID, &audit.StartedAt, &audit.CompletedAt,
@@ -131,7 +137,8 @@ func (r *SQLRepository) GetPreviousCompletedAudit(ctx context.Context, repositor
 }
 
 // ListAudits lists audit jobs for the current tenant with filtering.
-func (r *SQLRepository) ListAudits(ctx context.Context, repoID *uuid.UUID, status *string, page, pageSize int) ([]model.AuditJobSummary, int, error) {
+// statuses is an optional set of status values; when non-empty rows must match any of them.
+func (r *SQLRepository) ListAudits(ctx context.Context, repoID *uuid.UUID, statuses []string, page, pageSize int) ([]model.AuditJobSummary, int, error) {
 	tx, err := r.base.BeginTenantTx(ctx, nil)
 	if err != nil {
 		return nil, 0, fmt.Errorf("begin tenant tx: %w", err)
@@ -148,14 +155,14 @@ func (r *SQLRepository) ListAudits(ctx context.Context, repoID *uuid.UUID, statu
 		args = append(args, *repoID)
 		argIdx++
 	}
-	if status != nil {
+	if len(statuses) > 0 {
 		if whereClause == "" {
 			whereClause += " WHERE"
 		} else {
 			whereClause += " AND"
 		}
-		whereClause += " status = $" + fmt.Sprint(argIdx)
-		args = append(args, *status)
+		whereClause += " status = ANY($" + fmt.Sprint(argIdx) + "::text[])"
+		args = append(args, pq.Array(statuses))
 		argIdx++
 	}
 
@@ -177,7 +184,10 @@ func (r *SQLRepository) ListAudits(ctx context.Context, repoID *uuid.UUID, statu
 
 	// Get paginated results
 	query := `
-		SELECT id, name, audit_type, status, risk_score, risk_severity, findings_count, created_at
+		SELECT id, name, audit_type, status,
+		       COALESCE(current_step, '') AS current_step,
+		       progress_percentage,
+		       risk_score, risk_severity, findings_count, created_at
 		FROM audit_jobs` + whereClause + `
 		ORDER BY created_at DESC
 		LIMIT $` + fmt.Sprint(argIdx) + ` OFFSET $` + fmt.Sprint(argIdx+1)
@@ -194,6 +204,7 @@ func (r *SQLRepository) ListAudits(ctx context.Context, repoID *uuid.UUID, statu
 		var summary model.AuditJobSummary
 		err := rows.Scan(
 			&summary.ID, &summary.Name, &summary.AuditType, &summary.Status,
+			&summary.CurrentStep, &summary.ProgressPercentage,
 			&summary.RiskScore, &summary.RiskSeverity, &summary.FindingsCount,
 			&summary.CreatedAt,
 		)
@@ -224,6 +235,50 @@ func (r *SQLRepository) UpdateAuditStatus(ctx context.Context, id uuid.UUID, sta
 	)
 	if err != nil {
 		return fmt.Errorf("update audit status: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// UpdateAuditStep updates status, current workflow step, and progress percentage in one statement.
+// Used by the workflow to surface step-level progress to the streaming/list endpoints.
+func (r *SQLRepository) UpdateAuditStep(ctx context.Context, id uuid.UUID, status, step string, percentage int) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx,
+		`UPDATE audit_jobs
+		 SET status = $1, current_step = $2, progress_percentage = $3, updated_at = NOW()
+		 WHERE id = $4`,
+		status, step, percentage, id,
+	)
+	if err != nil {
+		return fmt.Errorf("update audit step: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// UpdateAuditFailure marks an audit as failed and records the step it died on plus the error message.
+// Used by the workflow's failure paths so the UI can show users which step crashed and why.
+func (r *SQLRepository) UpdateAuditFailure(ctx context.Context, id uuid.UUID, step string, percentage int, errMsg string) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx,
+		`UPDATE audit_jobs
+		 SET status = $1, current_step = $2, progress_percentage = $3, error_message = $4, updated_at = NOW()
+		 WHERE id = $5`,
+		model.AuditJobStatusFailed, step, percentage, errMsg, id,
+	)
+	if err != nil {
+		return fmt.Errorf("update audit failure: %w", err)
 	}
 
 	return tx.Commit()

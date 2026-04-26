@@ -76,7 +76,7 @@ func (l *AuditLogic) TriggerAudit(ctx context.Context, req *types.TriggerAuditRe
 
 // ListAudits lists audits with filtering and pagination.
 func (l *AuditLogic) ListAudits(ctx context.Context, req *types.ListAuditsRequest) ([]model.AuditJobSummary, int, error) {
-	summaries, total, err := l.repo.ListAudits(ctx, req.RepositoryID, req.Status, req.Page, req.PageSize)
+	summaries, total, err := l.repo.ListAudits(ctx, req.RepositoryID, req.Statuses, req.Page, req.PageSize)
 	if err != nil {
 		return nil, 0, fmt.Errorf("list audits: %w", err)
 	}

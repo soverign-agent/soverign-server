@@ -137,7 +137,10 @@ func toProtoAuditJob(a *model.AuditJob) *auditv1.AuditJob {
 		RepositoryId:       a.RepositoryID.String(),
 		Name:               a.Name,
 		AuditType:          auditTypeToProto(a.AuditType),
-		Status:             statusToProto(a.Status),
+		// Status is the proto string field (not the enum) — see audit.proto.
+		// Pass the model's lowercase status through verbatim; protojson would
+		// otherwise serialize the enum as "AUDIT_JOB_STATUS_RUNNING".
+		Status:             a.Status,
 		RiskScore:          int32(a.RiskScore),
 		RiskSeverity:       severityToProto(a.RiskSeverity),
 		ProgressPercentage: int32(a.ProgressPercentage),
@@ -151,20 +154,28 @@ func toProtoAuditJob(a *model.AuditJob) *auditv1.AuditJob {
 		CompletedAt:        timeToProto(a.CompletedAt),
 		CreatedAt:          timestamppb.New(a.CreatedAt),
 		UpdatedAt:          timestamppb.New(a.UpdatedAt),
+		CurrentStep:        a.CurrentStep,
+		ErrorMessage:       a.ErrorMessage,
 	}
 }
 
-// toProtoAuditJobSummary converts model.AuditJobSummary to proto.
+// toProtoAuditJobSummary converts model.AuditJobSummary to proto. Mirrors the
+// `AuditJobSummary` proto contract — keep `current_step` and `progress_percentage`
+// in sync so the list endpoint reports live progress, not zero-value defaults.
 func toProtoAuditJobSummary(a model.AuditJobSummary) *auditv1.AuditJobSummary {
 	return &auditv1.AuditJobSummary{
-		Id:            a.ID.String(),
-		Name:          a.Name,
-		AuditType:     auditTypeToProto(a.AuditType),
-		Status:        statusToProto(a.Status),
-		RiskScore:     int32(a.RiskScore),
-		RiskSeverity:  severityToProto(a.RiskSeverity),
-		FindingsCount: int32(a.FindingsCount),
-		CreatedAt:     timestamppb.New(a.CreatedAt),
+		Id:                 a.ID.String(),
+		Name:               a.Name,
+		AuditType:          auditTypeToProto(a.AuditType),
+		// Proto string field (not the enum) — pass the model's lowercase status
+		// through verbatim. See AuditJob.status in audit.proto for rationale.
+		Status:             a.Status,
+		RiskScore:          int32(a.RiskScore),
+		RiskSeverity:       severityToProto(a.RiskSeverity),
+		FindingsCount:      int32(a.FindingsCount),
+		CreatedAt:          timestamppb.New(a.CreatedAt),
+		CurrentStep:        a.CurrentStep,
+		ProgressPercentage: int32(a.ProgressPercentage),
 	}
 }
 

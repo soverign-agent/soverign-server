@@ -52,7 +52,10 @@ message AuditJob {
   string                    repository_id       = 3;
   string                    name                = 4;
   AuditType                 audit_type          = 5;
-  AuditJobStatus            status              = 6;
+  // status carries the lowercase status string (pending/running/paused/completed/failed/cancelled).
+  // Typed as string (not the AuditJobStatus enum) so the REST gateway emits "running" instead of
+  // the full proto constant "AUDIT_JOB_STATUS_RUNNING" — mirrors GetAuditStatusResponse.state.
+  string                    status              = 6;
   int32                     risk_score          = 7;
   RiskSeverity              risk_severity       = 8;
   int32                     progress_percentage = 9;
@@ -66,18 +69,23 @@ message AuditJob {
   google.protobuf.Timestamp completed_at        = 17;
   google.protobuf.Timestamp created_at          = 18;
   google.protobuf.Timestamp updated_at          = 19;
+  string                    current_step        = 20; // workflow step name
+  string                    error_message       = 21; // populated on failed state
 }
 
 // AuditJobSummary is a lightweight summary for listing.
 message AuditJobSummary {
-  string                    id             = 1;
-  string                    name           = 2;
-  AuditType                 audit_type     = 3;
-  AuditJobStatus            status         = 4;
-  int32                     risk_score     = 5;
-  RiskSeverity              risk_severity  = 6;
-  int32                     findings_count = 7;
-  google.protobuf.Timestamp created_at     = 8;
+  string                    id                  = 1;
+  string                    name                = 2;
+  AuditType                 audit_type          = 3;
+  // status carries the lowercase status string. See AuditJob.status for rationale.
+  string                    status              = 4;
+  int32                     risk_score          = 5;
+  RiskSeverity              risk_severity       = 6;
+  int32                     findings_count      = 7;
+  google.protobuf.Timestamp created_at          = 8;
+  string                    current_step        = 9;  // workflow step name (e.g. "run_static_analysis")
+  int32                     progress_percentage = 10;
 }
 
 // Finding represents a single issue found during an audit.
@@ -123,10 +131,11 @@ message TriggerAuditResponse {
 
 // ListAuditsRequest lists audits with filtering and pagination.
 message ListAuditsRequest {
-  string repository_id = 1; // optional filter
-  string status        = 2; // optional filter by status name
-  int32  page          = 3;
-  int32  page_size     = 4;
+  string repository_id    = 1; // optional filter
+  string status           = 2; // DEPRECATED — use `statuses`. Kept for backward compat.
+  int32  page             = 3;
+  int32  page_size        = 4;
+  repeated string statuses = 5; // optional filter — match any of these status values
 }
 
 // ListAuditsResponse returns a paginated list of audits.
@@ -197,10 +206,12 @@ message GetAuditStatusRequest {
 
 // GetAuditStatusResponse is a progress event.
 message GetAuditStatusResponse {
-  int32  percentage  = 1;
-  string step        = 2;
-  string message     = 3;
-  int64  timestamp   = 4;
+  int32  percentage    = 1;
+  string state         = 2;  // status enum (running/paused/completed/failed/cancelled)
+  string message       = 3;
+  int64  timestamp     = 4;
+  string current_step  = 5;  // workflow step name (e.g. "run_static_analysis")
+  string error_message = 6;  // populated on failed state
 }
 
 // ApprovalStatus represents the status of an approval request.

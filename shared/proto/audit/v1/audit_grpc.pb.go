@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.19.4
-// source: shared/proto/audit/v1/audit.proto
+// source: audit/v1/audit.proto
 
 package auditv1
 
@@ -429,5 +429,5 @@ var AuditService_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 	},
-	Metadata: "shared/proto/audit/v1/audit.proto",
+	Metadata: "audit/v1/audit.proto",
 }

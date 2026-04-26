@@ -23,7 +23,7 @@ type TriggerAuditResponse struct {
 // ListAuditsRequest is the request to list audits with filtering.
 type ListAuditsRequest struct {
 	RepositoryID *uuid.UUID `json:"repository_id,omitempty"`
-	Status       *string    `json:"status,omitempty"`
+	Statuses     []string   `json:"statuses,omitempty"`
 	Page         int        `json:"page"`
 	PageSize     int        `json:"page_size"`
 }

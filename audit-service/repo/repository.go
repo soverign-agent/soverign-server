@@ -25,10 +25,17 @@ type Repository interface {
 	GetPreviousCompletedAudit(ctx context.Context, repositoryID, excludeAuditID uuid.UUID) (*model.AuditJob, error)
 
 	// ListAudits lists audit jobs for the current tenant with filtering.
-	ListAudits(ctx context.Context, repoID *uuid.UUID, status *string, page, pageSize int) ([]model.AuditJobSummary, int, error)
+	// statuses is an optional set of status values; when non-empty rows must match any of them.
+	ListAudits(ctx context.Context, repoID *uuid.UUID, statuses []string, page, pageSize int) ([]model.AuditJobSummary, int, error)
 
 	// UpdateAuditStatus updates the status of an audit job.
 	UpdateAuditStatus(ctx context.Context, id uuid.UUID, status string) error
+
+	// UpdateAuditStep updates the status, current workflow step, and progress percentage in a single statement.
+	UpdateAuditStep(ctx context.Context, id uuid.UUID, status, step string, percentage int) error
+
+	// UpdateAuditFailure marks an audit as failed and records the step it died on plus the error message.
+	UpdateAuditFailure(ctx context.Context, id uuid.UUID, step string, percentage int, errMsg string) error
 
 	// UpdateAuditProgress updates audit progress and completion stats.
 	UpdateAuditProgress(ctx context.Context, id uuid.UUID, progress int, riskScore int, severity string, findingsCount, critical, high, medium, low int) error

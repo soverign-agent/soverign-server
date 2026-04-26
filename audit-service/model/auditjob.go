@@ -38,6 +38,8 @@ type AuditJob struct {
 	Name               string     `json:"name"`
 	AuditType          string     `json:"audit_type"`
 	Status             string     `json:"status"`
+	CurrentStep        string     `json:"current_step"`
+	ErrorMessage       string     `json:"error_message,omitempty"`
 	RiskScore          int        `json:"risk_score"`
 	RiskSeverity       string     `json:"risk_severity"`
 	ProgressPercentage int        `json:"progress_percentage"`
@@ -56,12 +58,14 @@ type AuditJob struct {
 
 // AuditJobSummary is a lightweight summary for listing
 type AuditJobSummary struct {
-	ID            uuid.UUID `json:"id"`
-	Name          string    `json:"name"`
-	AuditType     string    `json:"audit_type"`
-	Status        string    `json:"status"`
-	RiskScore     int       `json:"risk_score"`
-	RiskSeverity  string    `json:"risk_severity"`
-	FindingsCount int       `json:"findings_count"`
-	CreatedAt     time.Time `json:"created_at"`
+	ID                 uuid.UUID `json:"id"`
+	Name               string    `json:"name"`
+	AuditType          string    `json:"audit_type"`
+	Status             string    `json:"status"`
+	CurrentStep        string    `json:"current_step"`
+	ProgressPercentage int       `json:"progress_percentage"`
+	RiskScore          int       `json:"risk_score"`
+	RiskSeverity       string    `json:"risk_severity"`
+	FindingsCount      int       `json:"findings_count"`
+	CreatedAt          time.Time `json:"created_at"`
 }

@@ -4,6 +4,7 @@ package grpcserver
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -61,9 +62,23 @@ func withTenant(ctx context.Context) context.Context {
 func (s *Server) ListAudits(ctx context.Context, req *auditv1.ListAuditsRequest) (*auditv1.ListAuditsResponse, error) {
 	ctx = withTenant(ctx)
 
+	// Prefer repeated `statuses`; fall back to legacy single `status` for back-compat.
+	statuses := req.GetStatuses()
+	if len(statuses) == 0 && req.GetStatus() != "" {
+		// api-gateway may collapse multiple ?status= params into a comma-separated string;
+		// accept both shapes server-side so the client doesn't have to know which form
+		// survives the gateway.
+		raw := req.GetStatus()
+		for _, s := range splitCommaList(raw) {
+			if s != "" {
+				statuses = append(statuses, s)
+			}
+		}
+	}
+
 	listReq := &types.ListAuditsRequest{
 		RepositoryID: uuidPtr(req.RepositoryId),
-		Status:       strPtr(req.Status),
+		Statuses:     statuses,
 		Page:         int(req.Page),
 		PageSize:     int(req.PageSize),
 	}
@@ -286,10 +301,12 @@ func (s *Server) GetAuditStatus(req *auditv1.GetAuditStatusRequest, stream audit
 	// If already terminal, send one event and close.
 	if audit.Status == model.AuditJobStatusCompleted || audit.Status == model.AuditJobStatusFailed || audit.Status == model.AuditJobStatusCancelled {
 		_ = stream.Send(&auditv1.GetAuditStatusResponse{
-			Percentage: 100,
-			Step:       audit.Status,
-			Message:    fmt.Sprintf("Audit %s", audit.Status),
-			Timestamp:  time.Now().Unix(),
+			Percentage:   100,
+			State:        audit.Status,
+			CurrentStep:  audit.CurrentStep,
+			Message:      fmt.Sprintf("Audit %s", audit.Status),
+			ErrorMessage: audit.ErrorMessage,
+			Timestamp:    time.Now().Unix(),
 		})
 		return nil
 	}
@@ -299,17 +316,20 @@ func (s *Server) GetAuditStatus(req *auditv1.GetAuditStatusRequest, stream audit
 	defer ticker.Stop()
 
 	lastProgress := audit.ProgressPercentage
-	lastStep := audit.Status
+	lastState := audit.Status
+	lastStep := audit.CurrentStep
 
 	// Always send an initial event so the client gets headers and the current
 	// state immediately, even if the audit hasn't moved yet (e.g. stuck in
 	// pending). Without this, the response writer buffers indefinitely until
 	// the first state change, which the client perceives as a hang.
 	if err := stream.Send(&auditv1.GetAuditStatusResponse{
-		Percentage: int32(audit.ProgressPercentage),
-		Step:       audit.Status,
-		Message:    fmt.Sprintf("Audit is %s", audit.Status),
-		Timestamp:  time.Now().Unix(),
+		Percentage:   int32(audit.ProgressPercentage),
+		State:        audit.Status,
+		CurrentStep:  audit.CurrentStep,
+		Message:      fmt.Sprintf("Audit is %s", audit.Status),
+		ErrorMessage: audit.ErrorMessage,
+		Timestamp:    time.Now().Unix(),
 	}); err != nil {
 		return err
 	}
@@ -327,17 +347,20 @@ func (s *Server) GetAuditStatus(req *auditv1.GetAuditStatusRequest, stream audit
 				return status.Errorf(codes.NotFound, "audit not found")
 			}
 
-			if current.ProgressPercentage != lastProgress || current.Status != lastStep {
+			if current.ProgressPercentage != lastProgress || current.Status != lastState || current.CurrentStep != lastStep {
 				if err := stream.Send(&auditv1.GetAuditStatusResponse{
-					Percentage: int32(current.ProgressPercentage),
-					Step:       current.Status,
-					Message:    fmt.Sprintf("Audit is %s", current.Status),
-					Timestamp:  time.Now().Unix(),
+					Percentage:   int32(current.ProgressPercentage),
+					State:        current.Status,
+					CurrentStep:  current.CurrentStep,
+					Message:      fmt.Sprintf("Audit is %s", current.Status),
+					ErrorMessage: current.ErrorMessage,
+					Timestamp:    time.Now().Unix(),
 				}); err != nil {
 					return err
 				}
 				lastProgress = current.ProgressPercentage
-				lastStep = current.Status
+				lastState = current.Status
+				lastStep = current.CurrentStep
 			}
 
 			if current.Status == model.AuditJobStatusCompleted || current.Status == model.AuditJobStatusFailed || current.Status == model.AuditJobStatusCancelled {
@@ -422,9 +445,20 @@ func (s *Server) DecideApproval(ctx context.Context, req *auditv1.DecideApproval
 	}, nil
 }
 
-func strPtr(s string) *string {
+// splitCommaList splits a comma-separated list, trimming whitespace and dropping empties.
+// Used to accept api-gateway-collapsed multi-status filters from the legacy `status` query
+// param when the client sent `?status=pending,running`.
+func splitCommaList(s string) []string {
 	if s == "" {
 		return nil
 	}
-	return &s
+	parts := strings.Split(s, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
 }

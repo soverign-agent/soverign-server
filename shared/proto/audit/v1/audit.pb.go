@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        v3.19.4
-// source: shared/proto/audit/v1/audit.proto
+// source: audit/v1/audit.proto
 
 package auditv1
 
@@ -69,11 +69,11 @@ func (x AuditJobStatus) String() string {
 }
 
 func (AuditJobStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_shared_proto_audit_v1_audit_proto_enumTypes[0].Descriptor()
+	return file_audit_v1_audit_proto_enumTypes[0].Descriptor()
 }
 
 func (AuditJobStatus) Type() protoreflect.EnumType {
-	return &file_shared_proto_audit_v1_audit_proto_enumTypes[0]
+	return &file_audit_v1_audit_proto_enumTypes[0]
 }
 
 func (x AuditJobStatus) Number() protoreflect.EnumNumber {
@@ -82,7 +82,7 @@ func (x AuditJobStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use AuditJobStatus.Descriptor instead.
 func (AuditJobStatus) EnumDescriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{0}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{0}
 }
 
 // AuditType represents the type of audit.
@@ -119,11 +119,11 @@ func (x AuditType) String() string {
 }
 
 func (AuditType) Descriptor() protoreflect.EnumDescriptor {
-	return file_shared_proto_audit_v1_audit_proto_enumTypes[1].Descriptor()
+	return file_audit_v1_audit_proto_enumTypes[1].Descriptor()
 }
 
 func (AuditType) Type() protoreflect.EnumType {
-	return &file_shared_proto_audit_v1_audit_proto_enumTypes[1]
+	return &file_audit_v1_audit_proto_enumTypes[1]
 }
 
 func (x AuditType) Number() protoreflect.EnumNumber {
@@ -132,7 +132,7 @@ func (x AuditType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use AuditType.Descriptor instead.
 func (AuditType) EnumDescriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{1}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{1}
 }
 
 // RiskSeverity represents the risk severity level.
@@ -175,11 +175,11 @@ func (x RiskSeverity) String() string {
 }
 
 func (RiskSeverity) Descriptor() protoreflect.EnumDescriptor {
-	return file_shared_proto_audit_v1_audit_proto_enumTypes[2].Descriptor()
+	return file_audit_v1_audit_proto_enumTypes[2].Descriptor()
 }
 
 func (RiskSeverity) Type() protoreflect.EnumType {
-	return &file_shared_proto_audit_v1_audit_proto_enumTypes[2]
+	return &file_audit_v1_audit_proto_enumTypes[2]
 }
 
 func (x RiskSeverity) Number() protoreflect.EnumNumber {
@@ -188,7 +188,7 @@ func (x RiskSeverity) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use RiskSeverity.Descriptor instead.
 func (RiskSeverity) EnumDescriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{2}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{2}
 }
 
 // IssueType represents the EU AI Act issue category.
@@ -237,11 +237,11 @@ func (x IssueType) String() string {
 }
 
 func (IssueType) Descriptor() protoreflect.EnumDescriptor {
-	return file_shared_proto_audit_v1_audit_proto_enumTypes[3].Descriptor()
+	return file_audit_v1_audit_proto_enumTypes[3].Descriptor()
 }
 
 func (IssueType) Type() protoreflect.EnumType {
-	return &file_shared_proto_audit_v1_audit_proto_enumTypes[3]
+	return &file_audit_v1_audit_proto_enumTypes[3]
 }
 
 func (x IssueType) Number() protoreflect.EnumNumber {
@@ -250,7 +250,7 @@ func (x IssueType) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use IssueType.Descriptor instead.
 func (IssueType) EnumDescriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{3}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{3}
 }
 
 // ApprovalStatus represents the status of an approval request.
@@ -290,11 +290,11 @@ func (x ApprovalStatus) String() string {
 }
 
 func (ApprovalStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_shared_proto_audit_v1_audit_proto_enumTypes[4].Descriptor()
+	return file_audit_v1_audit_proto_enumTypes[4].Descriptor()
 }
 
 func (ApprovalStatus) Type() protoreflect.EnumType {
-	return &file_shared_proto_audit_v1_audit_proto_enumTypes[4]
+	return &file_audit_v1_audit_proto_enumTypes[4]
 }
 
 func (x ApprovalStatus) Number() protoreflect.EnumNumber {
@@ -303,18 +303,21 @@ func (x ApprovalStatus) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use ApprovalStatus.Descriptor instead.
 func (ApprovalStatus) EnumDescriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{4}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{4}
 }
 
 // AuditJob represents an audit job.
 type AuditJob struct {
-	state              protoimpl.MessageState `protogen:"open.v1"`
-	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TenantId           string                 `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
-	RepositoryId       string                 `protobuf:"bytes,3,opt,name=repository_id,json=repositoryId,proto3" json:"repository_id,omitempty"`
-	Name               string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
-	AuditType          AuditType              `protobuf:"varint,5,opt,name=audit_type,json=auditType,proto3,enum=audit.v1.AuditType" json:"audit_type,omitempty"`
-	Status             AuditJobStatus         `protobuf:"varint,6,opt,name=status,proto3,enum=audit.v1.AuditJobStatus" json:"status,omitempty"`
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Id           string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TenantId     string                 `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	RepositoryId string                 `protobuf:"bytes,3,opt,name=repository_id,json=repositoryId,proto3" json:"repository_id,omitempty"`
+	Name         string                 `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	AuditType    AuditType              `protobuf:"varint,5,opt,name=audit_type,json=auditType,proto3,enum=audit.v1.AuditType" json:"audit_type,omitempty"`
+	// status carries the lowercase status string (pending/running/paused/completed/failed/cancelled).
+	// Typed as string (not the AuditJobStatus enum) so the REST gateway emits "running" instead of
+	// the full proto constant "AUDIT_JOB_STATUS_RUNNING" — mirrors GetAuditStatusResponse.state.
+	Status             string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
 	RiskScore          int32                  `protobuf:"varint,7,opt,name=risk_score,json=riskScore,proto3" json:"risk_score,omitempty"`
 	RiskSeverity       RiskSeverity           `protobuf:"varint,8,opt,name=risk_severity,json=riskSeverity,proto3,enum=audit.v1.RiskSeverity" json:"risk_severity,omitempty"`
 	ProgressPercentage int32                  `protobuf:"varint,9,opt,name=progress_percentage,json=progressPercentage,proto3" json:"progress_percentage,omitempty"`
@@ -328,13 +331,15 @@ type AuditJob struct {
 	CompletedAt        *timestamppb.Timestamp `protobuf:"bytes,17,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
 	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,18,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,19,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	CurrentStep        string                 `protobuf:"bytes,20,opt,name=current_step,json=currentStep,proto3" json:"current_step,omitempty"`    // workflow step name
+	ErrorMessage       string                 `protobuf:"bytes,21,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"` // populated on failed state
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
 
 func (x *AuditJob) Reset() {
 	*x = AuditJob{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[0]
+	mi := &file_audit_v1_audit_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -346,7 +351,7 @@ func (x *AuditJob) String() string {
 func (*AuditJob) ProtoMessage() {}
 
 func (x *AuditJob) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[0]
+	mi := &file_audit_v1_audit_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -359,7 +364,7 @@ func (x *AuditJob) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuditJob.ProtoReflect.Descriptor instead.
 func (*AuditJob) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{0}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *AuditJob) GetId() string {
@@ -397,11 +402,11 @@ func (x *AuditJob) GetAuditType() AuditType {
 	return AuditType_AUDIT_TYPE_UNSPECIFIED
 }
 
-func (x *AuditJob) GetStatus() AuditJobStatus {
+func (x *AuditJob) GetStatus() string {
 	if x != nil {
 		return x.Status
 	}
-	return AuditJobStatus_AUDIT_JOB_STATUS_UNSPECIFIED
+	return ""
 }
 
 func (x *AuditJob) GetRiskScore() int32 {
@@ -495,24 +500,41 @@ func (x *AuditJob) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *AuditJob) GetCurrentStep() string {
+	if x != nil {
+		return x.CurrentStep
+	}
+	return ""
+}
+
+func (x *AuditJob) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
+}
+
 // AuditJobSummary is a lightweight summary for listing.
 type AuditJobSummary struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	AuditType     AuditType              `protobuf:"varint,3,opt,name=audit_type,json=auditType,proto3,enum=audit.v1.AuditType" json:"audit_type,omitempty"`
-	Status        AuditJobStatus         `protobuf:"varint,4,opt,name=status,proto3,enum=audit.v1.AuditJobStatus" json:"status,omitempty"`
-	RiskScore     int32                  `protobuf:"varint,5,opt,name=risk_score,json=riskScore,proto3" json:"risk_score,omitempty"`
-	RiskSeverity  RiskSeverity           `protobuf:"varint,6,opt,name=risk_severity,json=riskSeverity,proto3,enum=audit.v1.RiskSeverity" json:"risk_severity,omitempty"`
-	FindingsCount int32                  `protobuf:"varint,7,opt,name=findings_count,json=findingsCount,proto3" json:"findings_count,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	Id        string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name      string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	AuditType AuditType              `protobuf:"varint,3,opt,name=audit_type,json=auditType,proto3,enum=audit.v1.AuditType" json:"audit_type,omitempty"`
+	// status carries the lowercase status string. See AuditJob.status for rationale.
+	Status             string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	RiskScore          int32                  `protobuf:"varint,5,opt,name=risk_score,json=riskScore,proto3" json:"risk_score,omitempty"`
+	RiskSeverity       RiskSeverity           `protobuf:"varint,6,opt,name=risk_severity,json=riskSeverity,proto3,enum=audit.v1.RiskSeverity" json:"risk_severity,omitempty"`
+	FindingsCount      int32                  `protobuf:"varint,7,opt,name=findings_count,json=findingsCount,proto3" json:"findings_count,omitempty"`
+	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	CurrentStep        string                 `protobuf:"bytes,9,opt,name=current_step,json=currentStep,proto3" json:"current_step,omitempty"` // workflow step name (e.g. "run_static_analysis")
+	ProgressPercentage int32                  `protobuf:"varint,10,opt,name=progress_percentage,json=progressPercentage,proto3" json:"progress_percentage,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *AuditJobSummary) Reset() {
 	*x = AuditJobSummary{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[1]
+	mi := &file_audit_v1_audit_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -524,7 +546,7 @@ func (x *AuditJobSummary) String() string {
 func (*AuditJobSummary) ProtoMessage() {}
 
 func (x *AuditJobSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[1]
+	mi := &file_audit_v1_audit_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -537,7 +559,7 @@ func (x *AuditJobSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuditJobSummary.ProtoReflect.Descriptor instead.
 func (*AuditJobSummary) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{1}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *AuditJobSummary) GetId() string {
@@ -561,11 +583,11 @@ func (x *AuditJobSummary) GetAuditType() AuditType {
 	return AuditType_AUDIT_TYPE_UNSPECIFIED
 }
 
-func (x *AuditJobSummary) GetStatus() AuditJobStatus {
+func (x *AuditJobSummary) GetStatus() string {
 	if x != nil {
 		return x.Status
 	}
-	return AuditJobStatus_AUDIT_JOB_STATUS_UNSPECIFIED
+	return ""
 }
 
 func (x *AuditJobSummary) GetRiskScore() int32 {
@@ -596,6 +618,20 @@ func (x *AuditJobSummary) GetCreatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *AuditJobSummary) GetCurrentStep() string {
+	if x != nil {
+		return x.CurrentStep
+	}
+	return ""
+}
+
+func (x *AuditJobSummary) GetProgressPercentage() int32 {
+	if x != nil {
+		return x.ProgressPercentage
+	}
+	return 0
+}
+
 // Finding represents a single issue found during an audit.
 type Finding struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -616,7 +652,7 @@ type Finding struct {
 
 func (x *Finding) Reset() {
 	*x = Finding{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[2]
+	mi := &file_audit_v1_audit_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -628,7 +664,7 @@ func (x *Finding) String() string {
 func (*Finding) ProtoMessage() {}
 
 func (x *Finding) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[2]
+	mi := &file_audit_v1_audit_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -641,7 +677,7 @@ func (x *Finding) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Finding.ProtoReflect.Descriptor instead.
 func (*Finding) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{2}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Finding) GetId() string {
@@ -738,7 +774,7 @@ type AuditReportSummary struct {
 
 func (x *AuditReportSummary) Reset() {
 	*x = AuditReportSummary{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[3]
+	mi := &file_audit_v1_audit_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -750,7 +786,7 @@ func (x *AuditReportSummary) String() string {
 func (*AuditReportSummary) ProtoMessage() {}
 
 func (x *AuditReportSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[3]
+	mi := &file_audit_v1_audit_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -763,7 +799,7 @@ func (x *AuditReportSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuditReportSummary.ProtoReflect.Descriptor instead.
 func (*AuditReportSummary) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{3}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *AuditReportSummary) GetTotalFindings() int32 {
@@ -834,7 +870,7 @@ type TriggerAuditRequest struct {
 
 func (x *TriggerAuditRequest) Reset() {
 	*x = TriggerAuditRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[4]
+	mi := &file_audit_v1_audit_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -846,7 +882,7 @@ func (x *TriggerAuditRequest) String() string {
 func (*TriggerAuditRequest) ProtoMessage() {}
 
 func (x *TriggerAuditRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[4]
+	mi := &file_audit_v1_audit_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -859,7 +895,7 @@ func (x *TriggerAuditRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TriggerAuditRequest.ProtoReflect.Descriptor instead.
 func (*TriggerAuditRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{4}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *TriggerAuditRequest) GetRepositoryId() string {
@@ -895,7 +931,7 @@ type TriggerAuditResponse struct {
 
 func (x *TriggerAuditResponse) Reset() {
 	*x = TriggerAuditResponse{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[5]
+	mi := &file_audit_v1_audit_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -907,7 +943,7 @@ func (x *TriggerAuditResponse) String() string {
 func (*TriggerAuditResponse) ProtoMessage() {}
 
 func (x *TriggerAuditResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[5]
+	mi := &file_audit_v1_audit_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -920,7 +956,7 @@ func (x *TriggerAuditResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TriggerAuditResponse.ProtoReflect.Descriptor instead.
 func (*TriggerAuditResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{5}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *TriggerAuditResponse) GetAuditId() string {
@@ -948,16 +984,17 @@ func (x *TriggerAuditResponse) GetWorkflowId() string {
 type ListAuditsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	RepositoryId  string                 `protobuf:"bytes,1,opt,name=repository_id,json=repositoryId,proto3" json:"repository_id,omitempty"` // optional filter
-	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`                                 // optional filter by status name
+	Status        string                 `protobuf:"bytes,2,opt,name=status,proto3" json:"status,omitempty"`                                 // DEPRECATED — use `statuses`. Kept for backward compat.
 	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	Statuses      []string               `protobuf:"bytes,5,rep,name=statuses,proto3" json:"statuses,omitempty"` // optional filter — match any of these status values
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListAuditsRequest) Reset() {
 	*x = ListAuditsRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[6]
+	mi := &file_audit_v1_audit_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -969,7 +1006,7 @@ func (x *ListAuditsRequest) String() string {
 func (*ListAuditsRequest) ProtoMessage() {}
 
 func (x *ListAuditsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[6]
+	mi := &file_audit_v1_audit_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -982,7 +1019,7 @@ func (x *ListAuditsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuditsRequest.ProtoReflect.Descriptor instead.
 func (*ListAuditsRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{6}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ListAuditsRequest) GetRepositoryId() string {
@@ -1013,6 +1050,13 @@ func (x *ListAuditsRequest) GetPageSize() int32 {
 	return 0
 }
 
+func (x *ListAuditsRequest) GetStatuses() []string {
+	if x != nil {
+		return x.Statuses
+	}
+	return nil
+}
+
 // ListAuditsResponse returns a paginated list of audits.
 type ListAuditsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1026,7 +1070,7 @@ type ListAuditsResponse struct {
 
 func (x *ListAuditsResponse) Reset() {
 	*x = ListAuditsResponse{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[7]
+	mi := &file_audit_v1_audit_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1038,7 +1082,7 @@ func (x *ListAuditsResponse) String() string {
 func (*ListAuditsResponse) ProtoMessage() {}
 
 func (x *ListAuditsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[7]
+	mi := &file_audit_v1_audit_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1051,7 +1095,7 @@ func (x *ListAuditsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuditsResponse.ProtoReflect.Descriptor instead.
 func (*ListAuditsResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{7}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ListAuditsResponse) GetItems() []*AuditJobSummary {
@@ -1092,7 +1136,7 @@ type GetAuditRequest struct {
 
 func (x *GetAuditRequest) Reset() {
 	*x = GetAuditRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[8]
+	mi := &file_audit_v1_audit_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1104,7 +1148,7 @@ func (x *GetAuditRequest) String() string {
 func (*GetAuditRequest) ProtoMessage() {}
 
 func (x *GetAuditRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[8]
+	mi := &file_audit_v1_audit_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1117,7 +1161,7 @@ func (x *GetAuditRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAuditRequest.ProtoReflect.Descriptor instead.
 func (*GetAuditRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{8}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *GetAuditRequest) GetAuditId() string {
@@ -1138,7 +1182,7 @@ type GetAuditResponse struct {
 
 func (x *GetAuditResponse) Reset() {
 	*x = GetAuditResponse{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[9]
+	mi := &file_audit_v1_audit_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1150,7 +1194,7 @@ func (x *GetAuditResponse) String() string {
 func (*GetAuditResponse) ProtoMessage() {}
 
 func (x *GetAuditResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[9]
+	mi := &file_audit_v1_audit_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1163,7 +1207,7 @@ func (x *GetAuditResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAuditResponse.ProtoReflect.Descriptor instead.
 func (*GetAuditResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{9}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetAuditResponse) GetAudit() *AuditJob {
@@ -1190,7 +1234,7 @@ type PauseAuditRequest struct {
 
 func (x *PauseAuditRequest) Reset() {
 	*x = PauseAuditRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[10]
+	mi := &file_audit_v1_audit_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1202,7 +1246,7 @@ func (x *PauseAuditRequest) String() string {
 func (*PauseAuditRequest) ProtoMessage() {}
 
 func (x *PauseAuditRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[10]
+	mi := &file_audit_v1_audit_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1215,7 +1259,7 @@ func (x *PauseAuditRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PauseAuditRequest.ProtoReflect.Descriptor instead.
 func (*PauseAuditRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{10}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *PauseAuditRequest) GetAuditId() string {
@@ -1236,7 +1280,7 @@ type PauseAuditResponse struct {
 
 func (x *PauseAuditResponse) Reset() {
 	*x = PauseAuditResponse{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[11]
+	mi := &file_audit_v1_audit_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1248,7 +1292,7 @@ func (x *PauseAuditResponse) String() string {
 func (*PauseAuditResponse) ProtoMessage() {}
 
 func (x *PauseAuditResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[11]
+	mi := &file_audit_v1_audit_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1261,7 +1305,7 @@ func (x *PauseAuditResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PauseAuditResponse.ProtoReflect.Descriptor instead.
 func (*PauseAuditResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{11}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *PauseAuditResponse) GetSuccess() bool {
@@ -1289,7 +1333,7 @@ type ResumeAuditRequest struct {
 
 func (x *ResumeAuditRequest) Reset() {
 	*x = ResumeAuditRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[12]
+	mi := &file_audit_v1_audit_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1301,7 +1345,7 @@ func (x *ResumeAuditRequest) String() string {
 func (*ResumeAuditRequest) ProtoMessage() {}
 
 func (x *ResumeAuditRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[12]
+	mi := &file_audit_v1_audit_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1314,7 +1358,7 @@ func (x *ResumeAuditRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResumeAuditRequest.ProtoReflect.Descriptor instead.
 func (*ResumeAuditRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{12}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ResumeAuditRequest) GetAuditId() string {
@@ -1342,7 +1386,7 @@ type ResumeAuditResponse struct {
 
 func (x *ResumeAuditResponse) Reset() {
 	*x = ResumeAuditResponse{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[13]
+	mi := &file_audit_v1_audit_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1354,7 +1398,7 @@ func (x *ResumeAuditResponse) String() string {
 func (*ResumeAuditResponse) ProtoMessage() {}
 
 func (x *ResumeAuditResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[13]
+	mi := &file_audit_v1_audit_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1367,7 +1411,7 @@ func (x *ResumeAuditResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ResumeAuditResponse.ProtoReflect.Descriptor instead.
 func (*ResumeAuditResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{13}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ResumeAuditResponse) GetSuccess() bool {
@@ -1394,7 +1438,7 @@ type GetAuditReportRequest struct {
 
 func (x *GetAuditReportRequest) Reset() {
 	*x = GetAuditReportRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[14]
+	mi := &file_audit_v1_audit_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1406,7 +1450,7 @@ func (x *GetAuditReportRequest) String() string {
 func (*GetAuditReportRequest) ProtoMessage() {}
 
 func (x *GetAuditReportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[14]
+	mi := &file_audit_v1_audit_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1419,7 +1463,7 @@ func (x *GetAuditReportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAuditReportRequest.ProtoReflect.Descriptor instead.
 func (*GetAuditReportRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{14}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *GetAuditReportRequest) GetAuditId() string {
@@ -1443,7 +1487,7 @@ type GetAuditReportResponse struct {
 
 func (x *GetAuditReportResponse) Reset() {
 	*x = GetAuditReportResponse{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[15]
+	mi := &file_audit_v1_audit_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1455,7 +1499,7 @@ func (x *GetAuditReportResponse) String() string {
 func (*GetAuditReportResponse) ProtoMessage() {}
 
 func (x *GetAuditReportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[15]
+	mi := &file_audit_v1_audit_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1468,7 +1512,7 @@ func (x *GetAuditReportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAuditReportResponse.ProtoReflect.Descriptor instead.
 func (*GetAuditReportResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{15}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetAuditReportResponse) GetAudit() *AuditJob {
@@ -1516,7 +1560,7 @@ type FindingGroup struct {
 
 func (x *FindingGroup) Reset() {
 	*x = FindingGroup{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[16]
+	mi := &file_audit_v1_audit_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1528,7 +1572,7 @@ func (x *FindingGroup) String() string {
 func (*FindingGroup) ProtoMessage() {}
 
 func (x *FindingGroup) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[16]
+	mi := &file_audit_v1_audit_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1541,7 +1585,7 @@ func (x *FindingGroup) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindingGroup.ProtoReflect.Descriptor instead.
 func (*FindingGroup) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{16}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *FindingGroup) GetFindings() []*Finding {
@@ -1561,7 +1605,7 @@ type GetAuditStatusRequest struct {
 
 func (x *GetAuditStatusRequest) Reset() {
 	*x = GetAuditStatusRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[17]
+	mi := &file_audit_v1_audit_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1573,7 +1617,7 @@ func (x *GetAuditStatusRequest) String() string {
 func (*GetAuditStatusRequest) ProtoMessage() {}
 
 func (x *GetAuditStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[17]
+	mi := &file_audit_v1_audit_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1586,7 +1630,7 @@ func (x *GetAuditStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAuditStatusRequest.ProtoReflect.Descriptor instead.
 func (*GetAuditStatusRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{17}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetAuditStatusRequest) GetAuditId() string {
@@ -1600,16 +1644,18 @@ func (x *GetAuditStatusRequest) GetAuditId() string {
 type GetAuditStatusResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Percentage    int32                  `protobuf:"varint,1,opt,name=percentage,proto3" json:"percentage,omitempty"`
-	Step          string                 `protobuf:"bytes,2,opt,name=step,proto3" json:"step,omitempty"`
+	State         string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"` // status enum (running/paused/completed/failed/cancelled)
 	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
 	Timestamp     int64                  `protobuf:"varint,4,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	CurrentStep   string                 `protobuf:"bytes,5,opt,name=current_step,json=currentStep,proto3" json:"current_step,omitempty"`    // workflow step name (e.g. "run_static_analysis")
+	ErrorMessage  string                 `protobuf:"bytes,6,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"` // populated on failed state
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetAuditStatusResponse) Reset() {
 	*x = GetAuditStatusResponse{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[18]
+	mi := &file_audit_v1_audit_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1621,7 +1667,7 @@ func (x *GetAuditStatusResponse) String() string {
 func (*GetAuditStatusResponse) ProtoMessage() {}
 
 func (x *GetAuditStatusResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[18]
+	mi := &file_audit_v1_audit_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1634,7 +1680,7 @@ func (x *GetAuditStatusResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAuditStatusResponse.ProtoReflect.Descriptor instead.
 func (*GetAuditStatusResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{18}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *GetAuditStatusResponse) GetPercentage() int32 {
@@ -1644,9 +1690,9 @@ func (x *GetAuditStatusResponse) GetPercentage() int32 {
 	return 0
 }
 
-func (x *GetAuditStatusResponse) GetStep() string {
+func (x *GetAuditStatusResponse) GetState() string {
 	if x != nil {
-		return x.Step
+		return x.State
 	}
 	return ""
 }
@@ -1663,6 +1709,20 @@ func (x *GetAuditStatusResponse) GetTimestamp() int64 {
 		return x.Timestamp
 	}
 	return 0
+}
+
+func (x *GetAuditStatusResponse) GetCurrentStep() string {
+	if x != nil {
+		return x.CurrentStep
+	}
+	return ""
+}
+
+func (x *GetAuditStatusResponse) GetErrorMessage() string {
+	if x != nil {
+		return x.ErrorMessage
+	}
+	return ""
 }
 
 // ApprovalRequest represents a human-in-the-loop approval item.
@@ -1685,7 +1745,7 @@ type ApprovalRequest struct {
 
 func (x *ApprovalRequest) Reset() {
 	*x = ApprovalRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[19]
+	mi := &file_audit_v1_audit_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1697,7 +1757,7 @@ func (x *ApprovalRequest) String() string {
 func (*ApprovalRequest) ProtoMessage() {}
 
 func (x *ApprovalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[19]
+	mi := &file_audit_v1_audit_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1710,7 +1770,7 @@ func (x *ApprovalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApprovalRequest.ProtoReflect.Descriptor instead.
 func (*ApprovalRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{19}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ApprovalRequest) GetId() string {
@@ -1800,7 +1860,7 @@ type ListPendingApprovalsRequest struct {
 
 func (x *ListPendingApprovalsRequest) Reset() {
 	*x = ListPendingApprovalsRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[20]
+	mi := &file_audit_v1_audit_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1812,7 +1872,7 @@ func (x *ListPendingApprovalsRequest) String() string {
 func (*ListPendingApprovalsRequest) ProtoMessage() {}
 
 func (x *ListPendingApprovalsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[20]
+	mi := &file_audit_v1_audit_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1825,7 +1885,7 @@ func (x *ListPendingApprovalsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPendingApprovalsRequest.ProtoReflect.Descriptor instead.
 func (*ListPendingApprovalsRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{20}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListPendingApprovalsRequest) GetStatus() string {
@@ -1846,7 +1906,7 @@ type ListPendingApprovalsResponse struct {
 
 func (x *ListPendingApprovalsResponse) Reset() {
 	*x = ListPendingApprovalsResponse{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[21]
+	mi := &file_audit_v1_audit_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1858,7 +1918,7 @@ func (x *ListPendingApprovalsResponse) String() string {
 func (*ListPendingApprovalsResponse) ProtoMessage() {}
 
 func (x *ListPendingApprovalsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[21]
+	mi := &file_audit_v1_audit_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1871,7 +1931,7 @@ func (x *ListPendingApprovalsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListPendingApprovalsResponse.ProtoReflect.Descriptor instead.
 func (*ListPendingApprovalsResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{21}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ListPendingApprovalsResponse) GetItems() []*ApprovalRequest {
@@ -1900,7 +1960,7 @@ type DecideApprovalRequest struct {
 
 func (x *DecideApprovalRequest) Reset() {
 	*x = DecideApprovalRequest{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[22]
+	mi := &file_audit_v1_audit_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1912,7 +1972,7 @@ func (x *DecideApprovalRequest) String() string {
 func (*DecideApprovalRequest) ProtoMessage() {}
 
 func (x *DecideApprovalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[22]
+	mi := &file_audit_v1_audit_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1925,7 +1985,7 @@ func (x *DecideApprovalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecideApprovalRequest.ProtoReflect.Descriptor instead.
 func (*DecideApprovalRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{22}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *DecideApprovalRequest) GetApprovalId() string {
@@ -1960,7 +2020,7 @@ type DecideApprovalResponse struct {
 
 func (x *DecideApprovalResponse) Reset() {
 	*x = DecideApprovalResponse{}
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[23]
+	mi := &file_audit_v1_audit_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1972,7 +2032,7 @@ func (x *DecideApprovalResponse) String() string {
 func (*DecideApprovalResponse) ProtoMessage() {}
 
 func (x *DecideApprovalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_audit_v1_audit_proto_msgTypes[23]
+	mi := &file_audit_v1_audit_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1985,7 +2045,7 @@ func (x *DecideApprovalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DecideApprovalResponse.ProtoReflect.Descriptor instead.
 func (*DecideApprovalResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_audit_v1_audit_proto_rawDescGZIP(), []int{23}
+	return file_audit_v1_audit_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *DecideApprovalResponse) GetSuccess() bool {
@@ -2002,19 +2062,19 @@ func (x *DecideApprovalResponse) GetStatus() ApprovalStatus {
 	return ApprovalStatus_APPROVAL_STATUS_UNSPECIFIED
 }
 
-var File_shared_proto_audit_v1_audit_proto protoreflect.FileDescriptor
+var File_audit_v1_audit_proto protoreflect.FileDescriptor
 
-const file_shared_proto_audit_v1_audit_proto_rawDesc = "" +
+const file_audit_v1_audit_proto_rawDesc = "" +
 	"\n" +
-	"!shared/proto/audit/v1/audit.proto\x12\baudit.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb9\x06\n" +
+	"\x14audit/v1/audit.proto\x12\baudit.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe7\x06\n" +
 	"\bAuditJob\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12#\n" +
 	"\rrepository_id\x18\x03 \x01(\tR\frepositoryId\x12\x12\n" +
 	"\x04name\x18\x04 \x01(\tR\x04name\x122\n" +
 	"\n" +
-	"audit_type\x18\x05 \x01(\x0e2\x13.audit.v1.AuditTypeR\tauditType\x120\n" +
-	"\x06status\x18\x06 \x01(\x0e2\x18.audit.v1.AuditJobStatusR\x06status\x12\x1d\n" +
+	"audit_type\x18\x05 \x01(\x0e2\x13.audit.v1.AuditTypeR\tauditType\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
 	"risk_score\x18\a \x01(\x05R\triskScore\x12;\n" +
 	"\rrisk_severity\x18\b \x01(\x0e2\x16.audit.v1.RiskSeverityR\friskSeverity\x12/\n" +
@@ -2033,19 +2093,24 @@ const file_shared_proto_audit_v1_audit_proto_rawDesc = "" +
 	"\n" +
 	"created_at\x18\x12 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\x13 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\xd9\x02\n" +
+	"updated_at\x18\x13 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12!\n" +
+	"\fcurrent_step\x18\x14 \x01(\tR\vcurrentStep\x12#\n" +
+	"\rerror_message\x18\x15 \x01(\tR\ferrorMessage\"\x93\x03\n" +
 	"\x0fAuditJobSummary\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x122\n" +
 	"\n" +
-	"audit_type\x18\x03 \x01(\x0e2\x13.audit.v1.AuditTypeR\tauditType\x120\n" +
-	"\x06status\x18\x04 \x01(\x0e2\x18.audit.v1.AuditJobStatusR\x06status\x12\x1d\n" +
+	"audit_type\x18\x03 \x01(\x0e2\x13.audit.v1.AuditTypeR\tauditType\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\x12\x1d\n" +
 	"\n" +
 	"risk_score\x18\x05 \x01(\x05R\triskScore\x12;\n" +
 	"\rrisk_severity\x18\x06 \x01(\x0e2\x16.audit.v1.RiskSeverityR\friskSeverity\x12%\n" +
 	"\x0efindings_count\x18\a \x01(\x05R\rfindingsCount\x129\n" +
 	"\n" +
-	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x93\x03\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12!\n" +
+	"\fcurrent_step\x18\t \x01(\tR\vcurrentStep\x12/\n" +
+	"\x13progress_percentage\x18\n" +
+	" \x01(\x05R\x12progressPercentage\"\x93\x03\n" +
 	"\aFinding\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12 \n" +
@@ -2082,12 +2147,13 @@ const file_shared_proto_audit_v1_audit_proto_rawDesc = "" +
 	"\baudit_id\x18\x01 \x01(\tR\aauditId\x120\n" +
 	"\x06status\x18\x02 \x01(\x0e2\x18.audit.v1.AuditJobStatusR\x06status\x12\x1f\n" +
 	"\vworkflow_id\x18\x03 \x01(\tR\n" +
-	"workflowId\"\x81\x01\n" +
+	"workflowId\"\x9d\x01\n" +
 	"\x11ListAuditsRequest\x12#\n" +
 	"\rrepository_id\x18\x01 \x01(\tR\frepositoryId\x12\x16\n" +
 	"\x06status\x18\x02 \x01(\tR\x06status\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\x85\x01\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\x12\x1a\n" +
+	"\bstatuses\x18\x05 \x03(\tR\bstatuses\"\x85\x01\n" +
 	"\x12ListAuditsResponse\x12/\n" +
 	"\x05items\x18\x01 \x03(\v2\x19.audit.v1.AuditJobSummaryR\x05items\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
@@ -2127,14 +2193,16 @@ const file_shared_proto_audit_v1_audit_proto_rawDesc = "" +
 	"\fFindingGroup\x12-\n" +
 	"\bfindings\x18\x01 \x03(\v2\x11.audit.v1.FindingR\bfindings\"2\n" +
 	"\x15GetAuditStatusRequest\x12\x19\n" +
-	"\baudit_id\x18\x01 \x01(\tR\aauditId\"\x84\x01\n" +
+	"\baudit_id\x18\x01 \x01(\tR\aauditId\"\xce\x01\n" +
 	"\x16GetAuditStatusResponse\x12\x1e\n" +
 	"\n" +
 	"percentage\x18\x01 \x01(\x05R\n" +
-	"percentage\x12\x12\n" +
-	"\x04step\x18\x02 \x01(\tR\x04step\x12\x18\n" +
+	"percentage\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x18\n" +
 	"\amessage\x18\x03 \x01(\tR\amessage\x12\x1c\n" +
-	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\"\xa4\x03\n" +
+	"\ttimestamp\x18\x04 \x01(\x03R\ttimestamp\x12!\n" +
+	"\fcurrent_step\x18\x05 \x01(\tR\vcurrentStep\x12#\n" +
+	"\rerror_message\x18\x06 \x01(\tR\ferrorMessage\"\xa4\x03\n" +
 	"\x0fApprovalRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12 \n" +
@@ -2211,20 +2279,20 @@ const file_shared_proto_audit_v1_audit_proto_rawDesc = "" +
 	"\x0eDecideApproval\x12\x1f.audit.v1.DecideApprovalRequest\x1a .audit.v1.DecideApprovalResponse\"1\x82\xd3\xe4\x93\x02+:\x01*\"&/api/v1/approvals/{approval_id}/decideB7Z5sovereign-ai-compliance/shared/proto/audit/v1;auditv1b\x06proto3"
 
 var (
-	file_shared_proto_audit_v1_audit_proto_rawDescOnce sync.Once
-	file_shared_proto_audit_v1_audit_proto_rawDescData []byte
+	file_audit_v1_audit_proto_rawDescOnce sync.Once
+	file_audit_v1_audit_proto_rawDescData []byte
 )
 
-func file_shared_proto_audit_v1_audit_proto_rawDescGZIP() []byte {
-	file_shared_proto_audit_v1_audit_proto_rawDescOnce.Do(func() {
-		file_shared_proto_audit_v1_audit_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_shared_proto_audit_v1_audit_proto_rawDesc), len(file_shared_proto_audit_v1_audit_proto_rawDesc)))
+func file_audit_v1_audit_proto_rawDescGZIP() []byte {
+	file_audit_v1_audit_proto_rawDescOnce.Do(func() {
+		file_audit_v1_audit_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_audit_v1_audit_proto_rawDesc), len(file_audit_v1_audit_proto_rawDesc)))
 	})
-	return file_shared_proto_audit_v1_audit_proto_rawDescData
+	return file_audit_v1_audit_proto_rawDescData
 }
 
-var file_shared_proto_audit_v1_audit_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
-var file_shared_proto_audit_v1_audit_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
-var file_shared_proto_audit_v1_audit_proto_goTypes = []any{
+var file_audit_v1_audit_proto_enumTypes = make([]protoimpl.EnumInfo, 5)
+var file_audit_v1_audit_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
+var file_audit_v1_audit_proto_goTypes = []any{
 	(AuditJobStatus)(0),                  // 0: audit.v1.AuditJobStatus
 	(AuditType)(0),                       // 1: audit.v1.AuditType
 	(RiskSeverity)(0),                    // 2: audit.v1.RiskSeverity
@@ -2258,88 +2326,86 @@ var file_shared_proto_audit_v1_audit_proto_goTypes = []any{
 	nil,                                  // 30: audit.v1.GetAuditReportResponse.ByIssueTypeEntry
 	(*timestamppb.Timestamp)(nil),        // 31: google.protobuf.Timestamp
 }
-var file_shared_proto_audit_v1_audit_proto_depIdxs = []int32{
+var file_audit_v1_audit_proto_depIdxs = []int32{
 	1,  // 0: audit.v1.AuditJob.audit_type:type_name -> audit.v1.AuditType
-	0,  // 1: audit.v1.AuditJob.status:type_name -> audit.v1.AuditJobStatus
-	2,  // 2: audit.v1.AuditJob.risk_severity:type_name -> audit.v1.RiskSeverity
-	31, // 3: audit.v1.AuditJob.started_at:type_name -> google.protobuf.Timestamp
-	31, // 4: audit.v1.AuditJob.completed_at:type_name -> google.protobuf.Timestamp
-	31, // 5: audit.v1.AuditJob.created_at:type_name -> google.protobuf.Timestamp
-	31, // 6: audit.v1.AuditJob.updated_at:type_name -> google.protobuf.Timestamp
-	1,  // 7: audit.v1.AuditJobSummary.audit_type:type_name -> audit.v1.AuditType
-	0,  // 8: audit.v1.AuditJobSummary.status:type_name -> audit.v1.AuditJobStatus
-	2,  // 9: audit.v1.AuditJobSummary.risk_severity:type_name -> audit.v1.RiskSeverity
-	31, // 10: audit.v1.AuditJobSummary.created_at:type_name -> google.protobuf.Timestamp
-	3,  // 11: audit.v1.Finding.issue_type:type_name -> audit.v1.IssueType
-	2,  // 12: audit.v1.Finding.severity:type_name -> audit.v1.RiskSeverity
-	31, // 13: audit.v1.Finding.created_at:type_name -> google.protobuf.Timestamp
-	2,  // 14: audit.v1.AuditReportSummary.risk_severity:type_name -> audit.v1.RiskSeverity
-	1,  // 15: audit.v1.TriggerAuditRequest.audit_type:type_name -> audit.v1.AuditType
-	0,  // 16: audit.v1.TriggerAuditResponse.status:type_name -> audit.v1.AuditJobStatus
-	6,  // 17: audit.v1.ListAuditsResponse.items:type_name -> audit.v1.AuditJobSummary
-	5,  // 18: audit.v1.GetAuditResponse.audit:type_name -> audit.v1.AuditJob
-	7,  // 19: audit.v1.GetAuditResponse.findings:type_name -> audit.v1.Finding
-	0,  // 20: audit.v1.PauseAuditResponse.status:type_name -> audit.v1.AuditJobStatus
-	0,  // 21: audit.v1.ResumeAuditResponse.status:type_name -> audit.v1.AuditJobStatus
-	5,  // 22: audit.v1.GetAuditReportResponse.audit:type_name -> audit.v1.AuditJob
-	7,  // 23: audit.v1.GetAuditReportResponse.findings:type_name -> audit.v1.Finding
-	29, // 24: audit.v1.GetAuditReportResponse.by_severity:type_name -> audit.v1.GetAuditReportResponse.BySeverityEntry
-	30, // 25: audit.v1.GetAuditReportResponse.by_issue_type:type_name -> audit.v1.GetAuditReportResponse.ByIssueTypeEntry
-	8,  // 26: audit.v1.GetAuditReportResponse.summary:type_name -> audit.v1.AuditReportSummary
-	7,  // 27: audit.v1.FindingGroup.findings:type_name -> audit.v1.Finding
-	4,  // 28: audit.v1.ApprovalRequest.status:type_name -> audit.v1.ApprovalStatus
-	31, // 29: audit.v1.ApprovalRequest.created_at:type_name -> google.protobuf.Timestamp
-	31, // 30: audit.v1.ApprovalRequest.decided_at:type_name -> google.protobuf.Timestamp
-	24, // 31: audit.v1.ListPendingApprovalsResponse.items:type_name -> audit.v1.ApprovalRequest
-	4,  // 32: audit.v1.DecideApprovalResponse.status:type_name -> audit.v1.ApprovalStatus
-	21, // 33: audit.v1.GetAuditReportResponse.BySeverityEntry.value:type_name -> audit.v1.FindingGroup
-	21, // 34: audit.v1.GetAuditReportResponse.ByIssueTypeEntry.value:type_name -> audit.v1.FindingGroup
-	11, // 35: audit.v1.AuditService.ListAudits:input_type -> audit.v1.ListAuditsRequest
-	9,  // 36: audit.v1.AuditService.TriggerAudit:input_type -> audit.v1.TriggerAuditRequest
-	13, // 37: audit.v1.AuditService.GetAudit:input_type -> audit.v1.GetAuditRequest
-	15, // 38: audit.v1.AuditService.PauseAudit:input_type -> audit.v1.PauseAuditRequest
-	17, // 39: audit.v1.AuditService.ResumeAudit:input_type -> audit.v1.ResumeAuditRequest
-	19, // 40: audit.v1.AuditService.GetAuditReport:input_type -> audit.v1.GetAuditReportRequest
-	22, // 41: audit.v1.AuditService.GetAuditStatus:input_type -> audit.v1.GetAuditStatusRequest
-	25, // 42: audit.v1.AuditService.ListPendingApprovals:input_type -> audit.v1.ListPendingApprovalsRequest
-	27, // 43: audit.v1.AuditService.DecideApproval:input_type -> audit.v1.DecideApprovalRequest
-	12, // 44: audit.v1.AuditService.ListAudits:output_type -> audit.v1.ListAuditsResponse
-	10, // 45: audit.v1.AuditService.TriggerAudit:output_type -> audit.v1.TriggerAuditResponse
-	14, // 46: audit.v1.AuditService.GetAudit:output_type -> audit.v1.GetAuditResponse
-	16, // 47: audit.v1.AuditService.PauseAudit:output_type -> audit.v1.PauseAuditResponse
-	18, // 48: audit.v1.AuditService.ResumeAudit:output_type -> audit.v1.ResumeAuditResponse
-	20, // 49: audit.v1.AuditService.GetAuditReport:output_type -> audit.v1.GetAuditReportResponse
-	23, // 50: audit.v1.AuditService.GetAuditStatus:output_type -> audit.v1.GetAuditStatusResponse
-	26, // 51: audit.v1.AuditService.ListPendingApprovals:output_type -> audit.v1.ListPendingApprovalsResponse
-	28, // 52: audit.v1.AuditService.DecideApproval:output_type -> audit.v1.DecideApprovalResponse
-	44, // [44:53] is the sub-list for method output_type
-	35, // [35:44] is the sub-list for method input_type
-	35, // [35:35] is the sub-list for extension type_name
-	35, // [35:35] is the sub-list for extension extendee
-	0,  // [0:35] is the sub-list for field type_name
+	2,  // 1: audit.v1.AuditJob.risk_severity:type_name -> audit.v1.RiskSeverity
+	31, // 2: audit.v1.AuditJob.started_at:type_name -> google.protobuf.Timestamp
+	31, // 3: audit.v1.AuditJob.completed_at:type_name -> google.protobuf.Timestamp
+	31, // 4: audit.v1.AuditJob.created_at:type_name -> google.protobuf.Timestamp
+	31, // 5: audit.v1.AuditJob.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 6: audit.v1.AuditJobSummary.audit_type:type_name -> audit.v1.AuditType
+	2,  // 7: audit.v1.AuditJobSummary.risk_severity:type_name -> audit.v1.RiskSeverity
+	31, // 8: audit.v1.AuditJobSummary.created_at:type_name -> google.protobuf.Timestamp
+	3,  // 9: audit.v1.Finding.issue_type:type_name -> audit.v1.IssueType
+	2,  // 10: audit.v1.Finding.severity:type_name -> audit.v1.RiskSeverity
+	31, // 11: audit.v1.Finding.created_at:type_name -> google.protobuf.Timestamp
+	2,  // 12: audit.v1.AuditReportSummary.risk_severity:type_name -> audit.v1.RiskSeverity
+	1,  // 13: audit.v1.TriggerAuditRequest.audit_type:type_name -> audit.v1.AuditType
+	0,  // 14: audit.v1.TriggerAuditResponse.status:type_name -> audit.v1.AuditJobStatus
+	6,  // 15: audit.v1.ListAuditsResponse.items:type_name -> audit.v1.AuditJobSummary
+	5,  // 16: audit.v1.GetAuditResponse.audit:type_name -> audit.v1.AuditJob
+	7,  // 17: audit.v1.GetAuditResponse.findings:type_name -> audit.v1.Finding
+	0,  // 18: audit.v1.PauseAuditResponse.status:type_name -> audit.v1.AuditJobStatus
+	0,  // 19: audit.v1.ResumeAuditResponse.status:type_name -> audit.v1.AuditJobStatus
+	5,  // 20: audit.v1.GetAuditReportResponse.audit:type_name -> audit.v1.AuditJob
+	7,  // 21: audit.v1.GetAuditReportResponse.findings:type_name -> audit.v1.Finding
+	29, // 22: audit.v1.GetAuditReportResponse.by_severity:type_name -> audit.v1.GetAuditReportResponse.BySeverityEntry
+	30, // 23: audit.v1.GetAuditReportResponse.by_issue_type:type_name -> audit.v1.GetAuditReportResponse.ByIssueTypeEntry
+	8,  // 24: audit.v1.GetAuditReportResponse.summary:type_name -> audit.v1.AuditReportSummary
+	7,  // 25: audit.v1.FindingGroup.findings:type_name -> audit.v1.Finding
+	4,  // 26: audit.v1.ApprovalRequest.status:type_name -> audit.v1.ApprovalStatus
+	31, // 27: audit.v1.ApprovalRequest.created_at:type_name -> google.protobuf.Timestamp
+	31, // 28: audit.v1.ApprovalRequest.decided_at:type_name -> google.protobuf.Timestamp
+	24, // 29: audit.v1.ListPendingApprovalsResponse.items:type_name -> audit.v1.ApprovalRequest
+	4,  // 30: audit.v1.DecideApprovalResponse.status:type_name -> audit.v1.ApprovalStatus
+	21, // 31: audit.v1.GetAuditReportResponse.BySeverityEntry.value:type_name -> audit.v1.FindingGroup
+	21, // 32: audit.v1.GetAuditReportResponse.ByIssueTypeEntry.value:type_name -> audit.v1.FindingGroup
+	11, // 33: audit.v1.AuditService.ListAudits:input_type -> audit.v1.ListAuditsRequest
+	9,  // 34: audit.v1.AuditService.TriggerAudit:input_type -> audit.v1.TriggerAuditRequest
+	13, // 35: audit.v1.AuditService.GetAudit:input_type -> audit.v1.GetAuditRequest
+	15, // 36: audit.v1.AuditService.PauseAudit:input_type -> audit.v1.PauseAuditRequest
+	17, // 37: audit.v1.AuditService.ResumeAudit:input_type -> audit.v1.ResumeAuditRequest
+	19, // 38: audit.v1.AuditService.GetAuditReport:input_type -> audit.v1.GetAuditReportRequest
+	22, // 39: audit.v1.AuditService.GetAuditStatus:input_type -> audit.v1.GetAuditStatusRequest
+	25, // 40: audit.v1.AuditService.ListPendingApprovals:input_type -> audit.v1.ListPendingApprovalsRequest
+	27, // 41: audit.v1.AuditService.DecideApproval:input_type -> audit.v1.DecideApprovalRequest
+	12, // 42: audit.v1.AuditService.ListAudits:output_type -> audit.v1.ListAuditsResponse
+	10, // 43: audit.v1.AuditService.TriggerAudit:output_type -> audit.v1.TriggerAuditResponse
+	14, // 44: audit.v1.AuditService.GetAudit:output_type -> audit.v1.GetAuditResponse
+	16, // 45: audit.v1.AuditService.PauseAudit:output_type -> audit.v1.PauseAuditResponse
+	18, // 46: audit.v1.AuditService.ResumeAudit:output_type -> audit.v1.ResumeAuditResponse
+	20, // 47: audit.v1.AuditService.GetAuditReport:output_type -> audit.v1.GetAuditReportResponse
+	23, // 48: audit.v1.AuditService.GetAuditStatus:output_type -> audit.v1.GetAuditStatusResponse
+	26, // 49: audit.v1.AuditService.ListPendingApprovals:output_type -> audit.v1.ListPendingApprovalsResponse
+	28, // 50: audit.v1.AuditService.DecideApproval:output_type -> audit.v1.DecideApprovalResponse
+	42, // [42:51] is the sub-list for method output_type
+	33, // [33:42] is the sub-list for method input_type
+	33, // [33:33] is the sub-list for extension type_name
+	33, // [33:33] is the sub-list for extension extendee
+	0,  // [0:33] is the sub-list for field type_name
 }
 
-func init() { file_shared_proto_audit_v1_audit_proto_init() }
-func file_shared_proto_audit_v1_audit_proto_init() {
-	if File_shared_proto_audit_v1_audit_proto != nil {
+func init() { file_audit_v1_audit_proto_init() }
+func file_audit_v1_audit_proto_init() {
+	if File_audit_v1_audit_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_shared_proto_audit_v1_audit_proto_rawDesc), len(file_shared_proto_audit_v1_audit_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_audit_v1_audit_proto_rawDesc), len(file_audit_v1_audit_proto_rawDesc)),
 			NumEnums:      5,
 			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_shared_proto_audit_v1_audit_proto_goTypes,
-		DependencyIndexes: file_shared_proto_audit_v1_audit_proto_depIdxs,
-		EnumInfos:         file_shared_proto_audit_v1_audit_proto_enumTypes,
-		MessageInfos:      file_shared_proto_audit_v1_audit_proto_msgTypes,
+		GoTypes:           file_audit_v1_audit_proto_goTypes,
+		DependencyIndexes: file_audit_v1_audit_proto_depIdxs,
+		EnumInfos:         file_audit_v1_audit_proto_enumTypes,
+		MessageInfos:      file_audit_v1_audit_proto_msgTypes,
 	}.Build()
-	File_shared_proto_audit_v1_audit_proto = out.File
-	file_shared_proto_audit_v1_audit_proto_goTypes = nil
-	file_shared_proto_audit_v1_audit_proto_depIdxs = nil
+	File_audit_v1_audit_proto = out.File
+	file_audit_v1_audit_proto_goTypes = nil
+	file_audit_v1_audit_proto_depIdxs = nil
 }
