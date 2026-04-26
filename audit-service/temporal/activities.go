@@ -376,35 +376,33 @@ func (a *Activities) CreateApprovalRequest(ctx context.Context, auditID string) 
 	return nil
 }
 
-// UpdateAuditStatus updates audit status and progress (called from workflow).
-func (a *Activities) UpdateAuditStatus(ctx context.Context, auditID string, status string, progress int, step string) error {
+// UpdateAuditStep writes status, current workflow step, and progress percentage atomically.
+// Called from the workflow after each successful step so the UI streams meaningful progress
+// (e.g. "run_static_analysis" at 50%) instead of jumping 0 → 50 → 100.
+func (a *Activities) UpdateAuditStep(ctx context.Context, auditID, status, step string, percentage int) error {
 	auditUUID, err := uuid.Parse(auditID)
 	if err != nil {
 		return fmt.Errorf("invalid audit ID: %w", err)
 	}
 
-	err = a.repo.UpdateAuditStatus(ctx, auditUUID, status)
+	if err := a.repo.UpdateAuditStep(ctx, auditUUID, status, step, percentage); err != nil {
+		return fmt.Errorf("update audit step: %w", err)
+	}
+	return nil
+}
+
+// MarkAuditFailed marks the audit as failed and records the step it died on plus the error
+// message. Called from the workflow's failure paths so the UI can surface "static analysis
+// failed: connection refused" instead of just a generic terminal state.
+func (a *Activities) MarkAuditFailed(ctx context.Context, auditID, step string, percentage int, errMsg string) error {
+	auditUUID, err := uuid.Parse(auditID)
 	if err != nil {
-		return fmt.Errorf("update status: %w", err)
+		return fmt.Errorf("invalid audit ID: %w", err)
 	}
 
-	// We don't update score here, just progress
-	// Progress is just for UI display
-	audit, err := a.repo.GetAuditByID(ctx, auditUUID)
-	if err != nil {
-		return fmt.Errorf("get audit: %w", err)
+	if err := a.repo.UpdateAuditFailure(ctx, auditUUID, step, percentage, errMsg); err != nil {
+		return fmt.Errorf("mark audit failed: %w", err)
 	}
-
-	err = a.repo.UpdateAuditProgress(
-		ctx, auditUUID, progress,
-		audit.RiskScore, audit.RiskSeverity,
-		audit.FindingsCount, audit.CriticalFindings,
-		audit.HighFindings, audit.MediumFindings, audit.LowFindings,
-	)
-	if err != nil {
-		return fmt.Errorf("update progress: %w", err)
-	}
-
 	return nil
 }
 

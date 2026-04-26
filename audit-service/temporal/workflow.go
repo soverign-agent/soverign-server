@@ -53,7 +53,9 @@ func (w *ComplianceAuditWorkflow) Execute(ctx workflow.Context, params Complianc
 
 	isIncremental := params.AuditType == model.AuditTypeIncremental
 
-	// Workflow steps with progress tracking
+	// Workflow steps with progress tracking.
+	// The order here drives both the progress percentage and the `current_step`
+	// field streamed to the client; steps[i] is the step that runs at iteration i.
 	var steps []string
 	if isIncremental {
 		steps = []string{
@@ -80,139 +82,131 @@ func (w *ComplianceAuditWorkflow) Execute(ctx workflow.Context, params Complianc
 		}
 	}
 
-	currentStep := 0
-	progress := 0
+	// runStep executes one workflow activity and writes step-level progress to the
+	// DB on success. On failure it marks the audit failed (with the step name and
+	// error message) and returns the original error so the workflow halts.
+	runStep := func(stepIdx int, activity any, args ...any) error {
+		stepName := steps[stepIdx]
+		future := workflow.ExecuteActivity(ctx, activity, args...)
+		if err := future.Get(ctx, nil); err != nil {
+			logger.Error("Audit step failed", "step", stepName, "error", err)
+			progressOnFail := (stepIdx * 100) / len(steps)
+			_ = w.markFailed(ctx, params.AuditID, stepName, progressOnFail, err.Error())
+			return err
+		}
+		// Step succeeded — write progress and the step name that just finished.
+		percentage := ((stepIdx + 1) * 100) / len(steps)
+		_ = w.updateStep(ctx, params.AuditID, model.AuditJobStatusRunning, stepName, percentage)
+		return nil
+	}
 
-	// Update audit status to running
-	err := workflow.ExecuteActivity(ctx, a.InitializeAudit, params.AuditID).Get(ctx, nil)
-	if err != nil {
-		logger.Error("Failed to initialize audit", "error", err)
+	currentStep := 0
+
+	// Step: initialize — flips status to running and stamps started_at.
+	if err := runStep(currentStep, a.InitializeAudit, params.AuditID); err != nil {
 		return err
 	}
 	currentStep++
-	progress = (currentStep * 100) / len(steps)
 
-	// For incremental audits, carry forward findings from the previous completed audit
+	// Step: load_previous_findings (incremental only).
 	if isIncremental {
-		err = workflow.ExecuteActivity(ctx, a.LoadPreviousFindings, params.AuditID).Get(ctx, nil)
-		if err != nil {
-			logger.Error("Failed to load previous findings", "error", err)
-			_ = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusFailed, progress, steps[currentStep-1])
+		if err := runStep(currentStep, a.LoadPreviousFindings, params.AuditID); err != nil {
 			return err
 		}
 		currentStep++
-		progress = (currentStep * 100) / len(steps)
 	}
 
-	// Fetch repository from repo-service
-	err = workflow.ExecuteActivity(ctx, a.FetchRepository, params.AuditID).Get(ctx, nil)
-	if err != nil {
-		logger.Error("Failed to fetch repository", "error", err)
-		_ = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusFailed, progress, steps[currentStep-1])
+	// Step: fetch_repository.
+	if err := runStep(currentStep, a.FetchRepository, params.AuditID); err != nil {
 		return err
 	}
 	currentStep++
-	progress = (currentStep * 100) / len(steps)
 
-	// Run static analysis on repository
-	err = workflow.ExecuteActivity(ctx, a.RunStaticAnalysis, params.AuditID).Get(ctx, nil)
-	if err != nil {
-		logger.Error("Failed to run static analysis", "error", err)
-		_ = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusFailed, progress, steps[currentStep-1])
+	// Step: run_static_analysis.
+	if err := runStep(currentStep, a.RunStaticAnalysis, params.AuditID); err != nil {
 		return err
 	}
 	currentStep++
-	progress = (currentStep * 100) / len(steps)
 
-	// Generate findings from analysis results
-	err = workflow.ExecuteActivity(ctx, a.GenerateFindings, params.AuditID).Get(ctx, nil)
-	if err != nil {
-		logger.Error("Failed to generate findings", "error", err)
-		_ = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusFailed, progress, steps[currentStep-1])
+	// Step: generate_findings.
+	if err := runStep(currentStep, a.GenerateFindings, params.AuditID); err != nil {
 		return err
 	}
 	currentStep++
-	progress = (currentStep * 100) / len(steps)
 
-	// Calculate risk score
-	err = workflow.ExecuteActivity(ctx, a.CalculateRiskScore, params.AuditID).Get(ctx, nil)
-	if err != nil {
-		logger.Error("Failed to calculate risk score", "error", err)
-		_ = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusFailed, progress, steps[currentStep-1])
+	// Step: calculate_risk_score.
+	if err := runStep(currentStep, a.CalculateRiskScore, params.AuditID); err != nil {
 		return err
 	}
 	currentStep++
-	progress = (currentStep * 100) / len(steps)
 
-	// Check if approval is required
+	// Step: check_approval_gate — also handles human-in-the-loop pause/resume.
+	approvalStepIdx := currentStep
+	approvalStepName := steps[approvalStepIdx]
+	approvalProgress := ((approvalStepIdx + 1) * 100) / len(steps)
+
 	var requiresApproval bool
-	err = workflow.ExecuteActivity(ctx, a.CheckApprovalGate, params.AuditID).Get(ctx, &requiresApproval)
-	if err != nil {
-		logger.Error("Failed to check approval gate", "error", err)
-		_ = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusFailed, progress, steps[currentStep-1])
+	approvalFuture := workflow.ExecuteActivity(ctx, a.CheckApprovalGate, params.AuditID)
+	if err := approvalFuture.Get(ctx, &requiresApproval); err != nil {
+		logger.Error("Audit step failed", "step", approvalStepName, "error", err)
+		_ = w.markFailed(ctx, params.AuditID, approvalStepName, (approvalStepIdx*100)/len(steps), err.Error())
 		return err
 	}
 
 	if requiresApproval {
 		// Create approval request so the frontend /approvals page can surface it.
-		err = workflow.ExecuteActivity(ctx, a.CreateApprovalRequest, params.AuditID).Get(ctx, nil)
-		if err != nil {
+		if err := workflow.ExecuteActivity(ctx, a.CreateApprovalRequest, params.AuditID).Get(ctx, nil); err != nil {
 			logger.Error("Failed to create approval request", "error", err)
 			// Non-fatal: continue to pause even if DB write fails.
 		}
 
-		// Pause for approval
-		err = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusPaused, progress, steps[currentStep])
-		if err != nil {
+		// Pause for approval at the approval gate step.
+		if err := w.updateStep(ctx, params.AuditID, model.AuditJobStatusPaused, approvalStepName, approvalProgress); err != nil {
 			return err
 		}
 
-		// Wait for approval signal
+		// Wait for approval signal.
 		signalChan := workflow.GetSignalChannel(ctx, "ApproveAuditSignal")
 		var signal ApproveAuditSignal
 		signalChan.Receive(ctx, &signal)
 
 		if !signal.Approved {
-			// Audit rejected - mark as cancelled
-			err = workflow.ExecuteActivity(ctx, a.CancelAudit, params.AuditID).Get(ctx, nil)
-			if err != nil {
-				logger.Error("Failed to cancel audit", "error", err)
+			// Audit rejected — mark as cancelled.
+			if cancelErr := workflow.ExecuteActivity(ctx, a.CancelAudit, params.AuditID).Get(ctx, nil); cancelErr != nil {
+				logger.Error("Failed to cancel audit", "error", cancelErr)
 			}
 			return fmt.Errorf("audit rejected by approval")
 		}
 
-		// Resume after approval
-		err = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusRunning, progress, steps[currentStep])
-		if err != nil {
+		// Resume after approval — back to running on the same step.
+		if err := w.updateStep(ctx, params.AuditID, model.AuditJobStatusRunning, approvalStepName, approvalProgress); err != nil {
 			return err
 		}
+	} else {
+		// Approval not required — mark this step done and move on.
+		_ = w.updateStep(ctx, params.AuditID, model.AuditJobStatusRunning, approvalStepName, approvalProgress)
 	}
 	currentStep++
-	progress = (currentStep * 100) / len(steps)
 
-	// Generate final report
-	err = workflow.ExecuteActivity(ctx, a.GenerateReport, params.AuditID).Get(ctx, nil)
-	if err != nil {
-		logger.Error("Failed to generate report", "error", err)
-		_ = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusFailed, progress, steps[currentStep-1])
+	// Step: generate_report.
+	if err := runStep(currentStep, a.GenerateReport, params.AuditID); err != nil {
 		return err
 	}
 	currentStep++
-	progress = (currentStep * 100) / len(steps)
 
-	// Send completion notification
-	err = workflow.ExecuteActivity(ctx, a.NotifyCompletion, params.AuditID).Get(ctx, nil)
-	if err != nil {
+	// Step: notify_completion. We don't fail the workflow if the notification
+	// activity errors — but we still want the step name and 100% reflected, so
+	// drive the step write directly instead of via runStep.
+	notifyStepName := steps[currentStep]
+	if err := workflow.ExecuteActivity(ctx, a.NotifyCompletion, params.AuditID).Get(ctx, nil); err != nil {
 		logger.Warn("Failed to send completion notification", "error", err)
-		// Don't fail the workflow for notification failure
 	}
-	currentStep++
-	progress = 100
+	_ = w.updateStep(ctx, params.AuditID, model.AuditJobStatusRunning, notifyStepName, 100)
 
-	// Mark as completed
-	err = workflow.ExecuteActivity(ctx, a.CompleteAudit, params.AuditID).Get(ctx, nil)
-	if err != nil {
+	// Mark as completed — flips status to completed and stamps completed_at.
+	if err := workflow.ExecuteActivity(ctx, a.CompleteAudit, params.AuditID).Get(ctx, nil); err != nil {
 		logger.Error("Failed to complete audit", "error", err)
+		_ = w.markFailed(ctx, params.AuditID, notifyStepName, 100, err.Error())
 		return err
 	}
 
@@ -220,11 +214,22 @@ func (w *ComplianceAuditWorkflow) Execute(ctx workflow.Context, params Complianc
 	return nil
 }
 
-func (w *ComplianceAuditWorkflow) updateStatus(ctx workflow.Context, auditID string, status string, progress int, step string) error {
+// updateStep writes status, current step name, and progress percentage in one call.
+// Used on every successful workflow step transition.
+func (w *ComplianceAuditWorkflow) updateStep(ctx workflow.Context, auditID, status, step string, progress int) error {
 	activityCtx := workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
 		StartToCloseTimeout: 30 * time.Second,
 	})
-	return workflow.ExecuteActivity(activityCtx, a.UpdateAuditStatus, auditID, status, progress, step).Get(ctx, nil)
+	return workflow.ExecuteActivity(activityCtx, a.UpdateAuditStep, auditID, status, step, progress).Get(ctx, nil)
+}
+
+// markFailed records the failure step + message so the streaming endpoint can
+// surface a real error to the client. Best-effort: callers ignore the return.
+func (w *ComplianceAuditWorkflow) markFailed(ctx workflow.Context, auditID, step string, progress int, errMsg string) error {
+	activityCtx := workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
+		StartToCloseTimeout: 30 * time.Second,
+	})
+	return workflow.ExecuteActivity(activityCtx, a.MarkAuditFailed, auditID, step, progress, errMsg).Get(ctx, nil)
 }
 
 // a is the activity reference - kept for code completion
