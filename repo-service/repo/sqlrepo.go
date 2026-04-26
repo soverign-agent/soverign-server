@@ -22,6 +22,42 @@ func NewSQLRepository(db *sql.DB) Repository {
 	return &sqlRepository{db: db}
 }
 
+// GetByURL retrieves a repository by URL for the given tenant.
+func (r *sqlRepository) GetByURL(ctx context.Context, tenantID uuid.UUID, url string) (*model.Repository, error) {
+	var repo model.Repository
+	var webhookID sql.NullString
+	var lastScannedAt sql.NullTime
+
+	err := r.db.QueryRowContext(ctx,
+		`SELECT id, tenant_id, name, url, provider, encrypted_credentials, webhook_secret, webhook_id, default_branch, last_scanned_at, created_at, updated_at
+		 FROM repositories WHERE tenant_id = $1 AND url = $2`,
+		tenantID, url,
+	).Scan(
+		&repo.ID,
+		&repo.TenantID,
+		&repo.Name,
+		&repo.URL,
+		&repo.Provider,
+		&repo.EncryptedCredentials,
+		&repo.WebhookSecret,
+		&webhookID,
+		&repo.DefaultBranch,
+		&lastScannedAt,
+		&repo.CreatedAt,
+		&repo.UpdatedAt,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("repository not found")
+		}
+		return nil, fmt.Errorf("query repository by url: %w", err)
+	}
+
+	repo.WebhookID = webhookID
+	repo.LastScannedAt = lastScannedAt
+	return &repo, nil
+}
+
 // GetByID retrieves a repository by ID for the given tenant.
 func (r *sqlRepository) GetByID(ctx context.Context, tenantID, repoID uuid.UUID) (*model.Repository, error) {
 	var repo model.Repository

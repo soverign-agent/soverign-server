@@ -1,2 +1,0 @@
-# This directory holds JWT key pairs (private.pem and public.pem)
-# Keys are gitignored - generate your own locally
