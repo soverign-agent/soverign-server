@@ -22,7 +22,7 @@ type Client struct {
 }
 
 // NewClient creates a new Temporal client and worker.
-func NewClient(cfg sharedconfig.TemporalConfig, repo repo.Repository, logic *logic.AuditLogic, calculator *scoring.Calculator, notificationClient NotificationServiceClient) (*Client, error) {
+func NewClient(cfg sharedconfig.TemporalConfig, repo repo.Repository, logic *logic.AuditLogic, calculator *scoring.Calculator, repoServiceClient RepoServiceClient, notificationClient NotificationServiceClient) (*Client, error) {
 	// Register a tenant context propagator so the tenant ID flows from the
 	// caller's Go context, through the workflow header, into each activity's
 	// Go context. Without this, RLS-protected repository calls inside
@@ -45,7 +45,7 @@ func NewClient(cfg sharedconfig.TemporalConfig, repo repo.Repository, logic *log
 	// Register workflow and activities
 	w.RegisterWorkflow(new(ComplianceAuditWorkflow).Execute)
 
-	activities := NewActivities(repo, logic, calculator, nil, notificationClient)
+	activities := NewActivities(repo, logic, calculator, repoServiceClient, notificationClient)
 	w.RegisterActivity(activities)
 
 	c := &Client{

@@ -10,10 +10,18 @@ type Config struct {
 	Risk         RiskConfig
 	GRPC         GRPCConfig
 	Notification NotificationConfig
+	Repo         RepoConfig
 }
 
 // NotificationConfig holds notification-service gRPC client settings.
 type NotificationConfig struct {
+	Addr        string `json:"addr"`
+	TLSCertFile string `json:"tls_cert_file,optional"`
+	Insecure    bool   `json:"insecure"`
+}
+
+// RepoConfig holds repo-service gRPC client settings.
+type RepoConfig struct {
 	Addr        string `json:"addr"`
 	TLSCertFile string `json:"tls_cert_file,optional"`
 	Insecure    bool   `json:"insecure"`

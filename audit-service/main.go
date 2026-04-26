@@ -69,6 +69,17 @@ func main() {
 	calculator := scoring.NewCalculator(c.Risk)
 	auditLogic := logic.NewAuditLogic(repository, calculator)
 
+	// Create repo-service gRPC client
+	var repoServiceClient temporal.RepoServiceClient
+	if c.Repo.Addr != "" {
+		repoConn, err := client.DialRepo(c.Repo.Addr, c.Repo.Insecure, c.Repo.TLSCertFile)
+		if err != nil {
+			logx.Must(fmt.Errorf("failed to dial repo-service: %w", err))
+		}
+		defer repoConn.Close()
+		repoServiceClient = client.NewRepoClient(repoConn)
+	}
+
 	// Create notification-service gRPC client
 	var notificationClient temporal.NotificationServiceClient
 	if c.Notification.Addr != "" {
@@ -81,7 +92,7 @@ func main() {
 	}
 
 	// Create Temporal client and start worker
-	temporalClient, err := temporal.NewClient(c.Temporal, repository, auditLogic, calculator, notificationClient)
+	temporalClient, err := temporal.NewClient(c.Temporal, repository, auditLogic, calculator, repoServiceClient, notificationClient)
 	if err != nil {
 		logx.Must(fmt.Errorf("failed to create temporal client: %w", err))
 	}

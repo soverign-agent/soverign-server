@@ -24,3 +24,7 @@ Risk:
 Notification:
   Addr: localhost:9087
   Insecure: true # local dev only; production must set tls_cert_file
+
+Repo:
+  Addr: localhost:9083
+  Insecure: true # local dev only; production must set tls_cert_file

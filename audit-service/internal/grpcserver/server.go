@@ -388,8 +388,27 @@ func (s *Server) DecideApproval(ctx context.Context, req *auditv1.DecideApproval
 		}
 	}
 
+	// Fetch the approval request first so we know which audit job / workflow to signal.
+	approvalReq, err := s.logic.GetApprovalRequest(ctx, approvalID)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "get approval request: %v", err)
+	}
+	if approvalReq == nil {
+		return nil, status.Errorf(codes.NotFound, "approval request not found")
+	}
+
 	if err := s.logic.DecideApproval(ctx, approvalID, req.Decision, decidedBy); err != nil {
 		return nil, status.Errorf(codes.Internal, "decide approval: %v", err)
+	}
+
+	// Signal the Temporal workflow so it can resume from the approval gate.
+	// The workflow ID was set to the audit job ID when the workflow started.
+	workflowID := approvalReq.AuditJobID.String()
+	signal := temporal.ApproveAuditSignal{Approved: req.Decision == "approved"}
+	if err := s.temporal.Client().SignalWorkflow(ctx, workflowID, "", "ApproveAuditSignal", signal); err != nil {
+		// Log but don't fail the request — the DB state is already updated.
+		// The workflow may still be polled via query or retried later.
+		return nil, status.Errorf(codes.Internal, "signal workflow: %v", err)
 	}
 
 	statusProto := auditv1.ApprovalStatus_APPROVAL_STATUS_APPROVED

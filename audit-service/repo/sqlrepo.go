@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	"sovereign-ai-compliance/audit-service/model"
 	"sovereign-ai-compliance/shared/tenant"
 )
@@ -405,7 +406,7 @@ func (r *SQLRepository) ListApprovalRequests(ctx context.Context, status string)
 		var decidedAt sql.NullTime
 		var decidedBy sql.NullString
 		err := rows.Scan(
-			&req.ID, &req.TenantID, &req.AuditJobID, &req.RequestedBy, &req.AssignedTo,
+			&req.ID, &req.TenantID, &req.AuditJobID, &req.RequestedBy, pq.Array(&req.AssignedTo),
 			&req.Title, &req.ContextJSON, &req.Status, &req.CreatedAt, &req.UpdatedAt,
 			&decidedAt, &decidedBy,
 		)
@@ -439,7 +440,7 @@ func (r *SQLRepository) GetApprovalRequest(ctx context.Context, id uuid.UUID) (*
 	var decidedAt sql.NullTime
 	var decidedBy sql.NullString
 	err := r.base.DB().QueryRowContext(ctx, query, id).Scan(
-		&req.ID, &req.TenantID, &req.AuditJobID, &req.RequestedBy, &req.AssignedTo,
+		&req.ID, &req.TenantID, &req.AuditJobID, &req.RequestedBy, pq.Array(&req.AssignedTo),
 		&req.Title, &req.ContextJSON, &req.Status, &req.CreatedAt, &req.UpdatedAt,
 		&decidedAt, &decidedBy,
 	)
@@ -476,7 +477,7 @@ func (r *SQLRepository) CreateApprovalRequest(ctx context.Context, req *model.Ap
 
 	err = tx.QueryRowContext(
 		ctx, query,
-		req.ID, req.TenantID, req.AuditJobID, req.RequestedBy, req.AssignedTo,
+		req.ID, req.TenantID, req.AuditJobID, req.RequestedBy, pq.Array(req.AssignedTo),
 		req.Title, req.ContextJSON, req.Status,
 	).Scan(&req.CreatedAt, &req.UpdatedAt)
 
