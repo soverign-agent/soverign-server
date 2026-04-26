@@ -154,6 +154,13 @@ func (w *ComplianceAuditWorkflow) Execute(ctx workflow.Context, params Complianc
 	}
 
 	if requiresApproval {
+		// Create approval request so the frontend /approvals page can surface it.
+		err = workflow.ExecuteActivity(ctx, a.CreateApprovalRequest, params.AuditID).Get(ctx, nil)
+		if err != nil {
+			logger.Error("Failed to create approval request", "error", err)
+			// Non-fatal: continue to pause even if DB write fails.
+		}
+
 		// Pause for approval
 		err = w.updateStatus(ctx, params.AuditID, model.AuditJobStatusPaused, progress, steps[currentStep])
 		if err != nil {

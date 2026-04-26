@@ -340,6 +340,42 @@ func (a *Activities) CheckApprovalGate(ctx context.Context, auditID string) (boo
 	return a.calculator.IsApprovalRequired(audit.RiskScore), nil
 }
 
+// CreateApprovalRequest creates a human-in-the-loop approval record in the
+// database so the frontend /approvals page can display it. This is called
+// from the workflow right before pausing for the approval signal.
+func (a *Activities) CreateApprovalRequest(ctx context.Context, auditID string) error {
+	auditUUID, err := uuid.Parse(auditID)
+	if err != nil {
+		return fmt.Errorf("invalid audit ID: %w", err)
+	}
+
+	audit, err := a.repo.GetAuditByID(ctx, auditUUID)
+	if err != nil {
+		return fmt.Errorf("get audit: %w", err)
+	}
+	if audit == nil {
+		return fmt.Errorf("audit not found: %s", auditID)
+	}
+
+	contextJSON := fmt.Sprintf(`{"audit_name":"%s","risk_score":%d,"risk_severity":"%s"}`, audit.Name, audit.RiskScore, audit.RiskSeverity)
+
+	req := &model.ApprovalRequest{
+		ID:          uuid.New(),
+		TenantID:    audit.TenantID,
+		AuditJobID:  auditUUID,
+		RequestedBy: "audit-service",
+		Title:       fmt.Sprintf("Audit approval required: %s", audit.Name),
+		ContextJSON: contextJSON,
+		AssignedTo:  []string{},
+		Status:      model.ApprovalStatusPending,
+	}
+
+	if err := a.repo.CreateApprovalRequest(ctx, req); err != nil {
+		return fmt.Errorf("create approval request: %w", err)
+	}
+	return nil
+}
+
 // UpdateAuditStatus updates audit status and progress (called from workflow).
 func (a *Activities) UpdateAuditStatus(ctx context.Context, auditID string, status string, progress int, step string) error {
 	auditUUID, err := uuid.Parse(auditID)
