@@ -33,9 +33,23 @@ type GetAuditStatusResult struct {
 type ComplianceAuditWorkflow struct {
 }
 
+// defaultActivityOptions are applied to every activity scheduled by the
+// compliance audit workflow. Temporal requires StartToCloseTimeout (or
+// ScheduleToCloseTimeout) on every activity invocation; without it the
+// workflow task fails with BadScheduleActivityAttributes.
+var defaultActivityOptions = workflow.ActivityOptions{
+	StartToCloseTimeout:    10 * time.Minute,
+	ScheduleToCloseTimeout: 30 * time.Minute,
+	HeartbeatTimeout:       1 * time.Minute,
+}
+
 // Execute runs the compliance audit workflow.
 func (w *ComplianceAuditWorkflow) Execute(ctx workflow.Context, params ComplianceAuditWorkflowParams) error {
 	logger := workflow.GetLogger(ctx)
+
+	// Apply default activity options to the entire workflow context so every
+	// downstream ExecuteActivity call inherits valid timeouts.
+	ctx = workflow.WithActivityOptions(ctx, defaultActivityOptions)
 
 	isIncremental := params.AuditType == model.AuditTypeIncremental
 

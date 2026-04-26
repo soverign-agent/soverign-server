@@ -50,11 +50,16 @@ func main() {
 
 	addr := fmt.Sprintf("%s:%d", c.Host, c.Port)
 	server := &http.Server{
-		Addr:         addr,
-		Handler:      finalHandler,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		Addr:    addr,
+		Handler: finalHandler,
+		// ReadHeaderTimeout protects against slowloris on request headers.
+		// ReadTimeout bounds the full request body read.
+		// WriteTimeout is intentionally unset (0 = no deadline) because the
+		// gateway proxies long-lived server-streaming gRPC endpoints (e.g.
+		// audit status SSE) where responses can stay open for minutes.
+		ReadHeaderTimeout: 10 * time.Second,
+		ReadTimeout:       30 * time.Second,
+		IdleTimeout:       120 * time.Second,
 	}
 
 	fmt.Printf("Starting API gateway at %s (grpc-gateway + REST fallback)...\n", addr)

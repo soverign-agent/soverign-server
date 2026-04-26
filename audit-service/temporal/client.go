@@ -12,6 +12,7 @@ import (
 
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
+	"go.temporal.io/sdk/workflow"
 )
 
 // Client wraps a Temporal client and worker for audit workflows.
@@ -22,10 +23,17 @@ type Client struct {
 
 // NewClient creates a new Temporal client and worker.
 func NewClient(cfg sharedconfig.TemporalConfig, repo repo.Repository, logic *logic.AuditLogic, calculator *scoring.Calculator, notificationClient NotificationServiceClient) (*Client, error) {
+	// Register a tenant context propagator so the tenant ID flows from the
+	// caller's Go context, through the workflow header, into each activity's
+	// Go context. Without this, RLS-protected repository calls inside
+	// activities fail with "tenant context required".
+	propagators := []workflow.ContextPropagator{NewTenantPropagator()}
+
 	// Create Temporal client
 	tc, err := client.NewClient(client.Options{
-		HostPort:  cfg.HostPort,
-		Namespace: cfg.Namespace,
+		HostPort:           cfg.HostPort,
+		Namespace:          cfg.Namespace,
+		ContextPropagators: propagators,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("create temporal client: %w", err)
