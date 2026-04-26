@@ -125,13 +125,22 @@ func (s *Server) TriggerAudit(ctx context.Context, req *auditv1.TriggerAuditRequ
 	}
 
 	// Start Temporal workflow in background; do not fail request if workflow start fails.
+	// The request ctx will be cancelled once the gRPC response is sent, but the workflow
+	// must outlive the request — so we use a fresh background ctx and rebind the tenant
+	// onto it. The Temporal ContextPropagator picks the tenant up from this ctx and
+	// carries it into every activity invocation, so RLS-protected queries succeed.
+	tenantID, _ := tenant.FromContext(ctx)
 	go func() {
-		workflowRun, err := s.temporal.StartAuditWorkflow(context.Background(), audit.ID.String(), audit.AuditType)
+		bgCtx := context.Background()
+		if tenantID != "" {
+			bgCtx = tenant.WithContext(bgCtx, tenantID)
+		}
+		workflowRun, err := s.temporal.StartAuditWorkflow(bgCtx, audit.ID.String(), audit.AuditType)
 		if err != nil {
 			return
 		}
 		wfID := workflowRun.GetID()
-		_ = s.logic.UpdateWorkflowID(context.Background(), audit.ID, wfID)
+		_ = s.logic.UpdateWorkflowID(bgCtx, audit.ID, wfID)
 	}()
 
 	return &auditv1.TriggerAuditResponse{
@@ -291,6 +300,19 @@ func (s *Server) GetAuditStatus(req *auditv1.GetAuditStatusRequest, stream audit
 
 	lastProgress := audit.ProgressPercentage
 	lastStep := audit.Status
+
+	// Always send an initial event so the client gets headers and the current
+	// state immediately, even if the audit hasn't moved yet (e.g. stuck in
+	// pending). Without this, the response writer buffers indefinitely until
+	// the first state change, which the client perceives as a hang.
+	if err := stream.Send(&auditv1.GetAuditStatusResponse{
+		Percentage: int32(audit.ProgressPercentage),
+		Step:       audit.Status,
+		Message:    fmt.Sprintf("Audit is %s", audit.Status),
+		Timestamp:  time.Now().Unix(),
+	}); err != nil {
+		return err
+	}
 
 	for {
 		select {
