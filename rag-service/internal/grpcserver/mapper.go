@@ -13,7 +13,7 @@ import (
 
 // toProtoDocument converts model.Document to proto Document.
 func toProtoDocument(d model.Document) *ragv1.Document {
-	return &ragv1.Document{
+	doc := &ragv1.Document{
 		Id:                 d.ID.String(),
 		TenantId:           d.TenantID.String(),
 		Name:               d.Name,
@@ -25,6 +25,10 @@ func toProtoDocument(d model.Document) *ragv1.Document {
 		CreatedAt:          timestamppb.New(d.CreatedAt),
 		UpdatedAt:          timestamppb.New(d.UpdatedAt),
 	}
+	if d.AISystemID != nil {
+		doc.AiSystemId = d.AISystemID.String()
+	}
+	return doc
 }
 
 // toProtoSearchResult converts logic.SearchResult to proto SearchResult.

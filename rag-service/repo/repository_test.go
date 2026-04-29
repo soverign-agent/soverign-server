@@ -23,7 +23,7 @@ func TestListDocuments(t *testing.T) {
 	tenantID := uuid.New()
 	ctx := tenant.WithContext(context.Background(), tenantID.String())
 
-	documents, total, err := repo.ListDocuments(ctx, 1, 10)
+	documents, total, err := repo.ListDocuments(ctx, 1, 10, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, documents)
 	assert.Equal(t, 0, total) // Empty initially

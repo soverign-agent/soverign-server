@@ -50,6 +50,7 @@ type UploadDocumentRequest struct {
 	Name        string                `form:"name"`
 	Description string                `form:"description"`
 	File        *multipart.FileHeader `form:"file"`
+	AISystemID  *uuid.UUID            `form:"ai_system_id"`
 }
 
 // UploadDocumentResponse is the response for uploading a document.
@@ -78,6 +79,7 @@ func (l *DocumentsLogic) UploadDocument(ctx context.Context, req UploadDocumentR
 	doc := &model.Document{
 		ID:          uuid.New(),
 		TenantID:    tenantID,
+		AISystemID:  req.AISystemID,
 		Name:        req.Name,
 		Description: req.Description,
 		FileType:    fileExt,
@@ -216,8 +218,9 @@ func (l *DocumentsLogic) processDocumentAsync(ctx context.Context, documentID uu
 
 // ListDocumentsRequest lists documents with pagination.
 type ListDocumentsRequest struct {
-	Page     int `json:"page"`
-	PageSize int `json:"page_size"`
+	Page        int        `json:"page"`
+	PageSize    int        `json:"page_size"`
+	AISystemID  *uuid.UUID `json:"ai_system_id,omitempty"`
 }
 
 // ListDocumentsResponse lists documents with pagination.
@@ -237,7 +240,7 @@ func (l *DocumentsLogic) ListDocuments(ctx context.Context, req ListDocumentsReq
 		req.PageSize = 10
 	}
 
-	documents, total, err := l.repo.ListDocuments(ctx, req.Page, req.PageSize)
+	documents, total, err := l.repo.ListDocuments(ctx, req.Page, req.PageSize, req.AISystemID)
 	if err != nil {
 		return nil, err
 	}

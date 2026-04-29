@@ -11,6 +11,7 @@ import (
 type Document struct {
 	ID                 uuid.UUID  `json:"id"`
 	TenantID           uuid.UUID  `json:"tenant_id"`
+	AISystemID         *uuid.UUID `json:"ai_system_id,omitempty"`
 	Name               string     `json:"name"`
 	Description        string     `json:"description"`
 	FileType           string     `json:"file_type"` // pdf, docx, md, txt

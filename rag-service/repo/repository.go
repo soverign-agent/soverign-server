@@ -40,13 +40,13 @@ func (r *SQLRepository) CreateDocument(ctx context.Context, doc *model.Document)
 	defer tx.Rollback()
 
 	query := `
-		INSERT INTO documents (id, tenant_id, name, description, file_type, file_size, status)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO documents (id, tenant_id, ai_system_id, name, description, file_type, file_size, status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 		RETURNING created_at, updated_at`
 
 	err = tx.QueryRowContext(
 		ctx, query,
-		doc.ID, doc.TenantID, doc.Name, doc.Description,
+		doc.ID, doc.TenantID, doc.AISystemID, doc.Name, doc.Description,
 		doc.FileType, doc.FileSize, doc.Status,
 	).Scan(&doc.CreatedAt, &doc.UpdatedAt)
 
@@ -65,14 +65,14 @@ func (r *SQLRepository) GetDocumentByID(ctx context.Context, id uuid.UUID) (*mod
 	}
 
 	query := `
-		SELECT id, tenant_id, name, description, file_type, file_size,
+		SELECT id, tenant_id, ai_system_id, name, description, file_type, file_size,
 		       status, progress_percentage, error_msg, created_at, updated_at, processed_at
 		FROM documents
 		WHERE id = $1`
 
 	var doc model.Document
 	err := r.base.DB().QueryRowContext(ctx, query, id).Scan(
-		&doc.ID, &doc.TenantID, &doc.Name, &doc.Description,
+		&doc.ID, &doc.TenantID, &doc.AISystemID, &doc.Name, &doc.Description,
 		&doc.FileType, &doc.FileSize, &doc.Status, &doc.ProgressPercentage,
 		&doc.ErrorMsg, &doc.CreatedAt, &doc.UpdatedAt, &doc.ProcessedAt,
 	)
@@ -92,8 +92,8 @@ func (r *SQLRepository) GetDocumentByID(ctx context.Context, id uuid.UUID) (*mod
 	return &doc, nil
 }
 
-// ListDocuments lists documents for the current tenant with pagination.
-func (r *SQLRepository) ListDocuments(ctx context.Context, page, pageSize int) ([]model.Document, int, error) {
+// ListDocuments lists documents for the current tenant with pagination and optional ai_system_id filter.
+func (r *SQLRepository) ListDocuments(ctx context.Context, page, pageSize int, aiSystemID *uuid.UUID) ([]model.Document, int, error) {
 	tx, err := r.base.BeginTenantTx(ctx, nil)
 	if err != nil {
 		return nil, 0, fmt.Errorf("begin tenant tx: %w", err)
@@ -102,22 +102,38 @@ func (r *SQLRepository) ListDocuments(ctx context.Context, page, pageSize int) (
 
 	offset := (page - 1) * pageSize
 
+	// Build query with optional ai_system_id filter
+	whereClause := ""
+	var args []interface{}
+	var countArgs []interface{}
+	if aiSystemID != nil {
+		whereClause = "WHERE ai_system_id = $1"
+		args = append(args, *aiSystemID)
+		countArgs = append(countArgs, *aiSystemID)
+	}
+
 	// Get total count
 	var total int
-	err = tx.QueryRowContext(ctx, `SELECT COUNT(*) FROM documents`).Scan(&total)
+	countQuery := "SELECT COUNT(*) FROM documents " + whereClause
+	if len(countArgs) > 0 {
+		err = tx.QueryRowContext(ctx, countQuery, countArgs...).Scan(&total)
+	} else {
+		err = tx.QueryRowContext(ctx, countQuery).Scan(&total)
+	}
 	if err != nil {
 		return nil, 0, fmt.Errorf("count documents: %w", err)
 	}
 
 	// Get paginated documents
 	query := `
-		SELECT id, tenant_id, name, description, file_type, file_size,
+		SELECT id, tenant_id, ai_system_id, name, description, file_type, file_size,
 		       status, progress_percentage, error_msg, created_at, updated_at, processed_at
-		FROM documents
+		FROM documents ` + whereClause + `
 		ORDER BY created_at DESC
-		LIMIT $1 OFFSET $2`
+		LIMIT $` + fmt.Sprintf("%d", len(args)+1) + ` OFFSET $` + fmt.Sprintf("%d", len(args)+2)
 
-	rows, err := tx.QueryContext(ctx, query, pageSize, offset)
+	args = append(args, pageSize, offset)
+	rows, err := tx.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, 0, fmt.Errorf("query documents: %w", err)
 	}
@@ -127,7 +143,7 @@ func (r *SQLRepository) ListDocuments(ctx context.Context, page, pageSize int) (
 	for rows.Next() {
 		var doc model.Document
 		err := rows.Scan(
-			&doc.ID, &doc.TenantID, &doc.Name, &doc.Description,
+			&doc.ID, &doc.TenantID, &doc.AISystemID, &doc.Name, &doc.Description,
 			&doc.FileType, &doc.FileSize, &doc.Status, &doc.ProgressPercentage,
 			&doc.ErrorMsg, &doc.CreatedAt, &doc.UpdatedAt, &doc.ProcessedAt,
 		)

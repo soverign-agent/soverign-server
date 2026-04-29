@@ -68,6 +68,12 @@ func (s *Server) UploadDocument(ctx context.Context, req *ragv1.UploadDocumentRe
 			Size:     int64(len(req.FileContent)),
 		},
 	}
+	if req.AiSystemId != "" {
+		aiSystemID, err := uuid.Parse(req.AiSystemId)
+		if err == nil {
+			uploadReq.AISystemID = &aiSystemID
+		}
+	}
 
 	resp, err := s.documentsLogic.UploadDocument(ctx, uploadReq, req.FileContent)
 	if err != nil {
@@ -87,6 +93,12 @@ func (s *Server) ListDocuments(ctx context.Context, req *ragv1.ListDocumentsRequ
 	listReq := logic.ListDocumentsRequest{
 		Page:     int(req.Page),
 		PageSize: int(req.PageSize),
+	}
+	if req.AiSystemId != "" {
+		aiSystemID, err := uuid.Parse(req.AiSystemId)
+		if err == nil {
+			listReq.AISystemID = &aiSystemID
+		}
 	}
 
 	resp, err := s.documentsLogic.ListDocuments(ctx, listReq)
