@@ -94,9 +94,11 @@ func (l *DocumentsLogic) UploadDocument(ctx context.Context, req UploadDocumentR
 		zap.String("tenant_id", tenantIDStr),
 		zap.Int64("file_size", doc.FileSize))
 
-	// Process document asynchronously in a goroutine
-	// TODO: In future, this could be a Temporal workflow for durable async processing with retries
-	go l.processDocumentAsync(ctx, doc.ID, fileContent, fileExt)
+	// Process document asynchronously in a goroutine.
+	// Use a background context because the request context will be cancelled
+	// once the HTTP response is sent.
+	bgCtx := tenant.WithContext(context.Background(), tenantIDStr)
+	go l.processDocumentAsync(bgCtx, doc.ID, fileContent, fileExt)
 
 	return &UploadDocumentResponse{
 		DocumentID: doc.ID,
@@ -129,14 +131,30 @@ func (l *DocumentsLogic) processDocumentAsync(ctx context.Context, documentID uu
 		return
 	}
 
+	// Report progress after text extraction (first 10%)
+	if err := l.repo.UpdateDocumentProgress(ctx, documentID, 10); err != nil {
+		l.logger.Warn("failed to update document progress after extraction",
+			zap.String("document_id", documentID.String()),
+			zap.Error(err))
+	}
+
 	// Generate embeddings for each chunk
 	tenantIDStr, _ := tenant.FromContext(ctx)
 	tenantID, _ := uuid.Parse(tenantIDStr)
 
 	totalChunks := len(chunks)
+	if totalChunks == 0 {
+		_ = l.repo.UpdateDocumentProgress(ctx, documentID, 100)
+		errMsg := ""
+		_ = l.repo.UpdateDocumentStatus(ctx, documentID, model.DocumentStatusCompleted, &errMsg)
+		l.logger.Info("document processing completed (no chunks)",
+			zap.String("document_id", documentID.String()))
+		return
+	}
+
 	for i, chunk := range chunks {
 		// Report progress after text extraction (first 10%) and per-chunk embedding (remaining 90%)
-		progress := 10 + int(float64(i)/float64(totalChunks)*90)
+		progress := 10 + int(float64(i+1)/float64(totalChunks)*90)
 		if err := l.repo.UpdateDocumentProgress(ctx, documentID, progress); err != nil {
 			l.logger.Warn("failed to update document progress",
 				zap.String("document_id", documentID.String()),
@@ -188,6 +206,7 @@ func (l *DocumentsLogic) processDocumentAsync(ctx context.Context, documentID uu
 	}
 
 	// Mark as completed
+	_ = l.repo.UpdateDocumentProgress(ctx, documentID, 100)
 	errMsg := ""
 	_ = l.repo.UpdateDocumentStatus(ctx, documentID, model.DocumentStatusCompleted, &errMsg)
 	l.logger.Info("document processing completed",
@@ -275,8 +294,10 @@ func (l *DocumentsLogic) ReprocessDocument(ctx context.Context, req ReprocessDoc
 		return err
 	}
 
-	// Process async
-	go l.processDocumentAsync(ctx, req.DocumentID, req.FileContent, doc.FileType)
+	// Process async with a background context because the request context
+	// will be cancelled once the HTTP response is sent.
+	bgCtx := tenant.WithContext(context.Background(), tenant.MustFromContext(ctx))
+	go l.processDocumentAsync(bgCtx, req.DocumentID, req.FileContent, doc.FileType)
 
 	return nil
 }
