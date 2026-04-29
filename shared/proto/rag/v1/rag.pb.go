@@ -36,6 +36,7 @@ type Document struct {
 	ProgressPercentage int32                  `protobuf:"varint,8,opt,name=progress_percentage,json=progressPercentage,proto3" json:"progress_percentage,omitempty"`
 	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	AiSystemId         string                 `protobuf:"bytes,11,opt,name=ai_system_id,json=aiSystemId,proto3" json:"ai_system_id,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -140,6 +141,13 @@ func (x *Document) GetUpdatedAt() *timestamppb.Timestamp {
 	return nil
 }
 
+func (x *Document) GetAiSystemId() string {
+	if x != nil {
+		return x.AiSystemId
+	}
+	return ""
+}
+
 // UploadDocumentRequest uploads a new document.
 type UploadDocumentRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -147,6 +155,7 @@ type UploadDocumentRequest struct {
 	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
 	FileContent   []byte                 `protobuf:"bytes,3,opt,name=file_content,json=fileContent,proto3" json:"file_content,omitempty"`
 	FileType      string                 `protobuf:"bytes,4,opt,name=file_type,json=fileType,proto3" json:"file_type,omitempty"`
+	AiSystemId    string                 `protobuf:"bytes,5,opt,name=ai_system_id,json=aiSystemId,proto3" json:"ai_system_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -209,6 +218,13 @@ func (x *UploadDocumentRequest) GetFileType() string {
 	return ""
 }
 
+func (x *UploadDocumentRequest) GetAiSystemId() string {
+	if x != nil {
+		return x.AiSystemId
+	}
+	return ""
+}
+
 // UploadDocumentResponse confirms upload.
 type UploadDocumentResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -267,6 +283,7 @@ type ListDocumentsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
 	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	AiSystemId    string                 `protobuf:"bytes,3,opt,name=ai_system_id,json=aiSystemId,proto3" json:"ai_system_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -313,6 +330,13 @@ func (x *ListDocumentsRequest) GetPageSize() int32 {
 		return x.PageSize
 	}
 	return 0
+}
+
+func (x *ListDocumentsRequest) GetAiSystemId() string {
+	if x != nil {
+		return x.AiSystemId
+	}
+	return ""
 }
 
 // ListDocumentsResponse returns paginated documents.
@@ -873,7 +897,7 @@ var File_shared_proto_rag_v1_rag_proto protoreflect.FileDescriptor
 
 const file_shared_proto_rag_v1_rag_proto_rawDesc = "" +
 	"\n" +
-	"\x1dshared/proto/rag/v1/rag.proto\x12\x06rag.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe6\x02\n" +
+	"\x1dshared/proto/rag/v1/rag.proto\x12\x06rag.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x88\x03\n" +
 	"\bDocument\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x12\n" +
@@ -887,19 +911,25 @@ const file_shared_proto_rag_v1_rag_proto_rawDesc = "" +
 	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
 	"updated_at\x18\n" +
-	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x8d\x01\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12 \n" +
+	"\fai_system_id\x18\v \x01(\tR\n" +
+	"aiSystemId\"\xaf\x01\n" +
 	"\x15UploadDocumentRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12!\n" +
 	"\ffile_content\x18\x03 \x01(\fR\vfileContent\x12\x1b\n" +
-	"\tfile_type\x18\x04 \x01(\tR\bfileType\"Q\n" +
+	"\tfile_type\x18\x04 \x01(\tR\bfileType\x12 \n" +
+	"\fai_system_id\x18\x05 \x01(\tR\n" +
+	"aiSystemId\"Q\n" +
 	"\x16UploadDocumentResponse\x12\x1f\n" +
 	"\vdocument_id\x18\x01 \x01(\tR\n" +
 	"documentId\x12\x16\n" +
-	"\x06status\x18\x02 \x01(\tR\x06status\"G\n" +
+	"\x06status\x18\x02 \x01(\tR\x06status\"i\n" +
 	"\x14ListDocumentsRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"\x8e\x01\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\x12 \n" +
+	"\fai_system_id\x18\x03 \x01(\tR\n" +
+	"aiSystemId\"\x8e\x01\n" +
 	"\x15ListDocumentsResponse\x12.\n" +
 	"\tdocuments\x18\x01 \x03(\v2\x10.rag.v1.DocumentR\tdocuments\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +

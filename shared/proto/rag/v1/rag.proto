@@ -19,6 +19,7 @@ message Document {
   int32  progress_percentage = 8;
   google.protobuf.Timestamp created_at = 9;
   google.protobuf.Timestamp updated_at = 10;
+  string ai_system_id        = 11;
 }
 
 // UploadDocumentRequest uploads a new document.
@@ -27,6 +28,7 @@ message UploadDocumentRequest {
   string description = 2;
   bytes  file_content = 3;
   string file_type   = 4;
+  string ai_system_id = 5;
 }
 
 // UploadDocumentResponse confirms upload.
@@ -39,6 +41,7 @@ message UploadDocumentResponse {
 message ListDocumentsRequest {
   int32 page      = 1;
   int32 page_size = 2;
+  string ai_system_id = 3;
 }
 
 // ListDocumentsResponse returns paginated documents.
