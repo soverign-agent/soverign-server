@@ -133,7 +133,16 @@ func (l *DocumentsLogic) processDocumentAsync(ctx context.Context, documentID uu
 	tenantIDStr, _ := tenant.FromContext(ctx)
 	tenantID, _ := uuid.Parse(tenantIDStr)
 
-	for _, chunk := range chunks {
+	totalChunks := len(chunks)
+	for i, chunk := range chunks {
+		// Report progress after text extraction (first 10%) and per-chunk embedding (remaining 90%)
+		progress := 10 + int(float64(i)/float64(totalChunks)*90)
+		if err := l.repo.UpdateDocumentProgress(ctx, documentID, progress); err != nil {
+			l.logger.Warn("failed to update document progress",
+				zap.String("document_id", documentID.String()),
+				zap.Error(err))
+		}
+
 		// Check for duplicate
 		exists, err := l.repo.ExistsChecksum(ctx, chunk.Checksum)
 		if err != nil {

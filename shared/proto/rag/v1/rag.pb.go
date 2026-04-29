@@ -25,18 +25,19 @@ const (
 
 // Document represents an uploaded document.
 type Document struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	TenantId      string                 `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
-	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
-	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
-	FileType      string                 `protobuf:"bytes,5,opt,name=file_type,json=fileType,proto3" json:"file_type,omitempty"`
-	FileSize      int64                  `protobuf:"varint,6,opt,name=file_size,json=fileSize,proto3" json:"file_size,omitempty"`
-	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TenantId           string                 `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	Name               string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Description        string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	FileType           string                 `protobuf:"bytes,5,opt,name=file_type,json=fileType,proto3" json:"file_type,omitempty"`
+	FileSize           int64                  `protobuf:"varint,6,opt,name=file_size,json=fileSize,proto3" json:"file_size,omitempty"`
+	Status             string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
+	ProgressPercentage int32                  `protobuf:"varint,8,opt,name=progress_percentage,json=progressPercentage,proto3" json:"progress_percentage,omitempty"`
+	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt          *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *Document) Reset() {
@@ -116,6 +117,13 @@ func (x *Document) GetStatus() string {
 		return x.Status
 	}
 	return ""
+}
+
+func (x *Document) GetProgressPercentage() int32 {
+	if x != nil {
+		return x.ProgressPercentage
+	}
+	return 0
 }
 
 func (x *Document) GetCreatedAt() *timestamppb.Timestamp {
@@ -865,7 +873,7 @@ var File_shared_proto_rag_v1_rag_proto protoreflect.FileDescriptor
 
 const file_shared_proto_rag_v1_rag_proto_rawDesc = "" +
 	"\n" +
-	"\x1dshared/proto/rag/v1/rag.proto\x12\x06rag.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb5\x02\n" +
+	"\x1dshared/proto/rag/v1/rag.proto\x12\x06rag.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\xe6\x02\n" +
 	"\bDocument\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x12\n" +
@@ -873,11 +881,13 @@ const file_shared_proto_rag_v1_rag_proto_rawDesc = "" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x1b\n" +
 	"\tfile_type\x18\x05 \x01(\tR\bfileType\x12\x1b\n" +
 	"\tfile_size\x18\x06 \x01(\x03R\bfileSize\x12\x16\n" +
-	"\x06status\x18\a \x01(\tR\x06status\x129\n" +
+	"\x06status\x18\a \x01(\tR\x06status\x12/\n" +
+	"\x13progress_percentage\x18\b \x01(\x05R\x12progressPercentage\x129\n" +
 	"\n" +
-	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x8d\x01\n" +
+	"updated_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\"\x8d\x01\n" +
 	"\x15UploadDocumentRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x02 \x01(\tR\vdescription\x12!\n" +

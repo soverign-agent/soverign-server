@@ -66,15 +66,15 @@ func (r *SQLRepository) GetDocumentByID(ctx context.Context, id uuid.UUID) (*mod
 
 	query := `
 		SELECT id, tenant_id, name, description, file_type, file_size,
-		       status, error_msg, created_at, updated_at, processed_at
+		       status, progress_percentage, error_msg, created_at, updated_at, processed_at
 		FROM documents
 		WHERE id = $1`
 
 	var doc model.Document
 	err := r.base.DB().QueryRowContext(ctx, query, id).Scan(
 		&doc.ID, &doc.TenantID, &doc.Name, &doc.Description,
-		&doc.FileType, &doc.FileSize, &doc.Status, &doc.ErrorMsg,
-		&doc.CreatedAt, &doc.UpdatedAt, &doc.ProcessedAt,
+		&doc.FileType, &doc.FileSize, &doc.Status, &doc.ProgressPercentage,
+		&doc.ErrorMsg, &doc.CreatedAt, &doc.UpdatedAt, &doc.ProcessedAt,
 	)
 
 	if err == sql.ErrNoRows {
@@ -112,7 +112,7 @@ func (r *SQLRepository) ListDocuments(ctx context.Context, page, pageSize int) (
 	// Get paginated documents
 	query := `
 		SELECT id, tenant_id, name, description, file_type, file_size,
-		       status, error_msg, created_at, updated_at, processed_at
+		       status, progress_percentage, error_msg, created_at, updated_at, processed_at
 		FROM documents
 		ORDER BY created_at DESC
 		LIMIT $1 OFFSET $2`
@@ -128,8 +128,8 @@ func (r *SQLRepository) ListDocuments(ctx context.Context, page, pageSize int) (
 		var doc model.Document
 		err := rows.Scan(
 			&doc.ID, &doc.TenantID, &doc.Name, &doc.Description,
-			&doc.FileType, &doc.FileSize, &doc.Status, &doc.ErrorMsg,
-			&doc.CreatedAt, &doc.UpdatedAt, &doc.ProcessedAt,
+			&doc.FileType, &doc.FileSize, &doc.Status, &doc.ProgressPercentage,
+			&doc.ErrorMsg, &doc.CreatedAt, &doc.UpdatedAt, &doc.ProcessedAt,
 		)
 		if err != nil {
 			return nil, 0, fmt.Errorf("scan document: %w", err)
@@ -184,6 +184,25 @@ func (r *SQLRepository) UpdateDocumentStatus(ctx context.Context, id uuid.UUID, 
 
 	if err != nil {
 		return fmt.Errorf("update document status: %w", err)
+	}
+
+	return tx.Commit()
+}
+
+// UpdateDocumentProgress updates the processing progress percentage.
+func (r *SQLRepository) UpdateDocumentProgress(ctx context.Context, id uuid.UUID, percentage int) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	_, err = tx.ExecContext(ctx,
+		`UPDATE documents SET progress_percentage = $1, updated_at = NOW() WHERE id = $2`,
+		percentage, id,
+	)
+	if err != nil {
+		return fmt.Errorf("update document progress: %w", err)
 	}
 
 	return tx.Commit()
