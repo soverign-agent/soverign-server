@@ -14,15 +14,16 @@ import (
 // toProtoDocument converts model.Document to proto Document.
 func toProtoDocument(d model.Document) *ragv1.Document {
 	return &ragv1.Document{
-		Id:          d.ID.String(),
-		TenantId:    d.TenantID.String(),
-		Name:        d.Name,
-		Description: d.Description,
-		FileType:    d.FileType,
-		FileSize:    d.FileSize,
-		Status:      d.Status,
-		CreatedAt:   timestamppb.New(d.CreatedAt),
-		UpdatedAt:   timestamppb.New(d.UpdatedAt),
+		Id:                 d.ID.String(),
+		TenantId:           d.TenantID.String(),
+		Name:               d.Name,
+		Description:        d.Description,
+		FileType:           d.FileType,
+		FileSize:           d.FileSize,
+		Status:             d.Status,
+		ProgressPercentage: int32(d.ProgressPercentage),
+		CreatedAt:          timestamppb.New(d.CreatedAt),
+		UpdatedAt:          timestamppb.New(d.UpdatedAt),
 	}
 }
 
