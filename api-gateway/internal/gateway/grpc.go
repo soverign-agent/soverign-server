@@ -61,6 +61,13 @@ func New(cfg config.Config) (*Mux, error) {
 					md.Set("x-user-id", userID)
 				}
 			}
+			// Forward webhook signature headers so repo-service can verify callbacks.
+			if v := r.Header.Get("x-hub-signature-256"); v != "" {
+				md.Set("x-hub-signature-256", v)
+			}
+			if v := r.Header.Get("x-gitlab-token"); v != "" {
+				md.Set("x-gitlab-token", v)
+			}
 			if len(md) > 0 {
 				return md
 			}
