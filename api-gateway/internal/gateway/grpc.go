@@ -28,13 +28,19 @@ import (
 
 // Mux holds the grpc-gateway runtime.ServeMux and its backing connections.
 type Mux struct {
-	handler *runtime.ServeMux
-	conns   []*grpc.ClientConn
+	handler    *runtime.ServeMux
+	conns      []*grpc.ClientConn
+	repoClient repov1.RepoServiceClient
 }
 
 // Handler returns the underlying http.Handler.
 func (m *Mux) Handler() http.Handler {
 	return m.handler
+}
+
+// RepoClient returns the repo-service gRPC client.
+func (m *Mux) RepoClient() repov1.RepoServiceClient {
+	return m.repoClient
 }
 
 // Close closes all gRPC connections.
@@ -77,6 +83,7 @@ func New(cfg config.Config) (*Mux, error) {
 	)
 
 	var conns []*grpc.ClientConn
+	var repoClient repov1.RepoServiceClient
 	ctx := context.Background()
 
 	// Helper to dial a backend
@@ -132,6 +139,7 @@ func New(cfg config.Config) (*Mux, error) {
 			return nil, err
 		}
 		conns = append(conns, conn)
+		repoClient = repov1.NewRepoServiceClient(conn)
 		if err := repov1.RegisterRepoServiceHandler(ctx, mux, conn); err != nil {
 			return nil, fmt.Errorf("register repo handler: %w", err)
 		}
@@ -185,7 +193,7 @@ func New(cfg config.Config) (*Mux, error) {
 		}
 	}
 
-	return &Mux{handler: mux, conns: conns}, nil
+	return &Mux{handler: mux, conns: conns, repoClient: repoClient}, nil
 }
 
 // ShouldHandle returns true if the request path should be handled by grpc-gateway.
