@@ -27,7 +27,12 @@ func JWTAuth(publicKeyPath string, publicEndpoints []string) func(http.Handler) 
 	publicKey := mustLoadPublicKey(publicKeyPath)
 
 	publicPathSet := make(map[string]struct{}, len(publicEndpoints))
+	publicPrefixes := make([]string, 0, len(publicEndpoints))
 	for _, p := range publicEndpoints {
+		if strings.HasSuffix(p, "/") {
+			publicPrefixes = append(publicPrefixes, p)
+			continue
+		}
 		publicPathSet[p] = struct{}{}
 	}
 
@@ -36,6 +41,12 @@ func JWTAuth(publicKeyPath string, publicEndpoints []string) func(http.Handler) 
 			if _, ok := publicPathSet[r.URL.Path]; ok {
 				next.ServeHTTP(w, r)
 				return
+			}
+			for _, prefix := range publicPrefixes {
+				if strings.HasPrefix(r.URL.Path, prefix) {
+					next.ServeHTTP(w, r)
+					return
+				}
 			}
 
 			authHeader := r.Header.Get("Authorization")

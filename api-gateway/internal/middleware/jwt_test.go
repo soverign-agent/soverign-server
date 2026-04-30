@@ -37,6 +37,28 @@ func TestJWTAuth_PublicEndpoint(t *testing.T) {
 	}
 }
 
+func TestJWTAuth_PublicEndpointPrefix(t *testing.T) {
+	keyPath := writeTestPublicKey(t)
+	mw := JWTAuth(keyPath, []string{"/api/v1/repository-webhooks/"})
+
+	called := false
+	handler := mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		called = true
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/repository-webhooks/1234", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if !called {
+		t.Error("expected handler to be called for public endpoint prefix")
+	}
+	if rec.Code != http.StatusOK {
+		t.Errorf("expected 200, got %d", rec.Code)
+	}
+}
+
 func TestJWTAuth_MissingToken(t *testing.T) {
 	keyPath := writeTestPublicKey(t)
 	mw := JWTAuth(keyPath, []string{})

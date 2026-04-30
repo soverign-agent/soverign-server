@@ -14,3 +14,4 @@ Database:
 
 EncryptionKey: "0000000000000000000000000000000000000000000000000000000000000000"
 TempDir: /tmp/repo-scans
+WebhookBaseURL: https://bb77-203-27-106-146.ngrok-free.app
