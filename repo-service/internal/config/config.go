@@ -8,7 +8,9 @@ type Config struct {
 	EncryptionKey string
 	// TempDir is the directory where we clone repositories for analysis
 	TempDir string `json:",default=/tmp/repo-scans"`
-	GRPC    GRPCConfig
+	// WebhookBaseURL is the externally reachable API gateway base URL used in provider webhook callbacks.
+	WebhookBaseURL string
+	GRPC           GRPCConfig
 }
 
 // GRPCConfig holds gRPC server configuration.
