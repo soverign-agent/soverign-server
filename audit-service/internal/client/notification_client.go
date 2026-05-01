@@ -47,6 +47,46 @@ func DialNotification(addr string, insecureConn bool, tlsCertFile string) (*grpc
 	return grpc.NewClient(addr, opts...)
 }
 
+// SendApprovalRequiredNotification sends a notification when an audit reaches the approval gate.
+func (n *NotificationClient) SendApprovalRequiredNotification(ctx context.Context, auditID uuid.UUID) error {
+	audit, err := n.repo.GetAuditByID(ctx, auditID)
+	if err != nil {
+		return fmt.Errorf("get audit: %w", err)
+	}
+	if audit == nil {
+		return fmt.Errorf("audit not found: %s", auditID)
+	}
+
+	ctx = withTenantMetadata(ctx, audit.TenantID.String())
+
+	priority := mapSeverityToPriority(audit.RiskSeverity)
+	title := fmt.Sprintf("Audit approval required: %s", audit.Name)
+	body := fmt.Sprintf("Risk score: %d (%s) — Click to review and approve.", audit.RiskScore, audit.RiskSeverity)
+
+	// Fallback: use tenant ID as user ID since AuditJob lacks CreatedBy
+	userID := audit.TenantID.String()
+
+	_, err = n.client.SendNotification(ctx, &notificationv1.SendNotificationRequest{
+		UserId:    userID,
+		Title:     title,
+		Body:      body,
+		Channel:   notificationv1.NotificationChannel_NOTIFICATION_CHANNEL_IN_APP,
+		Priority:  priority,
+		ActionUrl: "/approvals",
+		Metadata: map[string]string{
+			"audit_id":   auditID.String(),
+			"audit_name": audit.Name,
+			"risk_score": fmt.Sprintf("%d", audit.RiskScore),
+			"risk_level": audit.RiskSeverity,
+			"event_type": "approval_required",
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("send approval notification: %w", err)
+	}
+	return nil
+}
+
 // SendAuditCompletedNotification sends a notification when an audit job completes.
 func (n *NotificationClient) SendAuditCompletedNotification(ctx context.Context, auditID uuid.UUID) error {
 	audit, err := n.repo.GetAuditByID(ctx, auditID)

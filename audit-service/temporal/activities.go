@@ -4,12 +4,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
 	"sovereign-ai-compliance/audit-service/internal/logic"
 	"sovereign-ai-compliance/audit-service/model"
 	"sovereign-ai-compliance/audit-service/repo"
 	"sovereign-ai-compliance/audit-service/scoring"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // AnalysisFinding represents a single static analysis finding from repo-service.
@@ -39,6 +40,8 @@ type RepoServiceClient interface {
 type NotificationServiceClient interface {
 	// SendAuditCompletedNotification sends a notification that audit completed.
 	SendAuditCompletedNotification(ctx context.Context, auditID uuid.UUID) error
+	// SendApprovalRequiredNotification sends a notification that an audit needs approval.
+	SendApprovalRequiredNotification(ctx context.Context, auditID uuid.UUID) error
 }
 
 // Activities contains all activities for the compliance audit workflow.
@@ -373,6 +376,15 @@ func (a *Activities) CreateApprovalRequest(ctx context.Context, auditID string) 
 	if err := a.repo.CreateApprovalRequest(ctx, req); err != nil {
 		return fmt.Errorf("create approval request: %w", err)
 	}
+
+	// Send approval-required notification (best-effort; do not block workflow).
+	if a.notificationClient != nil {
+		if notifyErr := a.notificationClient.SendApprovalRequiredNotification(ctx, auditUUID); notifyErr != nil {
+			// Log but don't fail — the approval request is already created.
+			fmt.Printf("WARN: failed to send approval notification: %v\n", notifyErr)
+		}
+	}
+
 	return nil
 }
 
