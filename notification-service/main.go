@@ -2,6 +2,8 @@
 package main
 
 import (
+	"context"
+	"database/sql"
 	"flag"
 	"fmt"
 	"net"
@@ -20,6 +22,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
+	_ "github.com/lib/pq"
 )
 
 var configFile = flag.String("f", "etc/config.yaml", "the config file")
@@ -30,9 +33,27 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
+	// Connect to PostgreSQL
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		c.Database.Host, c.Database.Port, c.Database.User,
+		c.Database.Password, c.Database.Database, c.Database.SSLMode,
+	)
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		logx.Must(fmt.Errorf("failed to open database: %w", err))
+	}
+	defer db.Close()
+
+	if err := db.Ping(); err != nil {
+		logx.Must(fmt.Errorf("failed to ping database: %w", err))
+	}
+
 	// Wire dependencies
-	repository := repo.NewInMemoryRepository()
-	notificationLogic := logic.NewNotificationLogic(repository)
+	pgRepo := repo.NewPostgresRepository(db)
+	if err := pgRepo.InitSchema(context.Background()); err != nil {
+		logx.Errorf("Schema init warning: %v", err)
+	}
+	notificationLogic := logic.NewNotificationLogic(pgRepo)
 
 	// Start gRPC server
 	grpcAddr := fmt.Sprintf(":%d", c.GRPC.Port)
