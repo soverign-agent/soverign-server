@@ -28,6 +28,8 @@ grpc_upstream:
   audit_cert_file: ""
   notification: "localhost:9087"
   notif_cert_file: ""
+  monitoring: "localhost:9089"
+  monitoring_cert_file: ""
   insecure: true
 
 PublicEndpoints:
