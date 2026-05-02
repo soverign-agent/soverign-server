@@ -43,5 +43,7 @@ type GRPCUpstreamConfig struct {
 	AuditCert    string `json:"audit_cert_file"`
 	Notification string
 	NotifCert    string `json:"notif_cert_file"`
+	Monitoring   string
+	MonitoringCert string `json:"monitoring_cert_file"`
 	Insecure     bool   `json:"insecure"`
 }

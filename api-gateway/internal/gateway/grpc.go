@@ -19,6 +19,7 @@ import (
 	auditv1 "sovereign-ai-compliance/shared/proto/audit/v1"
 	authv1 "sovereign-ai-compliance/shared/proto/auth/v1"
 	docv1 "sovereign-ai-compliance/shared/proto/doc/v1"
+	monitoringv1 "sovereign-ai-compliance/shared/proto/monitoring/v1"
 	notificationv1 "sovereign-ai-compliance/shared/proto/notification/v1"
 	orgv1 "sovereign-ai-compliance/shared/proto/org/v1"
 	ragv1 "sovereign-ai-compliance/shared/proto/rag/v1"
@@ -193,6 +194,18 @@ func New(cfg config.Config) (*Mux, error) {
 		}
 	}
 
+	// Monitoring service
+	if cfg.GRPCUpstream.Monitoring != "" {
+		conn, err := dial("monitoring", cfg.GRPCUpstream.Monitoring, cfg.GRPCUpstream.MonitoringCert, cfg.GRPCUpstream.Insecure)
+		if err != nil {
+			return nil, err
+		}
+		conns = append(conns, conn)
+		if err := monitoringv1.RegisterMonitoringServiceHandler(ctx, mux, conn); err != nil {
+			return nil, fmt.Errorf("register monitoring handler: %w", err)
+		}
+	}
+
 	return &Mux{handler: mux, conns: conns, repoClient: repoClient}, nil
 }
 
@@ -211,6 +224,7 @@ func ShouldHandle(path string) bool {
 		"/api/v1/audit-jobs/",
 		"/api/v1/notifications/",
 		"/api/v1/approvals/",
+		"/api/v1/monitoring/",
 	}
 	for _, p := range prefixes {
 		if strings.HasPrefix(path, p) {

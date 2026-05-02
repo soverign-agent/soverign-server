@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package monitoring.v1;
+
+option go_package = "sovereign-ai-compliance/shared/proto/monitoring/v1;monitoringv1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+// MonitoringOverview provides a high-level snapshot of AI system health.
+message MonitoringOverview {
+  string hallucination_rate = 1; // e.g. "2.3%"
+  string avg_ttft           = 2; // e.g. "120ms"
+  string avg_tpot           = 3; // e.g. "45ms"
+  bool   alert              = 4; // true if any threshold breached
+}
+
+// HallucinationMetrics is a single time-series point for hallucination data.
+message HallucinationMetrics {
+  string time     = 1; // RFC3339 timestamp
+  double rate     = 2; // hallucination rate (0.0 - 1.0)
+  double bias     = 3; // bias score
+  double toxicity = 4; // toxicity score
+}
+
+// TokenPerformance is a single time-series point for token performance data.
+message TokenPerformance {
+  string time = 1; // RFC3339 timestamp
+  double ttft = 2; // time to first token (ms)
+  double tpot = 3; // time per output token (ms)
+}
+
+// GetOverviewRequest is empty; tenant_id is passed via gRPC metadata header.
+message GetOverviewRequest {}
+
+// GetOverviewResponse returns the current monitoring overview.
+message GetOverviewResponse {
+  MonitoringOverview overview = 1;
+}
+
+// GetHallucinationMetricsRequest supports optional time-range filtering.
+message GetHallucinationMetricsRequest {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time   = 2;
+}
+
+// GetHallucinationMetricsResponse returns a time-series of hallucination metrics.
+message GetHallucinationMetricsResponse {
+  repeated HallucinationMetrics metrics = 1;
+}
+
+// GetTokenPerformanceRequest supports optional time-range filtering.
+message GetTokenPerformanceRequest {
+  google.protobuf.Timestamp start_time = 1;
+  google.protobuf.Timestamp end_time   = 2;
+}
+
+// GetTokenPerformanceResponse returns a time-series of token performance metrics.
+message GetTokenPerformanceResponse {
+  repeated TokenPerformance metrics = 1;
+}
+
+// MonitoringService exposes AI system monitoring endpoints.
+service MonitoringService {
+  rpc GetOverview(GetOverviewRequest) returns (GetOverviewResponse) {
+    option (google.api.http) = { get: "/api/v1/monitoring/overview" };
+  }
+
+  rpc GetHallucinationMetrics(GetHallucinationMetricsRequest) returns (GetHallucinationMetricsResponse) {
+    option (google.api.http) = { get: "/api/v1/monitoring/hallucination-metrics" };
+  }
+
+  rpc GetTokenPerformance(GetTokenPerformanceRequest) returns (GetTokenPerformanceResponse) {
+    option (google.api.http) = { get: "/api/v1/monitoring/token-performance" };
+  }
+}

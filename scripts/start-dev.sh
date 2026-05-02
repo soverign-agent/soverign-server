@@ -28,6 +28,7 @@ declare -A SERVICES=(
   [doc-service]="$ROOT_DIR/doc-service:9888"
   [notification-service]="$ROOT_DIR/notification-service:9087"
   [agent-orchestrator]="$ROOT_DIR/agent-orchestrator:9088"
+  [monitoring-service]="$ROOT_DIR/monitoring-service:9089"
   [api-gateway]="$ROOT_DIR/api-gateway:8080"
 )
 
@@ -158,14 +159,14 @@ cmd_start() {
   log "Starting gRPC services..."
 
   # Start gRPC services first (no HTTP gateway, no inter-service deps beyond infra)
-  for svc in auth-service org-service repo-service rag-service audit-service doc-service notification-service agent-orchestrator; do
+  for svc in auth-service org-service repo-service rag-service audit-service doc-service notification-service agent-orchestrator monitoring-service; do
     dir="${SERVICES[$svc]%:*}"
     start_service "$svc" "$dir"
     sleep 0.5  # slight stagger to avoid thundering herd
   done
 
   # Wait for gRPC services to bind
-  for grpc_port in 9081 9085 9083 9082 9086 9888 9087 9088; do
+  for grpc_port in 9081 9085 9083 9082 9086 9888 9087 9088 9089; do
     wait_for_port localhost "$grpc_port" "service on :$grpc_port" || true
   done
 
@@ -184,6 +185,7 @@ cmd_start() {
   log "  Doc Service:    localhost:9888 (gRPC)"
   log "  Notification:   localhost:9087 (gRPC)"
   log "  Agent Orch.:    localhost:9088 (gRPC)"
+  log "  Monitoring:     localhost:9089 (gRPC)"
   log ""
   log "Infrastructure:"
   log "  PostgreSQL:     localhost:5432"
@@ -199,7 +201,7 @@ cmd_start() {
 
 cmd_stop() {
   log "Stopping all services..."
-  for svc in api-gateway agent-orchestrator notification-service doc-service audit-service rag-service repo-service org-service auth-service; do
+  for svc in api-gateway agent-orchestrator monitoring-service notification-service doc-service audit-service rag-service repo-service org-service auth-service; do
     stop_service "$svc"
   done
   log "All services stopped."
@@ -214,7 +216,7 @@ cmd_logs() {
 
 cmd_status() {
   log "Service status:"
-  for svc in auth-service org-service repo-service rag-service audit-service doc-service notification-service agent-orchestrator api-gateway; do
+  for svc in auth-service org-service repo-service rag-service audit-service doc-service notification-service agent-orchestrator monitoring-service api-gateway; do
     local pidfile="$ROOT_DIR/logs/$svc.pid"
     if [[ -f "$pidfile" ]]; then
       local pid
