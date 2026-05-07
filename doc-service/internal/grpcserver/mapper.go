@@ -285,17 +285,17 @@ func toProtoExportJob(j *model.ExportJob) *docv1.ExportJob {
 		completedAt = timestamppb.New(*j.CompletedAt)
 	}
 	return &docv1.ExportJob{
-		Id:            j.ID.String(),
-		TenantId:      j.TenantID.String(),
-		DocumentId:    j.DocumentID.String(),
-		Format:        exportFormatToProto(j.Format),
-		Status:        exportStatusToProto(j.Status),
-		FilePath:      filePath,
-		FileSize:      fileSize,
-		ErrorMessage:  errorMsg,
-		CreatedBy:     j.CreatedBy.String(),
-		CreatedAt:     timestamppb.New(j.CreatedAt),
-		CompletedAt:   completedAt,
+		Id:           j.ID.String(),
+		TenantId:     j.TenantID.String(),
+		DocumentId:   j.DocumentID.String(),
+		Format:       exportFormatToProto(j.Format),
+		Status:       exportStatusToProto(j.Status),
+		FilePath:     filePath,
+		FileSize:     fileSize,
+		ErrorMessage: errorMsg,
+		CreatedBy:    j.CreatedBy.String(),
+		CreatedAt:    timestamppb.New(j.CreatedAt),
+		CompletedAt:  completedAt,
 	}
 }
 

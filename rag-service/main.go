@@ -14,18 +14,19 @@ import (
 	"sovereign-ai-compliance/rag-service/internal/config"
 	"sovereign-ai-compliance/rag-service/internal/grpcserver"
 	"sovereign-ai-compliance/rag-service/internal/logic"
+	"sovereign-ai-compliance/rag-service/internal/orchestrator"
 	"sovereign-ai-compliance/rag-service/processing"
 	"sovereign-ai-compliance/rag-service/repo"
 	"sovereign-ai-compliance/shared/llm"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/reflection"
 	_ "github.com/lib/pq"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/reflection"
 )
 
 var configFile = flag.String("f", "etc/config.yaml", "the config file")
@@ -64,11 +65,15 @@ func main() {
 	defer logger.Sync()
 
 	// Initialize LLM client
+	chatModel := c.LLM.ChatModel
+	if chatModel == "" {
+		chatModel = "gpt-4o-mini"
+	}
 	llmConfig := llm.Config{
 		Provider:    c.LLM.Provider,
 		APIKey:      c.LLM.APIKey,
 		BaseURL:     c.LLM.BaseURL,
-		Model:       c.LLM.EmbeddingModel,
+		Model:       chatModel,
 		Timeout:     c.LLM.Timeout,
 		MaxTokens:   c.LLM.MaxTokens,
 		Temperature: c.LLM.Temperature,
@@ -84,8 +89,23 @@ func main() {
 	extractor := processing.NewExtractor()
 	processor := processing.NewProcessor(extractor, chunker)
 	documentsLogic := logic.NewDocumentsLogic(c, repository, processor, llmClient, logger)
-	searchLogic := logic.NewSearchLogic(repository, llmClient, logger)
+	searchLogic := logic.NewSearchLogic(repository, llmClient, c.LLM.EmbeddingModel, logger)
 	statsLogic := logic.NewStatsLogic(repository, logger)
+
+	// Build the agentic RAG pipeline that powers the streaming /chat endpoint.
+	// The pipeline is wrapped behind logic.ChatPipeline so the chat logic can
+	// be tested without a real LLM/vector store.
+	chatPipeline := orchestrator.NewPipeline(
+		orchestrator.Dependencies{
+			LLMClient:      llmClient,
+			EmbeddingModel: c.LLM.EmbeddingModel,
+			Repository:     repository,
+		},
+		logger,
+		orchestrator.DefaultGuardrailConfig(),
+		10,
+	)
+	chatLogic := logic.NewChatLogic(repository, chatPipeline, logger, logic.DefaultChatRateLimiterConfig())
 
 	// Start gRPC server
 	grpcAddr := fmt.Sprintf(":%d", c.GRPC.Port)
@@ -107,7 +127,7 @@ func main() {
 		grpcOpts = append(grpcOpts, grpc.Creds(insecure.NewCredentials()))
 	}
 	grpcServer := grpc.NewServer(grpcOpts...)
-	grpcSrv := grpcserver.NewServer(documentsLogic, searchLogic, statsLogic)
+	grpcSrv := grpcserver.NewServer(documentsLogic, searchLogic, statsLogic, chatLogic)
 	grpcSrv.Register(grpcServer)
 	reflection.Register(grpcServer)
 

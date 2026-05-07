@@ -15,10 +15,10 @@ import (
 
 func TestCustomErrorHandler_MapsGRPCCodes(t *testing.T) {
 	tests := []struct {
-		name       string
-		grpcCode   codes.Code
-		wantHTTP   int
-		wantMsg    string
+		name     string
+		grpcCode codes.Code
+		wantHTTP int
+		wantMsg  string
 	}{
 		{"NotFound", codes.NotFound, http.StatusNotFound, "resource missing"},
 		{"InvalidArgument", codes.InvalidArgument, http.StatusBadRequest, "bad input"},

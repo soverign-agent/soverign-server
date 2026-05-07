@@ -119,3 +119,13 @@ type GetExportJobRequest struct {
 type GetExportJobResponse struct {
 	model.ExportJob
 }
+
+// DeleteDocumentRequest is the request to delete a document.
+type DeleteDocumentRequest struct {
+	DocumentID uuid.UUID `json:"-" form:"-"`
+}
+
+// DeleteDocumentResponse is the response after deleting a document.
+type DeleteDocumentResponse struct {
+	Success bool `json:"success"`
+}

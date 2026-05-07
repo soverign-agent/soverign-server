@@ -11,6 +11,8 @@
 \i /sql/migrations/002_audit_progress.up.sql
 \i /sql/migrations/003_document_progress.up.sql
 \i /sql/migrations/004_documents_ai_system_id.up.sql
+\i /sql/migrations/005_notification_events_columns.up.sql
+\i /sql/migrations/006_chat_sessions_messages.up.sql
 
 -- Development seed data
 \i /sql/seed/001_demo_tenant.sql

@@ -47,7 +47,7 @@ type RedisConfig struct {
 
 // TemporalConfig holds Temporal workflow engine settings.
 type TemporalConfig struct {
-	HostPort string
+	HostPort  string
 	Namespace string
 }
 

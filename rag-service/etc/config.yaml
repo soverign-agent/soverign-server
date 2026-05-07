@@ -8,8 +8,9 @@ Database:
 
 LLM:
   Provider: openai
-  APIKey: ""
-  BaseURL: ""
+  APIKey: ${OPENAI_API_KEY}
+  BaseURL: "https://api.openai.com/v1"
+  ChatModel: gpt-4o-mini
   EmbeddingModel: text-embedding-3-small
   Timeout: 30
   MaxTokens: 1000

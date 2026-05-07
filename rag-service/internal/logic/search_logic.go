@@ -14,21 +14,24 @@ import (
 
 // SearchLogic handles RAG search business logic.
 type SearchLogic struct {
-	repo      *repo.SQLRepository
-	llmClient llm.Client
-	logger    *zap.Logger
+	repo           *repo.SQLRepository
+	llmClient      llm.Client
+	embeddingModel string
+	logger         *zap.Logger
 }
 
 // NewSearchLogic creates a new SearchLogic.
 func NewSearchLogic(
 	repo *repo.SQLRepository,
 	llmClient llm.Client,
+	embeddingModel string,
 	logger *zap.Logger,
 ) *SearchLogic {
 	return &SearchLogic{
-		repo:      repo,
-		llmClient: llmClient,
-		logger:    logger,
+		repo:           repo,
+		llmClient:      llmClient,
+		embeddingModel: embeddingModel,
+		logger:         logger,
 	}
 }
 
@@ -66,6 +69,7 @@ func (l *SearchLogic) Search(ctx context.Context, req SearchRequest) (*SearchRes
 
 	// Generate embedding for the query
 	embResp, err := l.llmClient.Embed(ctx, llm.EmbeddingRequest{
+		Model: l.embeddingModel,
 		Input: req.Query,
 	})
 	if err != nil {

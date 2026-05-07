@@ -17,6 +17,7 @@ type Config struct {
 		Provider       llm.Provider
 		APIKey         string
 		BaseURL        string
+		ChatModel      string
 		EmbeddingModel string
 		Timeout        int
 		MaxTokens      int
