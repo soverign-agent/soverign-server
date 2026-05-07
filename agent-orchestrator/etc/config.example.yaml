@@ -1,0 +1,35 @@
+GRPC:
+  Port: 9088
+  TLSCertFile: ""
+  TLSKeyFile: ""
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
+
+Metrics:
+  Port: 9090
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: sovereign
+  Password: your-password-here
+  Database: sovereign
+  SSLMode: disable
+
+Temporal:
+  HostPort: localhost:7233
+  Namespace: default
+
+LLM:
+  Provider: openai
+  Model: gpt-4
+  APIKey: "your-api-key-here"
+  BaseURL: "http://127.0.0.1:18080"
+  Timeout: 120s
+  MaxTokens: 4096
+  Temperature: 0.7
+
+Clients:
+  doc_addr: localhost:9888
+  audit_addr: localhost:9086
+  rag_addr: localhost:9082
+  insecure: true # local dev only; production must set tls_cert_file

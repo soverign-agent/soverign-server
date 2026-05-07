@@ -1,0 +1,30 @@
+GRPC:
+  Port: 9086
+  TLSCertFile: ""
+  TLSKeyFile: ""
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: sovereign
+  Password: your-password-here
+  Database: sovereign
+  SSLMode: disable
+
+Temporal:
+  HostPort: localhost:7233
+  Namespace: default
+
+Risk:
+  critical_threshold: 70
+  high_threshold: 40
+  medium_threshold: 20
+
+Notification:
+  Addr: localhost:9087
+  Insecure: true # local dev only; production must set tls_cert_file
+
+Repo:
+  Addr: localhost:9083
+  Insecure: true # local dev only; production must set tls_cert_file

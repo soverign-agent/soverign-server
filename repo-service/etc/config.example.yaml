@@ -1,0 +1,17 @@
+GRPC:
+  Port: 9083
+  TLSCertFile: ""
+  TLSKeyFile: ""
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: sovereign
+  Password: your-password-here
+  Database: sovereign
+  SSLMode: disable
+
+EncryptionKey: "your-32-byte-hex-key-here"
+TempDir: /tmp/repo-scans
+WebhookBaseURL: "your-webhook-base-url"

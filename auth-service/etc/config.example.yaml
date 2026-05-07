@@ -1,0 +1,19 @@
+Auth:
+  PrivateKeyPath: "../api-gateway/certs/jwt-private.pem"
+  AccessExpiry: 15m
+  RefreshExpiry: 168h
+  Issuer: "sovereign-ai-compliance"
+
+GRPC:
+  Port: 9081
+  TLSCertFile: ""
+  TLSKeyFile: ""
+  Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
+
+Database:
+  Host: localhost
+  Port: 5432
+  User: sovereign
+  Password: your-password-here
+  Database: sovereign
+  SSLMode: disable
