@@ -4,6 +4,8 @@ package agent.v1;
 
 option go_package = "sovereign-ai-compliance/shared/proto/agent/v1;agentv1";
 
+import "google/api/annotations.proto";
+
 // AgentCard describes an agent's identity, capabilities, and endpoint.
 message AgentCard {
   string agent_id = 1;
@@ -57,15 +59,26 @@ message TransferEvent {
 // AgentService defines the gRPC interface for agent-to-agent communication.
 service AgentService {
   // Invoke sends a task to an agent and blocks until completion.
-  rpc Invoke(AgentRequest) returns (AgentResponse);
+  rpc Invoke(AgentRequest) returns (AgentResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/orchestrator/invoke"
+      body: "*"
+    };
+  }
 
   // StreamInvoke opens a bidirectional stream for long-running tasks.
+  // No HTTP annotation: bidirectional streaming is not supported by grpc-gateway.
   rpc StreamInvoke(stream AgentRequest) returns (stream AgentResponse);
 
   // GetAgentCard returns the capability description of the requested agent.
-  rpc GetAgentCard(AgentCardRequest) returns (AgentCard);
+  rpc GetAgentCard(AgentCardRequest) returns (AgentCard) {
+    option (google.api.http) = {
+      get: "/api/v1/orchestrator/agents/{agent_id}"
+    };
+  }
 
   // SubscribeTransfers opens a server-side stream of hand-off events.
+  // No HTTP annotation: server-side streaming is delivered via gRPC only.
   rpc SubscribeTransfers(TransferSubscriptionRequest) returns (stream TransferEvent);
 }
 

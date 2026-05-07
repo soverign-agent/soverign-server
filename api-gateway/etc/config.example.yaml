@@ -30,6 +30,8 @@ grpc_upstream:
   notif_cert_file: ""
   monitoring: "localhost:9089"
   monitoring_cert_file: ""
+  orchestrator: "localhost:9088"
+  orchestrator_cert_file: ""
   insecure: true
 
 PublicEndpoints:

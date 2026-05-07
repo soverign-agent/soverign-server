@@ -16,6 +16,7 @@ import (
 	"sovereign-ai-compliance/api-gateway/internal/config"
 	"sovereign-ai-compliance/api-gateway/internal/middleware"
 
+	agentv1 "sovereign-ai-compliance/shared/proto/agent/v1"
 	auditv1 "sovereign-ai-compliance/shared/proto/audit/v1"
 	authv1 "sovereign-ai-compliance/shared/proto/auth/v1"
 	docv1 "sovereign-ai-compliance/shared/proto/doc/v1"
@@ -214,6 +215,18 @@ func New(cfg config.Config) (*Mux, error) {
 		}
 	}
 
+	// Orchestrator service
+	if cfg.GRPCUpstream.Orchestrator != "" {
+		conn, err := dial("orchestrator", cfg.GRPCUpstream.Orchestrator, cfg.GRPCUpstream.OrchestratorCert, cfg.GRPCUpstream.Insecure)
+		if err != nil {
+			return nil, err
+		}
+		conns = append(conns, conn)
+		if err := agentv1.RegisterAgentServiceHandler(ctx, mux, conn); err != nil {
+			return nil, fmt.Errorf("register orchestrator handler: %w", err)
+		}
+	}
+
 	return &Mux{handler: mux, conns: conns, repoClient: repoClient, ragClient: ragClient}, nil
 }
 
@@ -234,6 +247,7 @@ func ShouldHandle(path string) bool {
 		"/api/v1/notifications/",
 		"/api/v1/approvals/",
 		"/api/v1/monitoring/",
+		"/api/v1/orchestrator/",
 	}
 	for _, p := range prefixes {
 		if strings.HasPrefix(path, p) {
