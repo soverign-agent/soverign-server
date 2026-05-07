@@ -2,28 +2,34 @@
 package main
 
 import (
+	"context"
 	"database/sql"
+	"errors"
 	"flag"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"sovereign-ai-compliance/agent-orchestrator/internal/client"
-	"sovereign-ai-compliance/agent-orchestrator/internal/config"
-	"sovereign-ai-compliance/agent-orchestrator/internal/grpcserver"
-	"sovereign-ai-compliance/agent-orchestrator/internal/orchestrator"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/grpc/reflection"
 	_ "github.com/lib/pq"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/reflection"
+
+	"sovereign-ai-compliance/agent-orchestrator/internal/client"
+	"sovereign-ai-compliance/agent-orchestrator/internal/config"
+	"sovereign-ai-compliance/agent-orchestrator/internal/grpcserver"
+	"sovereign-ai-compliance/agent-orchestrator/internal/orchestrator"
+	"sovereign-ai-compliance/shared/eval"
+	"sovereign-ai-compliance/shared/llm"
+	"sovereign-ai-compliance/shared/metrics"
 )
 
 var configFile = flag.String("f", "etc/config.yaml", "the config file")
@@ -34,7 +40,6 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	// Open database connection
 	dsn := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
 		c.Database.Host, c.Database.Port, c.Database.User,
@@ -54,24 +59,33 @@ func main() {
 		logx.Must(fmt.Errorf("failed to ping database: %w", err))
 	}
 
-	// Initialize zap logger
 	logger, err := zap.NewProduction()
 	if err != nil {
 		logx.Must(fmt.Errorf("failed to create logger: %w", err))
 	}
 	defer logger.Sync()
 
-	// Wire dependencies - create typed gRPC clients for doc, audit, rag services
+	metricsReg := metrics.NewRegistry()
+	recorder, err := metrics.NewRecorder(metricsReg)
+	if err != nil {
+		logx.Must(fmt.Errorf("failed to init metrics recorder: %w", err))
+	}
+
+	llmClient := buildLLMClient(c, logger, recorder)
+
+	evalPipeline, err := eval.NewPipeline(recorder, eval.DefaultThresholds())
+	if err != nil {
+		logx.Must(fmt.Errorf("failed to init eval pipeline: %w", err))
+	}
+
 	downstreamClients, err := client.NewClients(c.Clients)
 	if err != nil {
 		logx.Must(fmt.Errorf("failed to create downstream clients: %w", err))
 	}
 	defer downstreamClients.Close()
 
-	// Initialize orchestrator with typed clients
-	orc := orchestrator.NewSupervisor(downstreamClients, logger, c.LLM)
+	orc := orchestrator.NewSupervisor(downstreamClients, logger, c.LLM, llmClient, evalPipeline)
 
-	// Start gRPC server
 	grpcAddr := fmt.Sprintf(":%d", c.GRPC.Port)
 	lis, err := net.Listen("tcp", grpcAddr)
 	if err != nil {
@@ -102,11 +116,67 @@ func main() {
 		}
 	}()
 
-	// Wait for interrupt signal
+	metricsPort := c.Metrics.Port
+	if metricsPort == 0 {
+		metricsPort = 9090
+	}
+	metricsMux := http.NewServeMux()
+	metricsMux.Handle("/metrics", metrics.NewHandler(metricsReg))
+	metricsSrv := &http.Server{
+		Addr:              fmt.Sprintf(":%d", metricsPort),
+		Handler:           metricsMux,
+		ReadHeaderTimeout: 5 * time.Second,
+	}
+	go func() {
+		logx.Infof("Starting agent-orchestrator metrics server on %s", metricsSrv.Addr)
+		if err := metricsSrv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logx.Errorf("metrics server: %v", err)
+		}
+	}()
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	logx.Info("Shutting down agent-orchestrator gRPC server...")
+	logx.Info("Shutting down agent-orchestrator...")
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := metricsSrv.Shutdown(shutdownCtx); err != nil {
+		logx.Errorf("metrics server shutdown: %v", err)
+	}
 	grpcServer.GracefulStop()
+}
+
+// buildLLMClient resolves the LLM API key from env vars (overriding any
+// placeholder in config), then constructs the streaming-capable client. We
+// require OPENAI_API_KEY in non-development environments to avoid silently
+// running with a misconfigured secret.
+func buildLLMClient(c config.Config, logger *zap.Logger, rec *metrics.Recorder) llm.Client {
+	apiKey := os.Getenv("OPENAI_API_KEY")
+	if apiKey == "" {
+		apiKey = c.LLM.APIKey
+	}
+	if apiKey == "" && os.Getenv("APP_ENV") == "production" {
+		logx.Must(fmt.Errorf("OPENAI_API_KEY is required for production startup; set it in env"))
+	}
+
+	provider := llm.Provider(c.LLM.Provider)
+	if provider == "" {
+		provider = llm.ProviderOpenAI
+	}
+
+	timeoutSeconds := int(c.LLM.Timeout / time.Second)
+	if timeoutSeconds <= 0 {
+		timeoutSeconds = 120
+	}
+
+	return llm.NewOpenAIClientWithRecorder(llm.Config{
+		Provider:    provider,
+		APIKey:      apiKey,
+		BaseURL:     c.LLM.BaseURL,
+		Model:       c.LLM.Model,
+		Timeout:     timeoutSeconds,
+		MaxTokens:   c.LLM.MaxTokens,
+		Temperature: c.LLM.Temperature,
+	}, logger, rec)
 }

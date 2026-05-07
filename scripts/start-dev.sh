@@ -131,6 +131,19 @@ stop_service() {
 }
 
 # -------------------------------------------------------------------
+# Environment
+# -------------------------------------------------------------------
+
+# Load environment variables from .env file so Go services can resolve
+# ${OPENAI_API_KEY} and other secrets in their config.yaml files.
+if [[ -f "$ROOT_DIR/.env" ]]; then
+  set -a
+  source "$ROOT_DIR/.env"
+  set +a
+  info "Loaded environment from $ROOT_DIR/.env"
+fi
+
+# -------------------------------------------------------------------
 # Commands
 # -------------------------------------------------------------------
 

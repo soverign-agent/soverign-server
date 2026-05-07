@@ -21,3 +21,5 @@ scrape_configs:
           - host.docker.internal:8086
           - host.docker.internal:8087
           - host.docker.internal:8088
+          # agent-orchestrator Prometheus /metrics endpoint (port 9090)
+          - host.docker.internal:9090

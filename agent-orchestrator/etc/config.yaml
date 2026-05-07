@@ -4,6 +4,9 @@ GRPC:
   TLSKeyFile: ""
   Insecure: true # local dev only; production must set tls_cert_file and tls_key_file
 
+Metrics:
+  Port: 9090
+
 Database:
   Host: localhost
   Port: 5432
@@ -19,8 +22,8 @@ Temporal:
 LLM:
   Provider: openai
   Model: gpt-4
-  APIKey: ""
-  BaseURL: ""
+  APIKey: "mock-key"
+  BaseURL: "http://127.0.0.1:18080"
   Timeout: 120s
   MaxTokens: 4096
   Temperature: 0.7

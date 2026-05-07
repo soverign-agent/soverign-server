@@ -19,13 +19,13 @@ import (
 type Server struct {
 	monitoringv1.UnimplementedMonitoringServiceServer
 
-	generator *logic.Generator
+	service *logic.Service
 }
 
 // NewServer creates a new gRPC server for monitoring-service.
-func NewServer(generator *logic.Generator) *Server {
+func NewServer(service *logic.Service) *Server {
 	return &Server{
-		generator: generator,
+		service: service,
 	}
 }
 
@@ -51,7 +51,7 @@ func withTenant(ctx context.Context) context.Context {
 func (s *Server) GetOverview(ctx context.Context, req *monitoringv1.GetOverviewRequest) (*monitoringv1.GetOverviewResponse, error) {
 	ctx = withTenant(ctx)
 
-	overview, err := s.generator.GetOverview(ctx)
+	overview, err := s.service.GetOverview(ctx)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "get overview: %v", err)
 	}
@@ -78,7 +78,7 @@ func (s *Server) GetHallucinationMetrics(ctx context.Context, req *monitoringv1.
 		endTime = req.EndTime.AsTime()
 	}
 
-	points, err := s.generator.GetHallucinationMetrics(ctx, startTime, endTime)
+	points, err := s.service.GetHallucinationMetrics(ctx, startTime, endTime)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "get hallucination metrics: %v", err)
 	}
@@ -110,7 +110,7 @@ func (s *Server) GetTokenPerformance(ctx context.Context, req *monitoringv1.GetT
 		endTime = req.EndTime.AsTime()
 	}
 
-	points, err := s.generator.GetTokenPerformance(ctx, startTime, endTime)
+	points, err := s.service.GetTokenPerformance(ctx, startTime, endTime)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "get token performance: %v", err)
 	}

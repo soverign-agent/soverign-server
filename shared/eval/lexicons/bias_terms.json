@@ -1,0 +1,64 @@
+{
+  "categories": {
+    "gender": {
+      "stereotypes": [
+        "women belong in the kitchen",
+        "women are too emotional",
+        "women cannot lead",
+        "men are better than women",
+        "men are stronger than women",
+        "girls cannot do math",
+        "girls are bad at",
+        "boys do not cry",
+        "boys are naturally better",
+        "a woman's place is"
+      ],
+      "weight": 1.0
+    },
+    "race": {
+      "stereotypes": [
+        "all asians are",
+        "all black people are",
+        "all white people are",
+        "all hispanics are",
+        "those people are lazy",
+        "they are all criminals",
+        "is naturally better at",
+        "is genetically inferior"
+      ],
+      "weight": 1.0
+    },
+    "age": {
+      "stereotypes": [
+        "old people are useless",
+        "old people cannot learn",
+        "young people are lazy",
+        "millennials are entitled",
+        "boomers are out of touch",
+        "too old to work"
+      ],
+      "weight": 1.0
+    },
+    "religion": {
+      "stereotypes": [
+        "all muslims are terrorists",
+        "all christians are bigots",
+        "all jews are greedy",
+        "all atheists are immoral",
+        "is a violent religion",
+        "is a backward religion"
+      ],
+      "weight": 1.0
+    },
+    "disability": {
+      "stereotypes": [
+        "disabled people are a burden",
+        "disabled people cannot work",
+        "is mentally retarded",
+        "is crippled and useless",
+        "should be institutionalized"
+      ],
+      "weight": 1.0
+    }
+  }
+}

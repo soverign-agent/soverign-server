@@ -4,6 +4,7 @@ package llm
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -50,10 +51,37 @@ type EmbeddingResponse struct {
 	Usage     Usage
 }
 
+// StreamCompletionResponse is the aggregated result of a streaming chat completion,
+// including timing data captured during the stream.
+type StreamCompletionResponse struct {
+	Content      string
+	Usage        Usage
+	FinishReason string
+	Timings      StreamTimings
+}
+
+// StreamTimings captures wall-clock timestamps for a streaming completion. TTFT
+// is the time from request start until the first non-empty content delta. TPOT
+// is the average time per output token measured between the first and last
+// delta. TotalDuration is end-to-end.
+type StreamTimings struct {
+	RequestStart  time.Time
+	FirstTokenAt  time.Time
+	LastTokenAt   time.Time
+	TTFT          time.Duration
+	TPOT          time.Duration
+	TotalDuration time.Duration
+}
+
 // Client is the provider-agnostic interface for LLM operations.
 type Client interface {
 	// Complete sends a chat completion request and returns the response.
 	Complete(ctx context.Context, req CompletionRequest) (CompletionResponse, error)
+
+	// StreamComplete sends a streaming chat completion. Each non-empty content
+	// delta is delivered to onDelta (which may be nil). Returns the aggregated
+	// response with timing metadata.
+	StreamComplete(ctx context.Context, req CompletionRequest, onDelta func(token string)) (StreamCompletionResponse, error)
 
 	// Embed sends an embedding request and returns the vector representation.
 	Embed(ctx context.Context, req EmbeddingRequest) (EmbeddingResponse, error)

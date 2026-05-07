@@ -40,6 +40,14 @@ func (m *mockLLMClient) Health(ctx context.Context) error {
 	return nil
 }
 
+func (m *mockLLMClient) StreamComplete(ctx context.Context, req llm.CompletionRequest, onDelta func(token string)) (llm.StreamCompletionResponse, error) {
+	resp, err := m.Complete(ctx, req)
+	if err != nil {
+		return llm.StreamCompletionResponse{}, err
+	}
+	return llm.StreamCompletionResponse{Content: resp.Content}, nil
+}
+
 func newTestDocumentLogic(mockRepo repo.Repository) *DocumentLogic {
 	logger, _ := zap.NewDevelopment()
 	return NewDocumentLogic(mockRepo, sharedconfig.LLMConfig{}, docserviceconfig.DefaultExportConfig(), logger, nil)

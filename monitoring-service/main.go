@@ -9,16 +9,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	"sovereign-ai-compliance/monitoring-service/internal/config"
-	"sovereign-ai-compliance/monitoring-service/internal/grpcserver"
-	"sovereign-ai-compliance/monitoring-service/internal/logic"
-
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"
+
+	"sovereign-ai-compliance/monitoring-service/internal/config"
+	"sovereign-ai-compliance/monitoring-service/internal/grpcserver"
+	"sovereign-ai-compliance/monitoring-service/internal/logic"
+	"sovereign-ai-compliance/monitoring-service/internal/promql"
 )
 
 var configFile = flag.String("f", "etc/config.yaml", "the config file")
@@ -29,10 +31,18 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c)
 
-	// Wire dependencies
-	generator := logic.NewGenerator()
+	logger, err := zap.NewProduction()
+	if err != nil {
+		logx.Must(fmt.Errorf("init logger: %w", err))
+	}
+	defer func() { _ = logger.Sync() }()
 
-	// Start gRPC server
+	querier, err := promql.NewClient(c.Prometheus.URL)
+	if err != nil {
+		logx.Must(fmt.Errorf("init promql client: %w", err))
+	}
+	service := logic.NewService(querier, logger)
+
 	grpcAddr := fmt.Sprintf(":%d", c.GRPC.Port)
 	lis, err := net.Listen("tcp", grpcAddr)
 	if err != nil {
@@ -52,7 +62,7 @@ func main() {
 		grpcOpts = append(grpcOpts, grpc.Creds(insecure.NewCredentials()))
 	}
 	grpcServer := grpc.NewServer(grpcOpts...)
-	grpcSrv := grpcserver.NewServer(generator)
+	grpcSrv := grpcserver.NewServer(service)
 	grpcSrv.Register(grpcServer)
 	reflection.Register(grpcServer)
 
@@ -63,7 +73,6 @@ func main() {
 		}
 	}()
 
-	// Wait for interrupt signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
