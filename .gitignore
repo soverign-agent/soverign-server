@@ -51,3 +51,9 @@ notification-service/notification-service
 logs/
 
 .DS_Store
+
+# Service runtime configs (examples stay tracked)
+*/etc/config.yaml
+!*/etc/config.example.yaml
+*/etc/gateway-api.yaml
+!*/etc/gateway-api.example.yaml

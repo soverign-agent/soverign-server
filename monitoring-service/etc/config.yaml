@@ -1,5 +1,0 @@
-GRPC:
-  Port: 9089
-  Insecure: true
-Prometheus:
-  URL: http://localhost:9001
