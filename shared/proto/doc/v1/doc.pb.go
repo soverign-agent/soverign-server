@@ -1470,6 +1470,96 @@ func (x *UpdateDocumentStatusResponse) GetStatus() DocumentStatus {
 	return DocumentStatus_DOCUMENT_STATUS_UNSPECIFIED
 }
 
+// DeleteDocumentRequest deletes a document by ID.
+type DeleteDocumentRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDocumentRequest) Reset() {
+	*x = DeleteDocumentRequest{}
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDocumentRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDocumentRequest) ProtoMessage() {}
+
+func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDocumentRequest.ProtoReflect.Descriptor instead.
+func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) {
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *DeleteDocumentRequest) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+// DeleteDocumentResponse confirms the document deletion.
+type DeleteDocumentResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteDocumentResponse) Reset() {
+	*x = DeleteDocumentResponse{}
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteDocumentResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteDocumentResponse) ProtoMessage() {}
+
+func (x *DeleteDocumentResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteDocumentResponse.ProtoReflect.Descriptor instead.
+func (*DeleteDocumentResponse) Descriptor() ([]byte, []int) {
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *DeleteDocumentResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 // ListVersionsRequest lists versions for a document.
 type ListVersionsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -1482,7 +1572,7 @@ type ListVersionsRequest struct {
 
 func (x *ListVersionsRequest) Reset() {
 	*x = ListVersionsRequest{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[17]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1494,7 +1584,7 @@ func (x *ListVersionsRequest) String() string {
 func (*ListVersionsRequest) ProtoMessage() {}
 
 func (x *ListVersionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[17]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1507,7 +1597,7 @@ func (x *ListVersionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListVersionsRequest.ProtoReflect.Descriptor instead.
 func (*ListVersionsRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{17}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ListVersionsRequest) GetDocumentId() string {
@@ -1544,7 +1634,7 @@ type ListVersionsResponse struct {
 
 func (x *ListVersionsResponse) Reset() {
 	*x = ListVersionsResponse{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[18]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1556,7 +1646,7 @@ func (x *ListVersionsResponse) String() string {
 func (*ListVersionsResponse) ProtoMessage() {}
 
 func (x *ListVersionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[18]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1569,7 +1659,7 @@ func (x *ListVersionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListVersionsResponse.ProtoReflect.Descriptor instead.
 func (*ListVersionsResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{18}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListVersionsResponse) GetItems() []*DocumentVersion {
@@ -1611,7 +1701,7 @@ type RollbackVersionRequest struct {
 
 func (x *RollbackVersionRequest) Reset() {
 	*x = RollbackVersionRequest{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[19]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1623,7 +1713,7 @@ func (x *RollbackVersionRequest) String() string {
 func (*RollbackVersionRequest) ProtoMessage() {}
 
 func (x *RollbackVersionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[19]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1636,7 +1726,7 @@ func (x *RollbackVersionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RollbackVersionRequest.ProtoReflect.Descriptor instead.
 func (*RollbackVersionRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{19}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *RollbackVersionRequest) GetDocumentId() string {
@@ -1663,7 +1753,7 @@ type RollbackVersionResponse struct {
 
 func (x *RollbackVersionResponse) Reset() {
 	*x = RollbackVersionResponse{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[20]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1675,7 +1765,7 @@ func (x *RollbackVersionResponse) String() string {
 func (*RollbackVersionResponse) ProtoMessage() {}
 
 func (x *RollbackVersionResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[20]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1688,7 +1778,7 @@ func (x *RollbackVersionResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RollbackVersionResponse.ProtoReflect.Descriptor instead.
 func (*RollbackVersionResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{20}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *RollbackVersionResponse) GetDocument() *GeneratedDocument {
@@ -1709,7 +1799,7 @@ type CreateExportJobRequest struct {
 
 func (x *CreateExportJobRequest) Reset() {
 	*x = CreateExportJobRequest{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[21]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1721,7 +1811,7 @@ func (x *CreateExportJobRequest) String() string {
 func (*CreateExportJobRequest) ProtoMessage() {}
 
 func (x *CreateExportJobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[21]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1734,7 +1824,7 @@ func (x *CreateExportJobRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateExportJobRequest.ProtoReflect.Descriptor instead.
 func (*CreateExportJobRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{21}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *CreateExportJobRequest) GetDocumentId() string {
@@ -1762,7 +1852,7 @@ type CreateExportJobResponse struct {
 
 func (x *CreateExportJobResponse) Reset() {
 	*x = CreateExportJobResponse{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[22]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1774,7 +1864,7 @@ func (x *CreateExportJobResponse) String() string {
 func (*CreateExportJobResponse) ProtoMessage() {}
 
 func (x *CreateExportJobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[22]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1787,7 +1877,7 @@ func (x *CreateExportJobResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateExportJobResponse.ProtoReflect.Descriptor instead.
 func (*CreateExportJobResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{22}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *CreateExportJobResponse) GetJobId() string {
@@ -1814,7 +1904,7 @@ type GetExportJobRequest struct {
 
 func (x *GetExportJobRequest) Reset() {
 	*x = GetExportJobRequest{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[23]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1826,7 +1916,7 @@ func (x *GetExportJobRequest) String() string {
 func (*GetExportJobRequest) ProtoMessage() {}
 
 func (x *GetExportJobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[23]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1839,7 +1929,7 @@ func (x *GetExportJobRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExportJobRequest.ProtoReflect.Descriptor instead.
 func (*GetExportJobRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{23}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetExportJobRequest) GetJobId() string {
@@ -1859,7 +1949,7 @@ type GetExportJobResponse struct {
 
 func (x *GetExportJobResponse) Reset() {
 	*x = GetExportJobResponse{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[24]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1871,7 +1961,7 @@ func (x *GetExportJobResponse) String() string {
 func (*GetExportJobResponse) ProtoMessage() {}
 
 func (x *GetExportJobResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[24]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1884,7 +1974,7 @@ func (x *GetExportJobResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetExportJobResponse.ProtoReflect.Descriptor instead.
 func (*GetExportJobResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{24}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *GetExportJobResponse) GetJob() *ExportJob {
@@ -1904,7 +1994,7 @@ type DownloadExportRequest struct {
 
 func (x *DownloadExportRequest) Reset() {
 	*x = DownloadExportRequest{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[25]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1916,7 +2006,7 @@ func (x *DownloadExportRequest) String() string {
 func (*DownloadExportRequest) ProtoMessage() {}
 
 func (x *DownloadExportRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[25]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1929,7 +2019,7 @@ func (x *DownloadExportRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadExportRequest.ProtoReflect.Descriptor instead.
 func (*DownloadExportRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{25}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *DownloadExportRequest) GetJobId() string {
@@ -1951,7 +2041,7 @@ type DownloadExportResponse struct {
 
 func (x *DownloadExportResponse) Reset() {
 	*x = DownloadExportResponse{}
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[26]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1963,7 +2053,7 @@ func (x *DownloadExportResponse) String() string {
 func (*DownloadExportResponse) ProtoMessage() {}
 
 func (x *DownloadExportResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[26]
+	mi := &file_shared_proto_doc_v1_doc_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1976,7 +2066,7 @@ func (x *DownloadExportResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadExportResponse.ProtoReflect.Descriptor instead.
 func (*DownloadExportResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{26}
+	return file_shared_proto_doc_v1_doc_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *DownloadExportResponse) GetFilename() string {
@@ -2126,7 +2216,12 @@ const file_shared_proto_doc_v1_doc_proto_rawDesc = "" +
 	"\x06status\x18\x02 \x01(\x0e2\x16.doc.v1.DocumentStatusR\x06status\"h\n" +
 	"\x1cUpdateDocumentStatusResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12.\n" +
-	"\x06status\x18\x02 \x01(\x0e2\x16.doc.v1.DocumentStatusR\x06status\"g\n" +
+	"\x06status\x18\x02 \x01(\x0e2\x16.doc.v1.DocumentStatusR\x06status\"8\n" +
+	"\x15DeleteDocumentRequest\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\"2\n" +
+	"\x16DeleteDocumentResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"g\n" +
 	"\x13ListVersionsRequest\x12\x1f\n" +
 	"\vdocument_id\x18\x01 \x01(\tR\n" +
 	"documentId\x12\x12\n" +
@@ -2181,13 +2276,15 @@ const file_shared_proto_doc_v1_doc_proto_rawDesc = "" +
 	"\x15EXPORT_STATUS_PENDING\x10\x01\x12\x1c\n" +
 	"\x18EXPORT_STATUS_PROCESSING\x10\x02\x12\x1b\n" +
 	"\x17EXPORT_STATUS_COMPLETED\x10\x03\x12\x18\n" +
-	"\x14EXPORT_STATUS_FAILED\x10\x042\xa0\t\n" +
+	"\x14EXPORT_STATUS_FAILED\x10\x042\xa5\n" +
+	"\n" +
 	"\n" +
 	"DocService\x12q\n" +
 	"\rListDocuments\x12\x1c.doc.v1.ListDocumentsRequest\x1a\x1d.doc.v1.ListDocumentsResponse\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/generated-documents\x12}\n" +
 	"\x10GenerateDocument\x12\x1f.doc.v1.GenerateDocumentRequest\x1a .doc.v1.GenerateDocumentResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/v1/generated-documents\x12y\n" +
 	"\vGetDocument\x12\x1a.doc.v1.GetDocumentRequest\x1a\x1b.doc.v1.GetDocumentResponse\"1\x82\xd3\xe4\x93\x02+\x12)/api/v1/generated-documents/{document_id}\x12\x85\x01\n" +
-	"\x0eUpdateDocument\x12\x1d.doc.v1.UpdateDocumentRequest\x1a\x1e.doc.v1.UpdateDocumentResponse\"4\x82\xd3\xe4\x93\x02.:\x01*\x1a)/api/v1/generated-documents/{document_id}\x12\x85\x01\n" +
+	"\x0eUpdateDocument\x12\x1d.doc.v1.UpdateDocumentRequest\x1a\x1e.doc.v1.UpdateDocumentResponse\"4\x82\xd3\xe4\x93\x02.:\x01*\x1a)/api/v1/generated-documents/{document_id}\x12\x82\x01\n" +
+	"\x0eDeleteDocument\x12\x1d.doc.v1.DeleteDocumentRequest\x1a\x1e.doc.v1.DeleteDocumentResponse\"1\x82\xd3\xe4\x93\x02+*)/api/v1/generated-documents/{document_id}\x12\x85\x01\n" +
 	"\fListVersions\x12\x1b.doc.v1.ListVersionsRequest\x1a\x1c.doc.v1.ListVersionsResponse\":\x82\xd3\xe4\x93\x024\x122/api/v1/generated-documents/{document_id}/versions\x12\x91\x01\n" +
 	"\x0fRollbackVersion\x12\x1e.doc.v1.RollbackVersionRequest\x1a\x1f.doc.v1.RollbackVersionResponse\"=\x82\xd3\xe4\x93\x027:\x01*\"2/api/v1/generated-documents/{document_id}/rollback\x12\x8f\x01\n" +
 	"\x0fCreateExportJob\x12\x1e.doc.v1.CreateExportJobRequest\x1a\x1f.doc.v1.CreateExportJobResponse\";\x82\xd3\xe4\x93\x025:\x01*\"0/api/v1/generated-documents/{document_id}/export\x12o\n" +
@@ -2207,7 +2304,7 @@ func file_shared_proto_doc_v1_doc_proto_rawDescGZIP() []byte {
 }
 
 var file_shared_proto_doc_v1_doc_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_shared_proto_doc_v1_doc_proto_msgTypes = make([]protoimpl.MessageInfo, 29)
+var file_shared_proto_doc_v1_doc_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_shared_proto_doc_v1_doc_proto_goTypes = []any{
 	(DocumentStatus)(0),                  // 0: doc.v1.DocumentStatus
 	(DocType)(0),                         // 1: doc.v1.DocType
@@ -2230,41 +2327,43 @@ var file_shared_proto_doc_v1_doc_proto_goTypes = []any{
 	(*UpdateDocumentResponse)(nil),       // 18: doc.v1.UpdateDocumentResponse
 	(*UpdateDocumentStatusRequest)(nil),  // 19: doc.v1.UpdateDocumentStatusRequest
 	(*UpdateDocumentStatusResponse)(nil), // 20: doc.v1.UpdateDocumentStatusResponse
-	(*ListVersionsRequest)(nil),          // 21: doc.v1.ListVersionsRequest
-	(*ListVersionsResponse)(nil),         // 22: doc.v1.ListVersionsResponse
-	(*RollbackVersionRequest)(nil),       // 23: doc.v1.RollbackVersionRequest
-	(*RollbackVersionResponse)(nil),      // 24: doc.v1.RollbackVersionResponse
-	(*CreateExportJobRequest)(nil),       // 25: doc.v1.CreateExportJobRequest
-	(*CreateExportJobResponse)(nil),      // 26: doc.v1.CreateExportJobResponse
-	(*GetExportJobRequest)(nil),          // 27: doc.v1.GetExportJobRequest
-	(*GetExportJobResponse)(nil),         // 28: doc.v1.GetExportJobResponse
-	(*DownloadExportRequest)(nil),        // 29: doc.v1.DownloadExportRequest
-	(*DownloadExportResponse)(nil),       // 30: doc.v1.DownloadExportResponse
-	nil,                                  // 31: doc.v1.DocumentContent.MetadataEntry
-	nil,                                  // 32: doc.v1.GenerateDocumentRequest.OptionsEntry
-	(*timestamppb.Timestamp)(nil),        // 33: google.protobuf.Timestamp
+	(*DeleteDocumentRequest)(nil),        // 21: doc.v1.DeleteDocumentRequest
+	(*DeleteDocumentResponse)(nil),       // 22: doc.v1.DeleteDocumentResponse
+	(*ListVersionsRequest)(nil),          // 23: doc.v1.ListVersionsRequest
+	(*ListVersionsResponse)(nil),         // 24: doc.v1.ListVersionsResponse
+	(*RollbackVersionRequest)(nil),       // 25: doc.v1.RollbackVersionRequest
+	(*RollbackVersionResponse)(nil),      // 26: doc.v1.RollbackVersionResponse
+	(*CreateExportJobRequest)(nil),       // 27: doc.v1.CreateExportJobRequest
+	(*CreateExportJobResponse)(nil),      // 28: doc.v1.CreateExportJobResponse
+	(*GetExportJobRequest)(nil),          // 29: doc.v1.GetExportJobRequest
+	(*GetExportJobResponse)(nil),         // 30: doc.v1.GetExportJobResponse
+	(*DownloadExportRequest)(nil),        // 31: doc.v1.DownloadExportRequest
+	(*DownloadExportResponse)(nil),       // 32: doc.v1.DownloadExportResponse
+	nil,                                  // 33: doc.v1.DocumentContent.MetadataEntry
+	nil,                                  // 34: doc.v1.GenerateDocumentRequest.OptionsEntry
+	(*timestamppb.Timestamp)(nil),        // 35: google.protobuf.Timestamp
 }
 var file_shared_proto_doc_v1_doc_proto_depIdxs = []int32{
 	4,  // 0: doc.v1.Section.subsections:type_name -> doc.v1.SubSection
 	5,  // 1: doc.v1.DocumentContent.sections:type_name -> doc.v1.Section
-	31, // 2: doc.v1.DocumentContent.metadata:type_name -> doc.v1.DocumentContent.MetadataEntry
+	33, // 2: doc.v1.DocumentContent.metadata:type_name -> doc.v1.DocumentContent.MetadataEntry
 	1,  // 3: doc.v1.GeneratedDocument.doc_type:type_name -> doc.v1.DocType
 	6,  // 4: doc.v1.GeneratedDocument.content:type_name -> doc.v1.DocumentContent
 	0,  // 5: doc.v1.GeneratedDocument.status:type_name -> doc.v1.DocumentStatus
-	33, // 6: doc.v1.GeneratedDocument.created_at:type_name -> google.protobuf.Timestamp
-	33, // 7: doc.v1.GeneratedDocument.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 6: doc.v1.GeneratedDocument.created_at:type_name -> google.protobuf.Timestamp
+	35, // 7: doc.v1.GeneratedDocument.updated_at:type_name -> google.protobuf.Timestamp
 	1,  // 8: doc.v1.DocumentSummary.doc_type:type_name -> doc.v1.DocType
 	0,  // 9: doc.v1.DocumentSummary.status:type_name -> doc.v1.DocumentStatus
-	33, // 10: doc.v1.DocumentSummary.created_at:type_name -> google.protobuf.Timestamp
-	33, // 11: doc.v1.DocumentSummary.updated_at:type_name -> google.protobuf.Timestamp
+	35, // 10: doc.v1.DocumentSummary.created_at:type_name -> google.protobuf.Timestamp
+	35, // 11: doc.v1.DocumentSummary.updated_at:type_name -> google.protobuf.Timestamp
 	6,  // 12: doc.v1.DocumentVersion.content:type_name -> doc.v1.DocumentContent
-	33, // 13: doc.v1.DocumentVersion.created_at:type_name -> google.protobuf.Timestamp
+	35, // 13: doc.v1.DocumentVersion.created_at:type_name -> google.protobuf.Timestamp
 	2,  // 14: doc.v1.ExportJob.format:type_name -> doc.v1.ExportFormat
 	3,  // 15: doc.v1.ExportJob.status:type_name -> doc.v1.ExportStatus
-	33, // 16: doc.v1.ExportJob.created_at:type_name -> google.protobuf.Timestamp
-	33, // 17: doc.v1.ExportJob.completed_at:type_name -> google.protobuf.Timestamp
+	35, // 16: doc.v1.ExportJob.created_at:type_name -> google.protobuf.Timestamp
+	35, // 17: doc.v1.ExportJob.completed_at:type_name -> google.protobuf.Timestamp
 	1,  // 18: doc.v1.GenerateDocumentRequest.doc_type:type_name -> doc.v1.DocType
-	32, // 19: doc.v1.GenerateDocumentRequest.options:type_name -> doc.v1.GenerateDocumentRequest.OptionsEntry
+	34, // 19: doc.v1.GenerateDocumentRequest.options:type_name -> doc.v1.GenerateDocumentRequest.OptionsEntry
 	0,  // 20: doc.v1.GenerateDocumentResponse.status:type_name -> doc.v1.DocumentStatus
 	8,  // 21: doc.v1.ListDocumentsResponse.items:type_name -> doc.v1.DocumentSummary
 	7,  // 22: doc.v1.GetDocumentResponse.document:type_name -> doc.v1.GeneratedDocument
@@ -2281,22 +2380,24 @@ var file_shared_proto_doc_v1_doc_proto_depIdxs = []int32{
 	11, // 33: doc.v1.DocService.GenerateDocument:input_type -> doc.v1.GenerateDocumentRequest
 	15, // 34: doc.v1.DocService.GetDocument:input_type -> doc.v1.GetDocumentRequest
 	17, // 35: doc.v1.DocService.UpdateDocument:input_type -> doc.v1.UpdateDocumentRequest
-	21, // 36: doc.v1.DocService.ListVersions:input_type -> doc.v1.ListVersionsRequest
-	23, // 37: doc.v1.DocService.RollbackVersion:input_type -> doc.v1.RollbackVersionRequest
-	25, // 38: doc.v1.DocService.CreateExportJob:input_type -> doc.v1.CreateExportJobRequest
-	27, // 39: doc.v1.DocService.GetExportJob:input_type -> doc.v1.GetExportJobRequest
-	29, // 40: doc.v1.DocService.DownloadExport:input_type -> doc.v1.DownloadExportRequest
-	14, // 41: doc.v1.DocService.ListDocuments:output_type -> doc.v1.ListDocumentsResponse
-	12, // 42: doc.v1.DocService.GenerateDocument:output_type -> doc.v1.GenerateDocumentResponse
-	16, // 43: doc.v1.DocService.GetDocument:output_type -> doc.v1.GetDocumentResponse
-	18, // 44: doc.v1.DocService.UpdateDocument:output_type -> doc.v1.UpdateDocumentResponse
-	22, // 45: doc.v1.DocService.ListVersions:output_type -> doc.v1.ListVersionsResponse
-	24, // 46: doc.v1.DocService.RollbackVersion:output_type -> doc.v1.RollbackVersionResponse
-	26, // 47: doc.v1.DocService.CreateExportJob:output_type -> doc.v1.CreateExportJobResponse
-	28, // 48: doc.v1.DocService.GetExportJob:output_type -> doc.v1.GetExportJobResponse
-	30, // 49: doc.v1.DocService.DownloadExport:output_type -> doc.v1.DownloadExportResponse
-	41, // [41:50] is the sub-list for method output_type
-	32, // [32:41] is the sub-list for method input_type
+	21, // 36: doc.v1.DocService.DeleteDocument:input_type -> doc.v1.DeleteDocumentRequest
+	23, // 37: doc.v1.DocService.ListVersions:input_type -> doc.v1.ListVersionsRequest
+	25, // 38: doc.v1.DocService.RollbackVersion:input_type -> doc.v1.RollbackVersionRequest
+	27, // 39: doc.v1.DocService.CreateExportJob:input_type -> doc.v1.CreateExportJobRequest
+	29, // 40: doc.v1.DocService.GetExportJob:input_type -> doc.v1.GetExportJobRequest
+	31, // 41: doc.v1.DocService.DownloadExport:input_type -> doc.v1.DownloadExportRequest
+	14, // 42: doc.v1.DocService.ListDocuments:output_type -> doc.v1.ListDocumentsResponse
+	12, // 43: doc.v1.DocService.GenerateDocument:output_type -> doc.v1.GenerateDocumentResponse
+	16, // 44: doc.v1.DocService.GetDocument:output_type -> doc.v1.GetDocumentResponse
+	18, // 45: doc.v1.DocService.UpdateDocument:output_type -> doc.v1.UpdateDocumentResponse
+	22, // 46: doc.v1.DocService.DeleteDocument:output_type -> doc.v1.DeleteDocumentResponse
+	24, // 47: doc.v1.DocService.ListVersions:output_type -> doc.v1.ListVersionsResponse
+	26, // 48: doc.v1.DocService.RollbackVersion:output_type -> doc.v1.RollbackVersionResponse
+	28, // 49: doc.v1.DocService.CreateExportJob:output_type -> doc.v1.CreateExportJobResponse
+	30, // 50: doc.v1.DocService.GetExportJob:output_type -> doc.v1.GetExportJobResponse
+	32, // 51: doc.v1.DocService.DownloadExport:output_type -> doc.v1.DownloadExportResponse
+	42, // [42:52] is the sub-list for method output_type
+	32, // [32:42] is the sub-list for method input_type
 	32, // [32:32] is the sub-list for extension type_name
 	32, // [32:32] is the sub-list for extension extendee
 	0,  // [0:32] is the sub-list for field type_name
@@ -2313,7 +2414,7 @@ func file_shared_proto_doc_v1_doc_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_shared_proto_doc_v1_doc_proto_rawDesc), len(file_shared_proto_doc_v1_doc_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   29,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

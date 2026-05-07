@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"sovereign-ai-compliance/shared/tenant"
 	"golang.org/x/time/rate"
+	"sovereign-ai-compliance/shared/tenant"
 )
 
 // RateLimiterConfig holds per-tenant rate limiting configuration.
@@ -27,8 +27,8 @@ func DefaultRateLimiterConfig() RateLimiterConfig {
 
 // tenantLimiter holds rate limiters per tenant with last-access tracking for cleanup.
 type tenantLimiter struct {
-	limiter   *rate.Limiter
-	lastSeen  time.Time
+	limiter  *rate.Limiter
+	lastSeen time.Time
 }
 
 // RateLimit returns HTTP middleware that enforces per-tenant token-bucket rate limiting.

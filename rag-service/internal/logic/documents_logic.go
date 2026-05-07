@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"mime/multipart"
+	"path/filepath"
 	"strings"
 
 	"sovereign-ai-compliance/rag-service/internal/config"
@@ -71,10 +72,7 @@ func (l *DocumentsLogic) UploadDocument(ctx context.Context, req UploadDocumentR
 		return nil, err
 	}
 
-	fileExt := strings.ToLower(strings.TrimPrefix(req.File.Filename, strings.TrimSuffix(req.File.Filename, ".")))
-	if fileExt == req.File.Filename {
-		fileExt = "txt"
-	}
+	fileExt := detectFileType(req.File.Filename)
 
 	doc := &model.Document{
 		ID:          uuid.New(),
@@ -147,13 +145,14 @@ func (l *DocumentsLogic) processDocumentAsync(ctx context.Context, documentID uu
 	totalChunks := len(chunks)
 	if totalChunks == 0 {
 		_ = l.repo.UpdateDocumentProgress(ctx, documentID, 100)
-		errMsg := ""
-		_ = l.repo.UpdateDocumentStatus(ctx, documentID, model.DocumentStatusCompleted, &errMsg)
-		l.logger.Info("document processing completed (no chunks)",
+		errMsg := "document produced no text chunks"
+		_ = l.repo.UpdateDocumentStatus(ctx, documentID, model.DocumentStatusFailed, &errMsg)
+		l.logger.Warn("document processing failed (no chunks)",
 			zap.String("document_id", documentID.String()))
 		return
 	}
 
+	insertedEmbeddings := 0
 	for i, chunk := range chunks {
 		// Report progress after text extraction (first 10%) and per-chunk embedding (remaining 90%)
 		progress := 10 + int(float64(i+1)/float64(totalChunks)*90)
@@ -161,18 +160,6 @@ func (l *DocumentsLogic) processDocumentAsync(ctx context.Context, documentID uu
 			l.logger.Warn("failed to update document progress",
 				zap.String("document_id", documentID.String()),
 				zap.Error(err))
-		}
-
-		// Check for duplicate
-		exists, err := l.repo.ExistsChecksum(ctx, chunk.Checksum)
-		if err != nil {
-			l.logger.Warn("failed to check duplicate chunk",
-				zap.String("document_id", documentID.String()),
-				zap.Error(err))
-			continue
-		}
-		if exists {
-			continue
 		}
 
 		// Generate embedding
@@ -204,7 +191,19 @@ func (l *DocumentsLogic) processDocumentAsync(ctx context.Context, documentID uu
 			l.logger.Warn("failed to insert embedding",
 				zap.String("document_id", documentID.String()),
 				zap.Error(err))
+			continue
 		}
+		insertedEmbeddings++
+	}
+
+	if insertedEmbeddings == 0 {
+		_ = l.repo.UpdateDocumentProgress(ctx, documentID, 100)
+		errMsg := "document processing produced no searchable embeddings"
+		_ = l.repo.UpdateDocumentStatus(ctx, documentID, model.DocumentStatusFailed, &errMsg)
+		l.logger.Warn("document processing failed (no embeddings inserted)",
+			zap.String("document_id", documentID.String()),
+			zap.Int("chunks", len(chunks)))
+		return
 	}
 
 	// Mark as completed
@@ -213,14 +212,23 @@ func (l *DocumentsLogic) processDocumentAsync(ctx context.Context, documentID uu
 	_ = l.repo.UpdateDocumentStatus(ctx, documentID, model.DocumentStatusCompleted, &errMsg)
 	l.logger.Info("document processing completed",
 		zap.String("document_id", documentID.String()),
-		zap.Int("chunks", len(chunks)))
+		zap.Int("chunks", len(chunks)),
+		zap.Int("embeddings", insertedEmbeddings))
+}
+
+func detectFileType(filename string) string {
+	ext := strings.ToLower(strings.TrimPrefix(filepath.Ext(filename), "."))
+	if ext == "" {
+		return "txt"
+	}
+	return ext
 }
 
 // ListDocumentsRequest lists documents with pagination.
 type ListDocumentsRequest struct {
-	Page        int        `json:"page"`
-	PageSize    int        `json:"page_size"`
-	AISystemID  *uuid.UUID `json:"ai_system_id,omitempty"`
+	Page       int        `json:"page"`
+	PageSize   int        `json:"page_size"`
+	AISystemID *uuid.UUID `json:"ai_system_id,omitempty"`
 }
 
 // ListDocumentsResponse lists documents with pagination.
@@ -300,7 +308,14 @@ func (l *DocumentsLogic) ReprocessDocument(ctx context.Context, req ReprocessDoc
 	// Process async with a background context because the request context
 	// will be cancelled once the HTTP response is sent.
 	bgCtx := tenant.WithContext(context.Background(), tenant.MustFromContext(ctx))
-	go l.processDocumentAsync(bgCtx, req.DocumentID, req.FileContent, doc.FileType)
+	fileType := strings.TrimSpace(req.FileType)
+	if fileType == "" {
+		fileType = strings.TrimSpace(doc.FileType)
+	}
+	if fileType == "" {
+		fileType = detectFileType(doc.Name)
+	}
+	go l.processDocumentAsync(bgCtx, req.DocumentID, req.FileContent, fileType)
 
 	return nil
 }

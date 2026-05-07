@@ -73,16 +73,34 @@ func NewRootHandler(serverCtx *svc.ServiceContext, grpcGateway *gateway.Mux) htt
 		mux.HandleFunc("/api/v1/repository-webhooks/", handleWebhook(repoClient))
 	}
 
+	// Chat session collection endpoints live at the exact path without a
+	// trailing slash. Register that path explicitly so ServeMux does not issue
+	// an automatic redirect to the subtree handler below.
+	gwHandler := grpcGateway.Handler()
+	if ragClient := grpcGateway.RAGClient(); ragClient != nil {
+		mux.Handle("/api/v1/chat/sessions", gwHandler)
+	}
+
+	// Chat SSE handler: translates gRPC server-streaming Chat RPC to proper SSE
+	// format for nested session message routes. Registered before the grpc-gateway
+	// catch-all so it takes precedence for /api/v1/chat/sessions/{id}/messages.
+	if ragClient := grpcGateway.RAGClient(); ragClient != nil {
+		mux.HandleFunc("/api/v1/chat/sessions/", handleChatSSE(ragClient, gwHandler))
+	}
+
 	// grpc-gateway catch-all for services with REST-to-gRPC proto annotations.
 	// Streaming endpoints (audit-jobs status) are wrapped with flushWriter so
 	// NDJSON chunks are delivered to the client immediately instead of buffering.
-	gwHandler := grpcGateway.Handler()
 	mux.Handle("/api/v1/", &flushProxy{
 		handler: gwHandler,
 		shouldFlush: func(r *http.Request) bool {
-			return strings.HasPrefix(r.URL.Path, "/api/v1/audit-jobs/") &&
+			// Audit-jobs status stream (server-sent NDJSON)
+			if strings.HasPrefix(r.URL.Path, "/api/v1/audit-jobs/") &&
 				strings.HasSuffix(r.URL.Path, "/status") &&
-				r.Method == http.MethodGet
+				r.Method == http.MethodGet {
+				return true
+			}
+			return false
 		},
 	})
 

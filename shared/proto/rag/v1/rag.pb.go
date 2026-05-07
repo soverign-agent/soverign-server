@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        v3.19.4
-// source: shared/proto/rag/v1/rag.proto
+// source: rag/v1/rag.proto
 
 package ragv1
 
@@ -22,6 +22,59 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+// ChatRole names the speaker for a chat message.
+type ChatRole int32
+
+const (
+	ChatRole_CHAT_ROLE_UNSPECIFIED ChatRole = 0
+	ChatRole_CHAT_ROLE_USER        ChatRole = 1
+	ChatRole_CHAT_ROLE_ASSISTANT   ChatRole = 2
+	ChatRole_CHAT_ROLE_SYSTEM      ChatRole = 3
+)
+
+// Enum value maps for ChatRole.
+var (
+	ChatRole_name = map[int32]string{
+		0: "CHAT_ROLE_UNSPECIFIED",
+		1: "CHAT_ROLE_USER",
+		2: "CHAT_ROLE_ASSISTANT",
+		3: "CHAT_ROLE_SYSTEM",
+	}
+	ChatRole_value = map[string]int32{
+		"CHAT_ROLE_UNSPECIFIED": 0,
+		"CHAT_ROLE_USER":        1,
+		"CHAT_ROLE_ASSISTANT":   2,
+		"CHAT_ROLE_SYSTEM":      3,
+	}
+)
+
+func (x ChatRole) Enum() *ChatRole {
+	p := new(ChatRole)
+	*p = x
+	return p
+}
+
+func (x ChatRole) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ChatRole) Descriptor() protoreflect.EnumDescriptor {
+	return file_rag_v1_rag_proto_enumTypes[0].Descriptor()
+}
+
+func (ChatRole) Type() protoreflect.EnumType {
+	return &file_rag_v1_rag_proto_enumTypes[0]
+}
+
+func (x ChatRole) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ChatRole.Descriptor instead.
+func (ChatRole) EnumDescriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{0}
+}
 
 // Document represents an uploaded document.
 type Document struct {
@@ -43,7 +96,7 @@ type Document struct {
 
 func (x *Document) Reset() {
 	*x = Document{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[0]
+	mi := &file_rag_v1_rag_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -55,7 +108,7 @@ func (x *Document) String() string {
 func (*Document) ProtoMessage() {}
 
 func (x *Document) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[0]
+	mi := &file_rag_v1_rag_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -68,7 +121,7 @@ func (x *Document) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Document.ProtoReflect.Descriptor instead.
 func (*Document) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{0}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Document) GetId() string {
@@ -162,7 +215,7 @@ type UploadDocumentRequest struct {
 
 func (x *UploadDocumentRequest) Reset() {
 	*x = UploadDocumentRequest{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[1]
+	mi := &file_rag_v1_rag_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -174,7 +227,7 @@ func (x *UploadDocumentRequest) String() string {
 func (*UploadDocumentRequest) ProtoMessage() {}
 
 func (x *UploadDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[1]
+	mi := &file_rag_v1_rag_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -187,7 +240,7 @@ func (x *UploadDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadDocumentRequest.ProtoReflect.Descriptor instead.
 func (*UploadDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{1}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *UploadDocumentRequest) GetName() string {
@@ -236,7 +289,7 @@ type UploadDocumentResponse struct {
 
 func (x *UploadDocumentResponse) Reset() {
 	*x = UploadDocumentResponse{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[2]
+	mi := &file_rag_v1_rag_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -248,7 +301,7 @@ func (x *UploadDocumentResponse) String() string {
 func (*UploadDocumentResponse) ProtoMessage() {}
 
 func (x *UploadDocumentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[2]
+	mi := &file_rag_v1_rag_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -261,7 +314,7 @@ func (x *UploadDocumentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UploadDocumentResponse.ProtoReflect.Descriptor instead.
 func (*UploadDocumentResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{2}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UploadDocumentResponse) GetDocumentId() string {
@@ -290,7 +343,7 @@ type ListDocumentsRequest struct {
 
 func (x *ListDocumentsRequest) Reset() {
 	*x = ListDocumentsRequest{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[3]
+	mi := &file_rag_v1_rag_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -302,7 +355,7 @@ func (x *ListDocumentsRequest) String() string {
 func (*ListDocumentsRequest) ProtoMessage() {}
 
 func (x *ListDocumentsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[3]
+	mi := &file_rag_v1_rag_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -315,7 +368,7 @@ func (x *ListDocumentsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDocumentsRequest.ProtoReflect.Descriptor instead.
 func (*ListDocumentsRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{3}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *ListDocumentsRequest) GetPage() int32 {
@@ -352,7 +405,7 @@ type ListDocumentsResponse struct {
 
 func (x *ListDocumentsResponse) Reset() {
 	*x = ListDocumentsResponse{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[4]
+	mi := &file_rag_v1_rag_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -364,7 +417,7 @@ func (x *ListDocumentsResponse) String() string {
 func (*ListDocumentsResponse) ProtoMessage() {}
 
 func (x *ListDocumentsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[4]
+	mi := &file_rag_v1_rag_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -377,7 +430,7 @@ func (x *ListDocumentsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListDocumentsResponse.ProtoReflect.Descriptor instead.
 func (*ListDocumentsResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{4}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *ListDocumentsResponse) GetDocuments() []*Document {
@@ -418,7 +471,7 @@ type DeleteDocumentRequest struct {
 
 func (x *DeleteDocumentRequest) Reset() {
 	*x = DeleteDocumentRequest{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[5]
+	mi := &file_rag_v1_rag_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -430,7 +483,7 @@ func (x *DeleteDocumentRequest) String() string {
 func (*DeleteDocumentRequest) ProtoMessage() {}
 
 func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[5]
+	mi := &file_rag_v1_rag_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -443,7 +496,7 @@ func (x *DeleteDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteDocumentRequest.ProtoReflect.Descriptor instead.
 func (*DeleteDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{5}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *DeleteDocumentRequest) GetDocumentId() string {
@@ -463,7 +516,7 @@ type DeleteDocumentResponse struct {
 
 func (x *DeleteDocumentResponse) Reset() {
 	*x = DeleteDocumentResponse{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[6]
+	mi := &file_rag_v1_rag_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -475,7 +528,7 @@ func (x *DeleteDocumentResponse) String() string {
 func (*DeleteDocumentResponse) ProtoMessage() {}
 
 func (x *DeleteDocumentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[6]
+	mi := &file_rag_v1_rag_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -488,7 +541,7 @@ func (x *DeleteDocumentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteDocumentResponse.ProtoReflect.Descriptor instead.
 func (*DeleteDocumentResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{6}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *DeleteDocumentResponse) GetSuccess() bool {
@@ -509,7 +562,7 @@ type ReprocessDocumentRequest struct {
 
 func (x *ReprocessDocumentRequest) Reset() {
 	*x = ReprocessDocumentRequest{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[7]
+	mi := &file_rag_v1_rag_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -521,7 +574,7 @@ func (x *ReprocessDocumentRequest) String() string {
 func (*ReprocessDocumentRequest) ProtoMessage() {}
 
 func (x *ReprocessDocumentRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[7]
+	mi := &file_rag_v1_rag_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -534,7 +587,7 @@ func (x *ReprocessDocumentRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReprocessDocumentRequest.ProtoReflect.Descriptor instead.
 func (*ReprocessDocumentRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{7}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ReprocessDocumentRequest) GetDocumentId() string {
@@ -561,7 +614,7 @@ type ReprocessDocumentResponse struct {
 
 func (x *ReprocessDocumentResponse) Reset() {
 	*x = ReprocessDocumentResponse{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[8]
+	mi := &file_rag_v1_rag_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -573,7 +626,7 @@ func (x *ReprocessDocumentResponse) String() string {
 func (*ReprocessDocumentResponse) ProtoMessage() {}
 
 func (x *ReprocessDocumentResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[8]
+	mi := &file_rag_v1_rag_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -586,7 +639,7 @@ func (x *ReprocessDocumentResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ReprocessDocumentResponse.ProtoReflect.Descriptor instead.
 func (*ReprocessDocumentResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{8}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ReprocessDocumentResponse) GetSuccess() bool {
@@ -607,7 +660,7 @@ type SearchRequest struct {
 
 func (x *SearchRequest) Reset() {
 	*x = SearchRequest{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[9]
+	mi := &file_rag_v1_rag_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -619,7 +672,7 @@ func (x *SearchRequest) String() string {
 func (*SearchRequest) ProtoMessage() {}
 
 func (x *SearchRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[9]
+	mi := &file_rag_v1_rag_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -632,7 +685,7 @@ func (x *SearchRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchRequest.ProtoReflect.Descriptor instead.
 func (*SearchRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{9}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *SearchRequest) GetQuery() string {
@@ -662,7 +715,7 @@ type SearchResult struct {
 
 func (x *SearchResult) Reset() {
 	*x = SearchResult{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[10]
+	mi := &file_rag_v1_rag_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -674,7 +727,7 @@ func (x *SearchResult) String() string {
 func (*SearchResult) ProtoMessage() {}
 
 func (x *SearchResult) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[10]
+	mi := &file_rag_v1_rag_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -687,7 +740,7 @@ func (x *SearchResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchResult.ProtoReflect.Descriptor instead.
 func (*SearchResult) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{10}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *SearchResult) GetDocumentId() string {
@@ -730,7 +783,7 @@ type SearchResponse struct {
 
 func (x *SearchResponse) Reset() {
 	*x = SearchResponse{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[11]
+	mi := &file_rag_v1_rag_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -742,7 +795,7 @@ func (x *SearchResponse) String() string {
 func (*SearchResponse) ProtoMessage() {}
 
 func (x *SearchResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[11]
+	mi := &file_rag_v1_rag_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -755,7 +808,7 @@ func (x *SearchResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SearchResponse.ProtoReflect.Descriptor instead.
 func (*SearchResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{11}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *SearchResponse) GetQuery() string {
@@ -788,7 +841,7 @@ type GetStatsRequest struct {
 
 func (x *GetStatsRequest) Reset() {
 	*x = GetStatsRequest{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[12]
+	mi := &file_rag_v1_rag_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -800,7 +853,7 @@ func (x *GetStatsRequest) String() string {
 func (*GetStatsRequest) ProtoMessage() {}
 
 func (x *GetStatsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[12]
+	mi := &file_rag_v1_rag_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -813,7 +866,7 @@ func (x *GetStatsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStatsRequest.ProtoReflect.Descriptor instead.
 func (*GetStatsRequest) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{12}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{12}
 }
 
 // GetStatsResponse returns tenant RAG statistics.
@@ -830,7 +883,7 @@ type GetStatsResponse struct {
 
 func (x *GetStatsResponse) Reset() {
 	*x = GetStatsResponse{}
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[13]
+	mi := &file_rag_v1_rag_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -842,7 +895,7 @@ func (x *GetStatsResponse) String() string {
 func (*GetStatsResponse) ProtoMessage() {}
 
 func (x *GetStatsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_shared_proto_rag_v1_rag_proto_msgTypes[13]
+	mi := &file_rag_v1_rag_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -855,7 +908,7 @@ func (x *GetStatsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetStatsResponse.ProtoReflect.Descriptor instead.
 func (*GetStatsResponse) Descriptor() ([]byte, []int) {
-	return file_shared_proto_rag_v1_rag_proto_rawDescGZIP(), []int{13}
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetStatsResponse) GetDocumentCount() int32 {
@@ -893,11 +946,1168 @@ func (x *GetStatsResponse) GetTotalFileSizeBytes() int64 {
 	return 0
 }
 
-var File_shared_proto_rag_v1_rag_proto protoreflect.FileDescriptor
+// Citation is a single source attribution for an assistant message.
+// It points back to a chunk that was retrieved during synthesis.
+type Citation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	DocumentId    string                 `protobuf:"bytes,1,opt,name=document_id,json=documentId,proto3" json:"document_id,omitempty"`
+	DocumentName  string                 `protobuf:"bytes,2,opt,name=document_name,json=documentName,proto3" json:"document_name,omitempty"`
+	ChunkId       string                 `protobuf:"bytes,3,opt,name=chunk_id,json=chunkId,proto3" json:"chunk_id,omitempty"` // optional; embedding/chunk identifier
+	Snippet       string                 `protobuf:"bytes,4,opt,name=snippet,proto3" json:"snippet,omitempty"`                // short excerpt shown next to the marker
+	Similarity    float64                `protobuf:"fixed64,5,opt,name=similarity,proto3" json:"similarity,omitempty"`        // similarity score (1 = exact)
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
 
-const file_shared_proto_rag_v1_rag_proto_rawDesc = "" +
+func (x *Citation) Reset() {
+	*x = Citation{}
+	mi := &file_rag_v1_rag_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Citation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Citation) ProtoMessage() {}
+
+func (x *Citation) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Citation.ProtoReflect.Descriptor instead.
+func (*Citation) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *Citation) GetDocumentId() string {
+	if x != nil {
+		return x.DocumentId
+	}
+	return ""
+}
+
+func (x *Citation) GetDocumentName() string {
+	if x != nil {
+		return x.DocumentName
+	}
+	return ""
+}
+
+func (x *Citation) GetChunkId() string {
+	if x != nil {
+		return x.ChunkId
+	}
+	return ""
+}
+
+func (x *Citation) GetSnippet() string {
+	if x != nil {
+		return x.Snippet
+	}
+	return ""
+}
+
+func (x *Citation) GetSimilarity() float64 {
+	if x != nil {
+		return x.Similarity
+	}
+	return 0
+}
+
+// ChatSession is a conversation container scoped to (tenant, user).
+type ChatSession struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	TenantId      string                 `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,3,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	MessageCount  int32                  `protobuf:"varint,7,opt,name=message_count,json=messageCount,proto3" json:"message_count,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatSession) Reset() {
+	*x = ChatSession{}
+	mi := &file_rag_v1_rag_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatSession) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatSession) ProtoMessage() {}
+
+func (x *ChatSession) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatSession.ProtoReflect.Descriptor instead.
+func (*ChatSession) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ChatSession) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ChatSession) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *ChatSession) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *ChatSession) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ChatSession) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *ChatSession) GetUpdatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return nil
+}
+
+func (x *ChatSession) GetMessageCount() int32 {
+	if x != nil {
+		return x.MessageCount
+	}
+	return 0
+}
+
+// ChatMessage is a single turn within a session.
+type ChatMessage struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	SessionId     string                 `protobuf:"bytes,2,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	TenantId      string                 `protobuf:"bytes,3,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	Role          ChatRole               `protobuf:"varint,4,opt,name=role,proto3,enum=rag.v1.ChatRole" json:"role,omitempty"`
+	Content       string                 `protobuf:"bytes,5,opt,name=content,proto3" json:"content,omitempty"`
+	Citations     []*Citation            `protobuf:"bytes,6,rep,name=citations,proto3" json:"citations,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatMessage) Reset() {
+	*x = ChatMessage{}
+	mi := &file_rag_v1_rag_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatMessage) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatMessage) ProtoMessage() {}
+
+func (x *ChatMessage) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatMessage.ProtoReflect.Descriptor instead.
+func (*ChatMessage) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *ChatMessage) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetRole() ChatRole {
+	if x != nil {
+		return x.Role
+	}
+	return ChatRole_CHAT_ROLE_UNSPECIFIED
+}
+
+func (x *ChatMessage) GetContent() string {
+	if x != nil {
+		return x.Content
+	}
+	return ""
+}
+
+func (x *ChatMessage) GetCitations() []*Citation {
+	if x != nil {
+		return x.Citations
+	}
+	return nil
+}
+
+func (x *ChatMessage) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+// CreateSessionRequest creates a new chat session for the authenticated user.
+type CreateSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"` // optional; server fills "New Chat" if empty
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSessionRequest) Reset() {
+	*x = CreateSessionRequest{}
+	mi := &file_rag_v1_rag_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSessionRequest) ProtoMessage() {}
+
+func (x *CreateSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSessionRequest.ProtoReflect.Descriptor instead.
+func (*CreateSessionRequest) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *CreateSessionRequest) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+// CreateSessionResponse returns the freshly created session.
+type CreateSessionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Session       *ChatSession           `protobuf:"bytes,1,opt,name=session,proto3" json:"session,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateSessionResponse) Reset() {
+	*x = CreateSessionResponse{}
+	mi := &file_rag_v1_rag_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateSessionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateSessionResponse) ProtoMessage() {}
+
+func (x *CreateSessionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateSessionResponse.ProtoReflect.Descriptor instead.
+func (*CreateSessionResponse) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *CreateSessionResponse) GetSession() *ChatSession {
+	if x != nil {
+		return x.Session
+	}
+	return nil
+}
+
+// ListSessionsRequest lists chat sessions for the current user/tenant.
+type ListSessionsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,2,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSessionsRequest) Reset() {
+	*x = ListSessionsRequest{}
+	mi := &file_rag_v1_rag_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSessionsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSessionsRequest) ProtoMessage() {}
+
+func (x *ListSessionsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSessionsRequest.ProtoReflect.Descriptor instead.
+func (*ListSessionsRequest) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ListSessionsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListSessionsRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// ListSessionsResponse returns paginated chat sessions.
+type ListSessionsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Sessions      []*ChatSession         `protobuf:"bytes,1,rep,name=sessions,proto3" json:"sessions,omitempty"`
+	Total         int32                  `protobuf:"varint,2,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,3,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,4,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSessionsResponse) Reset() {
+	*x = ListSessionsResponse{}
+	mi := &file_rag_v1_rag_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSessionsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSessionsResponse) ProtoMessage() {}
+
+func (x *ListSessionsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSessionsResponse.ProtoReflect.Descriptor instead.
+func (*ListSessionsResponse) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ListSessionsResponse) GetSessions() []*ChatSession {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+func (x *ListSessionsResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *ListSessionsResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *ListSessionsResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// GetSessionHistoryRequest fetches messages from a session in chronological order.
+type GetSessionHistoryRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,3,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSessionHistoryRequest) Reset() {
+	*x = GetSessionHistoryRequest{}
+	mi := &file_rag_v1_rag_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSessionHistoryRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSessionHistoryRequest) ProtoMessage() {}
+
+func (x *GetSessionHistoryRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSessionHistoryRequest.ProtoReflect.Descriptor instead.
+func (*GetSessionHistoryRequest) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GetSessionHistoryRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *GetSessionHistoryRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetSessionHistoryRequest) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// GetSessionHistoryResponse returns paginated message history for a session.
+type GetSessionHistoryResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Session       *ChatSession           `protobuf:"bytes,1,opt,name=session,proto3" json:"session,omitempty"`
+	Messages      []*ChatMessage         `protobuf:"bytes,2,rep,name=messages,proto3" json:"messages,omitempty"`
+	Total         int32                  `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
+	Page          int32                  `protobuf:"varint,4,opt,name=page,proto3" json:"page,omitempty"`
+	PageSize      int32                  `protobuf:"varint,5,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSessionHistoryResponse) Reset() {
+	*x = GetSessionHistoryResponse{}
+	mi := &file_rag_v1_rag_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSessionHistoryResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSessionHistoryResponse) ProtoMessage() {}
+
+func (x *GetSessionHistoryResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSessionHistoryResponse.ProtoReflect.Descriptor instead.
+func (*GetSessionHistoryResponse) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GetSessionHistoryResponse) GetSession() *ChatSession {
+	if x != nil {
+		return x.Session
+	}
+	return nil
+}
+
+func (x *GetSessionHistoryResponse) GetMessages() []*ChatMessage {
+	if x != nil {
+		return x.Messages
+	}
+	return nil
+}
+
+func (x *GetSessionHistoryResponse) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *GetSessionHistoryResponse) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetSessionHistoryResponse) GetPageSize() int32 {
+	if x != nil {
+		return x.PageSize
+	}
+	return 0
+}
+
+// DeleteSessionRequest deletes a chat session.
+type DeleteSessionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteSessionRequest) Reset() {
+	*x = DeleteSessionRequest{}
+	mi := &file_rag_v1_rag_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteSessionRequest) ProtoMessage() {}
+
+func (x *DeleteSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteSessionRequest.ProtoReflect.Descriptor instead.
+func (*DeleteSessionRequest) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *DeleteSessionRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+// DeleteSessionResponse confirms deletion.
+type DeleteSessionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteSessionResponse) Reset() {
+	*x = DeleteSessionResponse{}
+	mi := &file_rag_v1_rag_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteSessionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteSessionResponse) ProtoMessage() {}
+
+func (x *DeleteSessionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteSessionResponse.ProtoReflect.Descriptor instead.
+func (*DeleteSessionResponse) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *DeleteSessionResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+// ChatRequest is the unary request that opens a streaming Chat RPC.
+// session_id must reference an existing session owned by the authenticated user.
+type ChatRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SessionId     string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatRequest) Reset() {
+	*x = ChatRequest{}
+	mi := &file_rag_v1_rag_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatRequest) ProtoMessage() {}
+
+func (x *ChatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatRequest.ProtoReflect.Descriptor instead.
+func (*ChatRequest) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ChatRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *ChatRequest) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+// ChatProgressEvent is a "what the agent is doing now" hint surfaced to the UI.
+// stage values: "planning", "retrieving", "synthesizing", "formatting".
+type ChatProgressEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Stage         string                 `protobuf:"bytes,1,opt,name=stage,proto3" json:"stage,omitempty"`
+	Detail        string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatProgressEvent) Reset() {
+	*x = ChatProgressEvent{}
+	mi := &file_rag_v1_rag_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatProgressEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatProgressEvent) ProtoMessage() {}
+
+func (x *ChatProgressEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatProgressEvent.ProtoReflect.Descriptor instead.
+func (*ChatProgressEvent) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *ChatProgressEvent) GetStage() string {
+	if x != nil {
+		return x.Stage
+	}
+	return ""
+}
+
+func (x *ChatProgressEvent) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+// ChatTokenEvent carries an incremental piece of the assistant answer.
+type ChatTokenEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatTokenEvent) Reset() {
+	*x = ChatTokenEvent{}
+	mi := &file_rag_v1_rag_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatTokenEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatTokenEvent) ProtoMessage() {}
+
+func (x *ChatTokenEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatTokenEvent.ProtoReflect.Descriptor instead.
+func (*ChatTokenEvent) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *ChatTokenEvent) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+// ChatCitationsEvent emits the final citation list once retrieval is complete.
+type ChatCitationsEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Citations     []*Citation            `protobuf:"bytes,1,rep,name=citations,proto3" json:"citations,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatCitationsEvent) Reset() {
+	*x = ChatCitationsEvent{}
+	mi := &file_rag_v1_rag_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatCitationsEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatCitationsEvent) ProtoMessage() {}
+
+func (x *ChatCitationsEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatCitationsEvent.ProtoReflect.Descriptor instead.
+func (*ChatCitationsEvent) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *ChatCitationsEvent) GetCitations() []*Citation {
+	if x != nil {
+		return x.Citations
+	}
+	return nil
+}
+
+// ChatDoneEvent is the terminal event for a successful stream.
+type ChatDoneEvent struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	AssistantMessageId string                 `protobuf:"bytes,1,opt,name=assistant_message_id,json=assistantMessageId,proto3" json:"assistant_message_id,omitempty"`
+	FinishReason       string                 `protobuf:"bytes,2,opt,name=finish_reason,json=finishReason,proto3" json:"finish_reason,omitempty"`
+	PromptTokens       int32                  `protobuf:"varint,3,opt,name=prompt_tokens,json=promptTokens,proto3" json:"prompt_tokens,omitempty"`
+	CompletionTokens   int32                  `protobuf:"varint,4,opt,name=completion_tokens,json=completionTokens,proto3" json:"completion_tokens,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *ChatDoneEvent) Reset() {
+	*x = ChatDoneEvent{}
+	mi := &file_rag_v1_rag_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatDoneEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatDoneEvent) ProtoMessage() {}
+
+func (x *ChatDoneEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatDoneEvent.ProtoReflect.Descriptor instead.
+func (*ChatDoneEvent) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ChatDoneEvent) GetAssistantMessageId() string {
+	if x != nil {
+		return x.AssistantMessageId
+	}
+	return ""
+}
+
+func (x *ChatDoneEvent) GetFinishReason() string {
+	if x != nil {
+		return x.FinishReason
+	}
+	return ""
+}
+
+func (x *ChatDoneEvent) GetPromptTokens() int32 {
+	if x != nil {
+		return x.PromptTokens
+	}
+	return 0
+}
+
+func (x *ChatDoneEvent) GetCompletionTokens() int32 {
+	if x != nil {
+		return x.CompletionTokens
+	}
+	return 0
+}
+
+// ChatErrorEvent is the terminal event when the pipeline fails before completion.
+type ChatErrorEvent struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"` // e.g. "rate_limited", "out_of_domain", "internal"
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatErrorEvent) Reset() {
+	*x = ChatErrorEvent{}
+	mi := &file_rag_v1_rag_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatErrorEvent) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatErrorEvent) ProtoMessage() {}
+
+func (x *ChatErrorEvent) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatErrorEvent.ProtoReflect.Descriptor instead.
+func (*ChatErrorEvent) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ChatErrorEvent) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *ChatErrorEvent) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+// ChatResponse is one server-streamed event in a Chat RPC. Exactly one of the
+// oneof fields is populated per response. Clients should keep reading until
+// either `done` or `error` arrives.
+type ChatResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Event:
+	//
+	//	*ChatResponse_Progress
+	//	*ChatResponse_Token
+	//	*ChatResponse_Citations
+	//	*ChatResponse_Done
+	//	*ChatResponse_Error
+	Event         isChatResponse_Event `protobuf_oneof:"event"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChatResponse) Reset() {
+	*x = ChatResponse{}
+	mi := &file_rag_v1_rag_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChatResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChatResponse) ProtoMessage() {}
+
+func (x *ChatResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_rag_v1_rag_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChatResponse.ProtoReflect.Descriptor instead.
+func (*ChatResponse) Descriptor() ([]byte, []int) {
+	return file_rag_v1_rag_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *ChatResponse) GetEvent() isChatResponse_Event {
+	if x != nil {
+		return x.Event
+	}
+	return nil
+}
+
+func (x *ChatResponse) GetProgress() *ChatProgressEvent {
+	if x != nil {
+		if x, ok := x.Event.(*ChatResponse_Progress); ok {
+			return x.Progress
+		}
+	}
+	return nil
+}
+
+func (x *ChatResponse) GetToken() *ChatTokenEvent {
+	if x != nil {
+		if x, ok := x.Event.(*ChatResponse_Token); ok {
+			return x.Token
+		}
+	}
+	return nil
+}
+
+func (x *ChatResponse) GetCitations() *ChatCitationsEvent {
+	if x != nil {
+		if x, ok := x.Event.(*ChatResponse_Citations); ok {
+			return x.Citations
+		}
+	}
+	return nil
+}
+
+func (x *ChatResponse) GetDone() *ChatDoneEvent {
+	if x != nil {
+		if x, ok := x.Event.(*ChatResponse_Done); ok {
+			return x.Done
+		}
+	}
+	return nil
+}
+
+func (x *ChatResponse) GetError() *ChatErrorEvent {
+	if x != nil {
+		if x, ok := x.Event.(*ChatResponse_Error); ok {
+			return x.Error
+		}
+	}
+	return nil
+}
+
+type isChatResponse_Event interface {
+	isChatResponse_Event()
+}
+
+type ChatResponse_Progress struct {
+	Progress *ChatProgressEvent `protobuf:"bytes,1,opt,name=progress,proto3,oneof"`
+}
+
+type ChatResponse_Token struct {
+	Token *ChatTokenEvent `protobuf:"bytes,2,opt,name=token,proto3,oneof"`
+}
+
+type ChatResponse_Citations struct {
+	Citations *ChatCitationsEvent `protobuf:"bytes,3,opt,name=citations,proto3,oneof"`
+}
+
+type ChatResponse_Done struct {
+	Done *ChatDoneEvent `protobuf:"bytes,4,opt,name=done,proto3,oneof"`
+}
+
+type ChatResponse_Error struct {
+	Error *ChatErrorEvent `protobuf:"bytes,5,opt,name=error,proto3,oneof"`
+}
+
+func (*ChatResponse_Progress) isChatResponse_Event() {}
+
+func (*ChatResponse_Token) isChatResponse_Event() {}
+
+func (*ChatResponse_Citations) isChatResponse_Event() {}
+
+func (*ChatResponse_Done) isChatResponse_Event() {}
+
+func (*ChatResponse_Error) isChatResponse_Event() {}
+
+var File_rag_v1_rag_proto protoreflect.FileDescriptor
+
+const file_rag_v1_rag_proto_rawDesc = "" +
 	"\n" +
-	"\x1dshared/proto/rag/v1/rag.proto\x12\x06rag.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x88\x03\n" +
+	"\x10rag/v1/rag.proto\x12\x06rag.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x1fgoogle/protobuf/timestamp.proto\"\x88\x03\n" +
 	"\bDocument\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x12\n" +
@@ -967,7 +2177,95 @@ const file_shared_proto_rag_v1_rag_proto_rawDesc = "" +
 	"\x13completed_documents\x18\x02 \x01(\x05R\x12completedDocuments\x12+\n" +
 	"\x11pending_documents\x18\x03 \x01(\x05R\x10pendingDocuments\x12'\n" +
 	"\x0fembedding_count\x18\x04 \x01(\x05R\x0eembeddingCount\x121\n" +
-	"\x15total_file_size_bytes\x18\x05 \x01(\x03R\x12totalFileSizeBytes2\xa0\x05\n" +
+	"\x15total_file_size_bytes\x18\x05 \x01(\x03R\x12totalFileSizeBytes\"\xa5\x01\n" +
+	"\bCitation\x12\x1f\n" +
+	"\vdocument_id\x18\x01 \x01(\tR\n" +
+	"documentId\x12#\n" +
+	"\rdocument_name\x18\x02 \x01(\tR\fdocumentName\x12\x19\n" +
+	"\bchunk_id\x18\x03 \x01(\tR\achunkId\x12\x18\n" +
+	"\asnippet\x18\x04 \x01(\tR\asnippet\x12\x1e\n" +
+	"\n" +
+	"similarity\x18\x05 \x01(\x01R\n" +
+	"similarity\"\x84\x02\n" +
+	"\vChatSession\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
+	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x17\n" +
+	"\auser_id\x18\x03 \x01(\tR\x06userId\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\x129\n" +
+	"\n" +
+	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"\n" +
+	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x12#\n" +
+	"\rmessage_count\x18\a \x01(\x05R\fmessageCount\"\x84\x02\n" +
+	"\vChatMessage\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x02 \x01(\tR\tsessionId\x12\x1b\n" +
+	"\ttenant_id\x18\x03 \x01(\tR\btenantId\x12$\n" +
+	"\x04role\x18\x04 \x01(\x0e2\x10.rag.v1.ChatRoleR\x04role\x12\x18\n" +
+	"\acontent\x18\x05 \x01(\tR\acontent\x12.\n" +
+	"\tcitations\x18\x06 \x03(\v2\x10.rag.v1.CitationR\tcitations\x129\n" +
+	"\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\",\n" +
+	"\x14CreateSessionRequest\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\"F\n" +
+	"\x15CreateSessionResponse\x12-\n" +
+	"\asession\x18\x01 \x01(\v2\x13.rag.v1.ChatSessionR\asession\"F\n" +
+	"\x13ListSessionsRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x02 \x01(\x05R\bpageSize\"\x8e\x01\n" +
+	"\x14ListSessionsResponse\x12/\n" +
+	"\bsessions\x18\x01 \x03(\v2\x13.rag.v1.ChatSessionR\bsessions\x12\x14\n" +
+	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
+	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"j\n" +
+	"\x18GetSessionHistoryRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x03 \x01(\x05R\bpageSize\"\xc2\x01\n" +
+	"\x19GetSessionHistoryResponse\x12-\n" +
+	"\asession\x18\x01 \x01(\v2\x13.rag.v1.ChatSessionR\asession\x12/\n" +
+	"\bmessages\x18\x02 \x03(\v2\x13.rag.v1.ChatMessageR\bmessages\x12\x14\n" +
+	"\x05total\x18\x03 \x01(\x05R\x05total\x12\x12\n" +
+	"\x04page\x18\x04 \x01(\x05R\x04page\x12\x1b\n" +
+	"\tpage_size\x18\x05 \x01(\x05R\bpageSize\"5\n" +
+	"\x14DeleteSessionRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\"1\n" +
+	"\x15DeleteSessionResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"F\n" +
+	"\vChatRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"A\n" +
+	"\x11ChatProgressEvent\x12\x14\n" +
+	"\x05stage\x18\x01 \x01(\tR\x05stage\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\"&\n" +
+	"\x0eChatTokenEvent\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\"D\n" +
+	"\x12ChatCitationsEvent\x12.\n" +
+	"\tcitations\x18\x01 \x03(\v2\x10.rag.v1.CitationR\tcitations\"\xb8\x01\n" +
+	"\rChatDoneEvent\x120\n" +
+	"\x14assistant_message_id\x18\x01 \x01(\tR\x12assistantMessageId\x12#\n" +
+	"\rfinish_reason\x18\x02 \x01(\tR\ffinishReason\x12#\n" +
+	"\rprompt_tokens\x18\x03 \x01(\x05R\fpromptTokens\x12+\n" +
+	"\x11completion_tokens\x18\x04 \x01(\x05R\x10completionTokens\">\n" +
+	"\x0eChatErrorEvent\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\tR\x04code\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x99\x02\n" +
+	"\fChatResponse\x127\n" +
+	"\bprogress\x18\x01 \x01(\v2\x19.rag.v1.ChatProgressEventH\x00R\bprogress\x12.\n" +
+	"\x05token\x18\x02 \x01(\v2\x16.rag.v1.ChatTokenEventH\x00R\x05token\x12:\n" +
+	"\tcitations\x18\x03 \x01(\v2\x1a.rag.v1.ChatCitationsEventH\x00R\tcitations\x12+\n" +
+	"\x04done\x18\x04 \x01(\v2\x15.rag.v1.ChatDoneEventH\x00R\x04done\x12.\n" +
+	"\x05error\x18\x05 \x01(\v2\x16.rag.v1.ChatErrorEventH\x00R\x05errorB\a\n" +
+	"\x05event*h\n" +
+	"\bChatRole\x12\x19\n" +
+	"\x15CHAT_ROLE_UNSPECIFIED\x10\x00\x12\x12\n" +
+	"\x0eCHAT_ROLE_USER\x10\x01\x12\x17\n" +
+	"\x13CHAT_ROLE_ASSISTANT\x10\x02\x12\x14\n" +
+	"\x10CHAT_ROLE_SYSTEM\x10\x032\xf1\t\n" +
 	"\n" +
 	"RAGService\x12t\n" +
 	"\x0eUploadDocument\x12\x1d.rag.v1.UploadDocumentRequest\x1a\x1e.rag.v1.UploadDocumentResponse\"#\x82\xd3\xe4\x93\x02\x1d:\x01*\"\x18/api/v1/documents/upload\x12g\n" +
@@ -975,82 +2273,140 @@ const file_shared_proto_rag_v1_rag_proto_rawDesc = "" +
 	"\x0eDeleteDocument\x12\x1d.rag.v1.DeleteDocumentRequest\x1a\x1e.rag.v1.DeleteDocumentResponse\"'\x82\xd3\xe4\x93\x02!*\x1f/api/v1/documents/{document_id}\x12\x8e\x01\n" +
 	"\x11ReprocessDocument\x12 .rag.v1.ReprocessDocumentRequest\x1a!.rag.v1.ReprocessDocumentResponse\"4\x82\xd3\xe4\x93\x02.:\x01*\")/api/v1/documents/{document_id}/reprocess\x12R\n" +
 	"\x06Search\x12\x15.rag.v1.SearchRequest\x1a\x16.rag.v1.SearchResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/api/v1/search\x12T\n" +
-	"\bGetStats\x12\x17.rag.v1.GetStatsRequest\x1a\x18.rag.v1.GetStatsResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/statsB3Z1sovereign-ai-compliance/shared/proto/rag/v1;ragv1b\x06proto3"
+	"\bGetStats\x12\x17.rag.v1.GetStatsRequest\x1a\x18.rag.v1.GetStatsResponse\"\x15\x82\xd3\xe4\x93\x02\x0f\x12\r/api/v1/stats\x12n\n" +
+	"\rCreateSession\x12\x1c.rag.v1.CreateSessionRequest\x1a\x1d.rag.v1.CreateSessionResponse\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/v1/chat/sessions\x12h\n" +
+	"\fListSessions\x12\x1b.rag.v1.ListSessionsRequest\x1a\x1c.rag.v1.ListSessionsResponse\"\x1d\x82\xd3\xe4\x93\x02\x17\x12\x15/api/v1/chat/sessions\x12\x8d\x01\n" +
+	"\x11GetSessionHistory\x12 .rag.v1.GetSessionHistoryRequest\x1a!.rag.v1.GetSessionHistoryResponse\"3\x82\xd3\xe4\x93\x02-\x12+/api/v1/chat/sessions/{session_id}/messages\x12x\n" +
+	"\rDeleteSession\x12\x1c.rag.v1.DeleteSessionRequest\x1a\x1d.rag.v1.DeleteSessionResponse\"*\x82\xd3\xe4\x93\x02$*\"/api/v1/chat/sessions/{session_id}\x12k\n" +
+	"\x04Chat\x12\x13.rag.v1.ChatRequest\x1a\x14.rag.v1.ChatResponse\"6\x82\xd3\xe4\x93\x020:\x01*\"+/api/v1/chat/sessions/{session_id}/messages0\x01B3Z1sovereign-ai-compliance/shared/proto/rag/v1;ragv1b\x06proto3"
 
 var (
-	file_shared_proto_rag_v1_rag_proto_rawDescOnce sync.Once
-	file_shared_proto_rag_v1_rag_proto_rawDescData []byte
+	file_rag_v1_rag_proto_rawDescOnce sync.Once
+	file_rag_v1_rag_proto_rawDescData []byte
 )
 
-func file_shared_proto_rag_v1_rag_proto_rawDescGZIP() []byte {
-	file_shared_proto_rag_v1_rag_proto_rawDescOnce.Do(func() {
-		file_shared_proto_rag_v1_rag_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_shared_proto_rag_v1_rag_proto_rawDesc), len(file_shared_proto_rag_v1_rag_proto_rawDesc)))
+func file_rag_v1_rag_proto_rawDescGZIP() []byte {
+	file_rag_v1_rag_proto_rawDescOnce.Do(func() {
+		file_rag_v1_rag_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_rag_v1_rag_proto_rawDesc), len(file_rag_v1_rag_proto_rawDesc)))
 	})
-	return file_shared_proto_rag_v1_rag_proto_rawDescData
+	return file_rag_v1_rag_proto_rawDescData
 }
 
-var file_shared_proto_rag_v1_rag_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
-var file_shared_proto_rag_v1_rag_proto_goTypes = []any{
-	(*Document)(nil),                  // 0: rag.v1.Document
-	(*UploadDocumentRequest)(nil),     // 1: rag.v1.UploadDocumentRequest
-	(*UploadDocumentResponse)(nil),    // 2: rag.v1.UploadDocumentResponse
-	(*ListDocumentsRequest)(nil),      // 3: rag.v1.ListDocumentsRequest
-	(*ListDocumentsResponse)(nil),     // 4: rag.v1.ListDocumentsResponse
-	(*DeleteDocumentRequest)(nil),     // 5: rag.v1.DeleteDocumentRequest
-	(*DeleteDocumentResponse)(nil),    // 6: rag.v1.DeleteDocumentResponse
-	(*ReprocessDocumentRequest)(nil),  // 7: rag.v1.ReprocessDocumentRequest
-	(*ReprocessDocumentResponse)(nil), // 8: rag.v1.ReprocessDocumentResponse
-	(*SearchRequest)(nil),             // 9: rag.v1.SearchRequest
-	(*SearchResult)(nil),              // 10: rag.v1.SearchResult
-	(*SearchResponse)(nil),            // 11: rag.v1.SearchResponse
-	(*GetStatsRequest)(nil),           // 12: rag.v1.GetStatsRequest
-	(*GetStatsResponse)(nil),          // 13: rag.v1.GetStatsResponse
-	(*timestamppb.Timestamp)(nil),     // 14: google.protobuf.Timestamp
+var file_rag_v1_rag_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_rag_v1_rag_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
+var file_rag_v1_rag_proto_goTypes = []any{
+	(ChatRole)(0),                     // 0: rag.v1.ChatRole
+	(*Document)(nil),                  // 1: rag.v1.Document
+	(*UploadDocumentRequest)(nil),     // 2: rag.v1.UploadDocumentRequest
+	(*UploadDocumentResponse)(nil),    // 3: rag.v1.UploadDocumentResponse
+	(*ListDocumentsRequest)(nil),      // 4: rag.v1.ListDocumentsRequest
+	(*ListDocumentsResponse)(nil),     // 5: rag.v1.ListDocumentsResponse
+	(*DeleteDocumentRequest)(nil),     // 6: rag.v1.DeleteDocumentRequest
+	(*DeleteDocumentResponse)(nil),    // 7: rag.v1.DeleteDocumentResponse
+	(*ReprocessDocumentRequest)(nil),  // 8: rag.v1.ReprocessDocumentRequest
+	(*ReprocessDocumentResponse)(nil), // 9: rag.v1.ReprocessDocumentResponse
+	(*SearchRequest)(nil),             // 10: rag.v1.SearchRequest
+	(*SearchResult)(nil),              // 11: rag.v1.SearchResult
+	(*SearchResponse)(nil),            // 12: rag.v1.SearchResponse
+	(*GetStatsRequest)(nil),           // 13: rag.v1.GetStatsRequest
+	(*GetStatsResponse)(nil),          // 14: rag.v1.GetStatsResponse
+	(*Citation)(nil),                  // 15: rag.v1.Citation
+	(*ChatSession)(nil),               // 16: rag.v1.ChatSession
+	(*ChatMessage)(nil),               // 17: rag.v1.ChatMessage
+	(*CreateSessionRequest)(nil),      // 18: rag.v1.CreateSessionRequest
+	(*CreateSessionResponse)(nil),     // 19: rag.v1.CreateSessionResponse
+	(*ListSessionsRequest)(nil),       // 20: rag.v1.ListSessionsRequest
+	(*ListSessionsResponse)(nil),      // 21: rag.v1.ListSessionsResponse
+	(*GetSessionHistoryRequest)(nil),  // 22: rag.v1.GetSessionHistoryRequest
+	(*GetSessionHistoryResponse)(nil), // 23: rag.v1.GetSessionHistoryResponse
+	(*DeleteSessionRequest)(nil),      // 24: rag.v1.DeleteSessionRequest
+	(*DeleteSessionResponse)(nil),     // 25: rag.v1.DeleteSessionResponse
+	(*ChatRequest)(nil),               // 26: rag.v1.ChatRequest
+	(*ChatProgressEvent)(nil),         // 27: rag.v1.ChatProgressEvent
+	(*ChatTokenEvent)(nil),            // 28: rag.v1.ChatTokenEvent
+	(*ChatCitationsEvent)(nil),        // 29: rag.v1.ChatCitationsEvent
+	(*ChatDoneEvent)(nil),             // 30: rag.v1.ChatDoneEvent
+	(*ChatErrorEvent)(nil),            // 31: rag.v1.ChatErrorEvent
+	(*ChatResponse)(nil),              // 32: rag.v1.ChatResponse
+	(*timestamppb.Timestamp)(nil),     // 33: google.protobuf.Timestamp
 }
-var file_shared_proto_rag_v1_rag_proto_depIdxs = []int32{
-	14, // 0: rag.v1.Document.created_at:type_name -> google.protobuf.Timestamp
-	14, // 1: rag.v1.Document.updated_at:type_name -> google.protobuf.Timestamp
-	0,  // 2: rag.v1.ListDocumentsResponse.documents:type_name -> rag.v1.Document
-	10, // 3: rag.v1.SearchResponse.results:type_name -> rag.v1.SearchResult
-	1,  // 4: rag.v1.RAGService.UploadDocument:input_type -> rag.v1.UploadDocumentRequest
-	3,  // 5: rag.v1.RAGService.ListDocuments:input_type -> rag.v1.ListDocumentsRequest
-	5,  // 6: rag.v1.RAGService.DeleteDocument:input_type -> rag.v1.DeleteDocumentRequest
-	7,  // 7: rag.v1.RAGService.ReprocessDocument:input_type -> rag.v1.ReprocessDocumentRequest
-	9,  // 8: rag.v1.RAGService.Search:input_type -> rag.v1.SearchRequest
-	12, // 9: rag.v1.RAGService.GetStats:input_type -> rag.v1.GetStatsRequest
-	2,  // 10: rag.v1.RAGService.UploadDocument:output_type -> rag.v1.UploadDocumentResponse
-	4,  // 11: rag.v1.RAGService.ListDocuments:output_type -> rag.v1.ListDocumentsResponse
-	6,  // 12: rag.v1.RAGService.DeleteDocument:output_type -> rag.v1.DeleteDocumentResponse
-	8,  // 13: rag.v1.RAGService.ReprocessDocument:output_type -> rag.v1.ReprocessDocumentResponse
-	11, // 14: rag.v1.RAGService.Search:output_type -> rag.v1.SearchResponse
-	13, // 15: rag.v1.RAGService.GetStats:output_type -> rag.v1.GetStatsResponse
-	10, // [10:16] is the sub-list for method output_type
-	4,  // [4:10] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+var file_rag_v1_rag_proto_depIdxs = []int32{
+	33, // 0: rag.v1.Document.created_at:type_name -> google.protobuf.Timestamp
+	33, // 1: rag.v1.Document.updated_at:type_name -> google.protobuf.Timestamp
+	1,  // 2: rag.v1.ListDocumentsResponse.documents:type_name -> rag.v1.Document
+	11, // 3: rag.v1.SearchResponse.results:type_name -> rag.v1.SearchResult
+	33, // 4: rag.v1.ChatSession.created_at:type_name -> google.protobuf.Timestamp
+	33, // 5: rag.v1.ChatSession.updated_at:type_name -> google.protobuf.Timestamp
+	0,  // 6: rag.v1.ChatMessage.role:type_name -> rag.v1.ChatRole
+	15, // 7: rag.v1.ChatMessage.citations:type_name -> rag.v1.Citation
+	33, // 8: rag.v1.ChatMessage.created_at:type_name -> google.protobuf.Timestamp
+	16, // 9: rag.v1.CreateSessionResponse.session:type_name -> rag.v1.ChatSession
+	16, // 10: rag.v1.ListSessionsResponse.sessions:type_name -> rag.v1.ChatSession
+	16, // 11: rag.v1.GetSessionHistoryResponse.session:type_name -> rag.v1.ChatSession
+	17, // 12: rag.v1.GetSessionHistoryResponse.messages:type_name -> rag.v1.ChatMessage
+	15, // 13: rag.v1.ChatCitationsEvent.citations:type_name -> rag.v1.Citation
+	27, // 14: rag.v1.ChatResponse.progress:type_name -> rag.v1.ChatProgressEvent
+	28, // 15: rag.v1.ChatResponse.token:type_name -> rag.v1.ChatTokenEvent
+	29, // 16: rag.v1.ChatResponse.citations:type_name -> rag.v1.ChatCitationsEvent
+	30, // 17: rag.v1.ChatResponse.done:type_name -> rag.v1.ChatDoneEvent
+	31, // 18: rag.v1.ChatResponse.error:type_name -> rag.v1.ChatErrorEvent
+	2,  // 19: rag.v1.RAGService.UploadDocument:input_type -> rag.v1.UploadDocumentRequest
+	4,  // 20: rag.v1.RAGService.ListDocuments:input_type -> rag.v1.ListDocumentsRequest
+	6,  // 21: rag.v1.RAGService.DeleteDocument:input_type -> rag.v1.DeleteDocumentRequest
+	8,  // 22: rag.v1.RAGService.ReprocessDocument:input_type -> rag.v1.ReprocessDocumentRequest
+	10, // 23: rag.v1.RAGService.Search:input_type -> rag.v1.SearchRequest
+	13, // 24: rag.v1.RAGService.GetStats:input_type -> rag.v1.GetStatsRequest
+	18, // 25: rag.v1.RAGService.CreateSession:input_type -> rag.v1.CreateSessionRequest
+	20, // 26: rag.v1.RAGService.ListSessions:input_type -> rag.v1.ListSessionsRequest
+	22, // 27: rag.v1.RAGService.GetSessionHistory:input_type -> rag.v1.GetSessionHistoryRequest
+	24, // 28: rag.v1.RAGService.DeleteSession:input_type -> rag.v1.DeleteSessionRequest
+	26, // 29: rag.v1.RAGService.Chat:input_type -> rag.v1.ChatRequest
+	3,  // 30: rag.v1.RAGService.UploadDocument:output_type -> rag.v1.UploadDocumentResponse
+	5,  // 31: rag.v1.RAGService.ListDocuments:output_type -> rag.v1.ListDocumentsResponse
+	7,  // 32: rag.v1.RAGService.DeleteDocument:output_type -> rag.v1.DeleteDocumentResponse
+	9,  // 33: rag.v1.RAGService.ReprocessDocument:output_type -> rag.v1.ReprocessDocumentResponse
+	12, // 34: rag.v1.RAGService.Search:output_type -> rag.v1.SearchResponse
+	14, // 35: rag.v1.RAGService.GetStats:output_type -> rag.v1.GetStatsResponse
+	19, // 36: rag.v1.RAGService.CreateSession:output_type -> rag.v1.CreateSessionResponse
+	21, // 37: rag.v1.RAGService.ListSessions:output_type -> rag.v1.ListSessionsResponse
+	23, // 38: rag.v1.RAGService.GetSessionHistory:output_type -> rag.v1.GetSessionHistoryResponse
+	25, // 39: rag.v1.RAGService.DeleteSession:output_type -> rag.v1.DeleteSessionResponse
+	32, // 40: rag.v1.RAGService.Chat:output_type -> rag.v1.ChatResponse
+	30, // [30:41] is the sub-list for method output_type
+	19, // [19:30] is the sub-list for method input_type
+	19, // [19:19] is the sub-list for extension type_name
+	19, // [19:19] is the sub-list for extension extendee
+	0,  // [0:19] is the sub-list for field type_name
 }
 
-func init() { file_shared_proto_rag_v1_rag_proto_init() }
-func file_shared_proto_rag_v1_rag_proto_init() {
-	if File_shared_proto_rag_v1_rag_proto != nil {
+func init() { file_rag_v1_rag_proto_init() }
+func file_rag_v1_rag_proto_init() {
+	if File_rag_v1_rag_proto != nil {
 		return
+	}
+	file_rag_v1_rag_proto_msgTypes[31].OneofWrappers = []any{
+		(*ChatResponse_Progress)(nil),
+		(*ChatResponse_Token)(nil),
+		(*ChatResponse_Citations)(nil),
+		(*ChatResponse_Done)(nil),
+		(*ChatResponse_Error)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_shared_proto_rag_v1_rag_proto_rawDesc), len(file_shared_proto_rag_v1_rag_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   14,
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_rag_v1_rag_proto_rawDesc), len(file_rag_v1_rag_proto_rawDesc)),
+			NumEnums:      1,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
-		GoTypes:           file_shared_proto_rag_v1_rag_proto_goTypes,
-		DependencyIndexes: file_shared_proto_rag_v1_rag_proto_depIdxs,
-		MessageInfos:      file_shared_proto_rag_v1_rag_proto_msgTypes,
+		GoTypes:           file_rag_v1_rag_proto_goTypes,
+		DependencyIndexes: file_rag_v1_rag_proto_depIdxs,
+		EnumInfos:         file_rag_v1_rag_proto_enumTypes,
+		MessageInfos:      file_rag_v1_rag_proto_msgTypes,
 	}.Build()
-	File_shared_proto_rag_v1_rag_proto = out.File
-	file_shared_proto_rag_v1_rag_proto_goTypes = nil
-	file_shared_proto_rag_v1_rag_proto_depIdxs = nil
+	File_rag_v1_rag_proto = out.File
+	file_rag_v1_rag_proto_goTypes = nil
+	file_rag_v1_rag_proto_depIdxs = nil
 }

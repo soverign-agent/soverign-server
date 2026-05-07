@@ -22,6 +22,7 @@ type MockRepository struct {
 	CreateExportJobFunc        func(ctx context.Context, job *model.ExportJob) error
 	GetExportJobByIDFunc       func(ctx context.Context, id uuid.UUID) (*model.ExportJob, error)
 	UpdateExportJobStatusFunc  func(ctx context.Context, id uuid.UUID, status string, filePath *string, fileSize *int64, errorMessage *string) error
+	DeleteDocumentFunc         func(ctx context.Context, id uuid.UUID) error
 }
 
 // DB is not implemented for the mock.
@@ -111,6 +112,14 @@ func (m *MockRepository) GetExportJobByID(ctx context.Context, id uuid.UUID) (*m
 func (m *MockRepository) UpdateExportJobStatus(ctx context.Context, id uuid.UUID, status string, filePath *string, fileSize *int64, errorMessage *string) error {
 	if m.UpdateExportJobStatusFunc != nil {
 		return m.UpdateExportJobStatusFunc(ctx, id, status, filePath, fileSize, errorMessage)
+	}
+	return nil
+}
+
+// DeleteDocument delegates to DeleteDocumentFunc.
+func (m *MockRepository) DeleteDocument(ctx context.Context, id uuid.UUID) error {
+	if m.DeleteDocumentFunc != nil {
+		return m.DeleteDocumentFunc(ctx, id)
 	}
 	return nil
 }

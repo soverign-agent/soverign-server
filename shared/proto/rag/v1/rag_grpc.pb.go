@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.5.1
 // - protoc             v3.19.4
-// source: shared/proto/rag/v1/rag.proto
+// source: rag/v1/rag.proto
 
 package ragv1
 
@@ -25,6 +25,11 @@ const (
 	RAGService_ReprocessDocument_FullMethodName = "/rag.v1.RAGService/ReprocessDocument"
 	RAGService_Search_FullMethodName            = "/rag.v1.RAGService/Search"
 	RAGService_GetStats_FullMethodName          = "/rag.v1.RAGService/GetStats"
+	RAGService_CreateSession_FullMethodName     = "/rag.v1.RAGService/CreateSession"
+	RAGService_ListSessions_FullMethodName      = "/rag.v1.RAGService/ListSessions"
+	RAGService_GetSessionHistory_FullMethodName = "/rag.v1.RAGService/GetSessionHistory"
+	RAGService_DeleteSession_FullMethodName     = "/rag.v1.RAGService/DeleteSession"
+	RAGService_Chat_FullMethodName              = "/rag.v1.RAGService/Chat"
 )
 
 // RAGServiceClient is the client API for RAGService service.
@@ -39,6 +44,15 @@ type RAGServiceClient interface {
 	ReprocessDocument(ctx context.Context, in *ReprocessDocumentRequest, opts ...grpc.CallOption) (*ReprocessDocumentResponse, error)
 	Search(ctx context.Context, in *SearchRequest, opts ...grpc.CallOption) (*SearchResponse, error)
 	GetStats(ctx context.Context, in *GetStatsRequest, opts ...grpc.CallOption) (*GetStatsResponse, error)
+	CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error)
+	ListSessions(ctx context.Context, in *ListSessionsRequest, opts ...grpc.CallOption) (*ListSessionsResponse, error)
+	GetSessionHistory(ctx context.Context, in *GetSessionHistoryRequest, opts ...grpc.CallOption) (*GetSessionHistoryResponse, error)
+	DeleteSession(ctx context.Context, in *DeleteSessionRequest, opts ...grpc.CallOption) (*DeleteSessionResponse, error)
+	// Chat is a server-streaming RPC. The grpc-gateway translates it into an
+	// SSE-compatible HTTP endpoint (each ChatResponse is delivered as a single
+	// SSE event). Clients without HTTP/2 grpc support can use the gRPC-Web
+	// adapter against the same gRPC method.
+	Chat(ctx context.Context, in *ChatRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatResponse], error)
 }
 
 type rAGServiceClient struct {
@@ -109,6 +123,65 @@ func (c *rAGServiceClient) GetStats(ctx context.Context, in *GetStatsRequest, op
 	return out, nil
 }
 
+func (c *rAGServiceClient) CreateSession(ctx context.Context, in *CreateSessionRequest, opts ...grpc.CallOption) (*CreateSessionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateSessionResponse)
+	err := c.cc.Invoke(ctx, RAGService_CreateSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rAGServiceClient) ListSessions(ctx context.Context, in *ListSessionsRequest, opts ...grpc.CallOption) (*ListSessionsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSessionsResponse)
+	err := c.cc.Invoke(ctx, RAGService_ListSessions_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rAGServiceClient) GetSessionHistory(ctx context.Context, in *GetSessionHistoryRequest, opts ...grpc.CallOption) (*GetSessionHistoryResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSessionHistoryResponse)
+	err := c.cc.Invoke(ctx, RAGService_GetSessionHistory_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rAGServiceClient) DeleteSession(ctx context.Context, in *DeleteSessionRequest, opts ...grpc.CallOption) (*DeleteSessionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteSessionResponse)
+	err := c.cc.Invoke(ctx, RAGService_DeleteSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rAGServiceClient) Chat(ctx context.Context, in *ChatRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &RAGService_ServiceDesc.Streams[0], RAGService_Chat_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[ChatRequest, ChatResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type RAGService_ChatClient = grpc.ServerStreamingClient[ChatResponse]
+
 // RAGServiceServer is the server API for RAGService service.
 // All implementations must embed UnimplementedRAGServiceServer
 // for forward compatibility.
@@ -121,6 +194,15 @@ type RAGServiceServer interface {
 	ReprocessDocument(context.Context, *ReprocessDocumentRequest) (*ReprocessDocumentResponse, error)
 	Search(context.Context, *SearchRequest) (*SearchResponse, error)
 	GetStats(context.Context, *GetStatsRequest) (*GetStatsResponse, error)
+	CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error)
+	ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error)
+	GetSessionHistory(context.Context, *GetSessionHistoryRequest) (*GetSessionHistoryResponse, error)
+	DeleteSession(context.Context, *DeleteSessionRequest) (*DeleteSessionResponse, error)
+	// Chat is a server-streaming RPC. The grpc-gateway translates it into an
+	// SSE-compatible HTTP endpoint (each ChatResponse is delivered as a single
+	// SSE event). Clients without HTTP/2 grpc support can use the gRPC-Web
+	// adapter against the same gRPC method.
+	Chat(*ChatRequest, grpc.ServerStreamingServer[ChatResponse]) error
 	mustEmbedUnimplementedRAGServiceServer()
 }
 
@@ -148,6 +230,21 @@ func (UnimplementedRAGServiceServer) Search(context.Context, *SearchRequest) (*S
 }
 func (UnimplementedRAGServiceServer) GetStats(context.Context, *GetStatsRequest) (*GetStatsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStats not implemented")
+}
+func (UnimplementedRAGServiceServer) CreateSession(context.Context, *CreateSessionRequest) (*CreateSessionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateSession not implemented")
+}
+func (UnimplementedRAGServiceServer) ListSessions(context.Context, *ListSessionsRequest) (*ListSessionsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSessions not implemented")
+}
+func (UnimplementedRAGServiceServer) GetSessionHistory(context.Context, *GetSessionHistoryRequest) (*GetSessionHistoryResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSessionHistory not implemented")
+}
+func (UnimplementedRAGServiceServer) DeleteSession(context.Context, *DeleteSessionRequest) (*DeleteSessionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteSession not implemented")
+}
+func (UnimplementedRAGServiceServer) Chat(*ChatRequest, grpc.ServerStreamingServer[ChatResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method Chat not implemented")
 }
 func (UnimplementedRAGServiceServer) mustEmbedUnimplementedRAGServiceServer() {}
 func (UnimplementedRAGServiceServer) testEmbeddedByValue()                    {}
@@ -278,6 +375,89 @@ func _RAGService_GetStats_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RAGService_CreateSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RAGServiceServer).CreateSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RAGService_CreateSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RAGServiceServer).CreateSession(ctx, req.(*CreateSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RAGService_ListSessions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSessionsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RAGServiceServer).ListSessions(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RAGService_ListSessions_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RAGServiceServer).ListSessions(ctx, req.(*ListSessionsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RAGService_GetSessionHistory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSessionHistoryRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RAGServiceServer).GetSessionHistory(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RAGService_GetSessionHistory_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RAGServiceServer).GetSessionHistory(ctx, req.(*GetSessionHistoryRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RAGService_DeleteSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RAGServiceServer).DeleteSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RAGService_DeleteSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RAGServiceServer).DeleteSession(ctx, req.(*DeleteSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RAGService_Chat_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ChatRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(RAGServiceServer).Chat(m, &grpc.GenericServerStream[ChatRequest, ChatResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type RAGService_ChatServer = grpc.ServerStreamingServer[ChatResponse]
+
 // RAGService_ServiceDesc is the grpc.ServiceDesc for RAGService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -309,7 +489,29 @@ var RAGService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetStats",
 			Handler:    _RAGService_GetStats_Handler,
 		},
+		{
+			MethodName: "CreateSession",
+			Handler:    _RAGService_CreateSession_Handler,
+		},
+		{
+			MethodName: "ListSessions",
+			Handler:    _RAGService_ListSessions_Handler,
+		},
+		{
+			MethodName: "GetSessionHistory",
+			Handler:    _RAGService_GetSessionHistory_Handler,
+		},
+		{
+			MethodName: "DeleteSession",
+			Handler:    _RAGService_DeleteSession_Handler,
+		},
 	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "shared/proto/rag/v1/rag.proto",
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Chat",
+			Handler:       _RAGService_Chat_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "rag/v1/rag.proto",
 }

@@ -309,6 +309,25 @@ func (l *DocumentLogic) UpdateDocumentStatus(ctx context.Context, req types.Upda
 	}, nil
 }
 
+// DeleteDocument deletes a document by ID.
+func (l *DocumentLogic) DeleteDocument(ctx context.Context, req types.DeleteDocumentRequest) (*types.DeleteDocumentResponse, error) {
+	doc, err := l.repo.GetDocumentByID(ctx, req.DocumentID)
+	if err != nil {
+		return nil, fmt.Errorf("get document: %w", err)
+	}
+	if doc == nil {
+		return nil, fmt.Errorf("document not found")
+	}
+
+	if err := l.repo.DeleteDocument(ctx, req.DocumentID); err != nil {
+		return nil, fmt.Errorf("delete document: %w", err)
+	}
+
+	return &types.DeleteDocumentResponse{
+		Success: true,
+	}, nil
+}
+
 // isValidStatusTransition checks if a status transition is allowed.
 func isValidStatusTransition(from, to string) bool {
 	// Define allowed transitions

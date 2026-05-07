@@ -106,6 +106,151 @@ message GetStatsResponse {
   int64 total_file_size_bytes = 5;
 }
 
+// =============================================================================
+// Chat / Agentic RAG
+// =============================================================================
+
+// ChatRole names the speaker for a chat message.
+enum ChatRole {
+  CHAT_ROLE_UNSPECIFIED = 0;
+  CHAT_ROLE_USER        = 1;
+  CHAT_ROLE_ASSISTANT   = 2;
+  CHAT_ROLE_SYSTEM      = 3;
+}
+
+// Citation is a single source attribution for an assistant message.
+// It points back to a chunk that was retrieved during synthesis.
+message Citation {
+  string document_id   = 1;
+  string document_name = 2;
+  string chunk_id      = 3;   // optional; embedding/chunk identifier
+  string snippet       = 4;   // short excerpt shown next to the marker
+  double similarity    = 5;   // similarity score (1 = exact)
+}
+
+// ChatSession is a conversation container scoped to (tenant, user).
+message ChatSession {
+  string id         = 1;
+  string tenant_id  = 2;
+  string user_id    = 3;
+  string title      = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  int32  message_count = 7;
+}
+
+// ChatMessage is a single turn within a session.
+message ChatMessage {
+  string id         = 1;
+  string session_id = 2;
+  string tenant_id  = 3;
+  ChatRole role     = 4;
+  string content    = 5;
+  repeated Citation citations = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+// CreateSessionRequest creates a new chat session for the authenticated user.
+message CreateSessionRequest {
+  string title = 1; // optional; server fills "New Chat" if empty
+}
+
+// CreateSessionResponse returns the freshly created session.
+message CreateSessionResponse {
+  ChatSession session = 1;
+}
+
+// ListSessionsRequest lists chat sessions for the current user/tenant.
+message ListSessionsRequest {
+  int32 page      = 1;
+  int32 page_size = 2;
+}
+
+// ListSessionsResponse returns paginated chat sessions.
+message ListSessionsResponse {
+  repeated ChatSession sessions = 1;
+  int32 total     = 2;
+  int32 page      = 3;
+  int32 page_size = 4;
+}
+
+// GetSessionHistoryRequest fetches messages from a session in chronological order.
+message GetSessionHistoryRequest {
+  string session_id = 1;
+  int32  page       = 2;
+  int32  page_size  = 3;
+}
+
+// GetSessionHistoryResponse returns paginated message history for a session.
+message GetSessionHistoryResponse {
+  ChatSession session       = 1;
+  repeated ChatMessage messages = 2;
+  int32 total     = 3;
+  int32 page      = 4;
+  int32 page_size = 5;
+}
+
+// DeleteSessionRequest deletes a chat session.
+message DeleteSessionRequest {
+  string session_id = 1;
+}
+
+// DeleteSessionResponse confirms deletion.
+message DeleteSessionResponse {
+  bool success = 1;
+}
+
+// ChatRequest is the unary request that opens a streaming Chat RPC.
+// session_id must reference an existing session owned by the authenticated user.
+message ChatRequest {
+  string session_id = 1;
+  string message    = 2;
+}
+
+// ChatProgressEvent is a "what the agent is doing now" hint surfaced to the UI.
+// stage values: "planning", "retrieving", "synthesizing", "formatting".
+message ChatProgressEvent {
+  string stage   = 1;
+  string detail  = 2;
+}
+
+// ChatTokenEvent carries an incremental piece of the assistant answer.
+message ChatTokenEvent {
+  string token = 1;
+}
+
+// ChatCitationsEvent emits the final citation list once retrieval is complete.
+message ChatCitationsEvent {
+  repeated Citation citations = 1;
+}
+
+// ChatDoneEvent is the terminal event for a successful stream.
+message ChatDoneEvent {
+  string assistant_message_id = 1;
+  string finish_reason        = 2;
+  int32  prompt_tokens        = 3;
+  int32  completion_tokens    = 4;
+}
+
+// ChatErrorEvent is the terminal event when the pipeline fails before completion.
+message ChatErrorEvent {
+  string code    = 1; // e.g. "rate_limited", "out_of_domain", "internal"
+  string message = 2;
+}
+
+// ChatResponse is one server-streamed event in a Chat RPC. Exactly one of the
+// oneof fields is populated per response. Clients should keep reading until
+// either `done` or `error` arrives.
+message ChatResponse {
+  oneof event {
+    ChatProgressEvent  progress  = 1;
+    ChatTokenEvent     token     = 2;
+    ChatCitationsEvent citations = 3;
+    ChatDoneEvent      done      = 4;
+    ChatErrorEvent     error     = 5;
+  }
+}
+
 // RAGService provides document management, search, and stats.
 service RAGService {
   rpc UploadDocument(UploadDocumentRequest) returns (UploadDocumentResponse) {
@@ -144,6 +289,44 @@ service RAGService {
   rpc GetStats(GetStatsRequest) returns (GetStatsResponse) {
     option (google.api.http) = {
       get: "/api/v1/stats"
+    };
+  }
+
+  // Chat / agentic RAG endpoints.
+
+  rpc CreateSession(CreateSessionRequest) returns (CreateSessionResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/chat/sessions"
+      body: "*"
+    };
+  }
+
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/chat/sessions"
+    };
+  }
+
+  rpc GetSessionHistory(GetSessionHistoryRequest) returns (GetSessionHistoryResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/chat/sessions/{session_id}/messages"
+    };
+  }
+
+  rpc DeleteSession(DeleteSessionRequest) returns (DeleteSessionResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/chat/sessions/{session_id}"
+    };
+  }
+
+  // Chat is a server-streaming RPC. The grpc-gateway translates it into an
+  // SSE-compatible HTTP endpoint (each ChatResponse is delivered as a single
+  // SSE event). Clients without HTTP/2 grpc support can use the gRPC-Web
+  // adapter against the same gRPC method.
+  rpc Chat(ChatRequest) returns (stream ChatResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/chat/sessions/{session_id}/messages"
+      body: "*"
     };
   }
 }

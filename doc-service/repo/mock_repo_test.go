@@ -146,6 +146,19 @@ func TestMockRepository_UpdateExportJobStatus(t *testing.T) {
 	assert.True(t, called)
 }
 
+func TestMockRepository_DeleteDocument(t *testing.T) {
+	called := false
+	m := &MockRepository{
+		DeleteDocumentFunc: func(ctx context.Context, id uuid.UUID) error {
+			called = true
+			return nil
+		},
+	}
+	err := m.DeleteDocument(context.Background(), uuid.New())
+	require.NoError(t, err)
+	assert.True(t, called)
+}
+
 func TestMockRepository_DB(t *testing.T) {
 	m := &MockRepository{}
 	assert.Nil(t, m.DB())

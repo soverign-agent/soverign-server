@@ -30,6 +30,9 @@ type Repository interface {
 	// UpdateDocumentStatus updates the status of a document.
 	UpdateDocumentStatus(ctx context.Context, id uuid.UUID, status string) error
 
+	// DeleteDocument deletes a document by ID.
+	DeleteDocument(ctx context.Context, id uuid.UUID) error
+
 	// CreateVersion creates a new document version snapshot.
 	CreateVersion(ctx context.Context, version *model.DocumentVersion) error
 

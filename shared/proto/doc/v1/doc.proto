@@ -184,6 +184,16 @@ message UpdateDocumentStatusResponse {
   DocumentStatus status  = 2;
 }
 
+// DeleteDocumentRequest deletes a document by ID.
+message DeleteDocumentRequest {
+  string document_id = 1;
+}
+
+// DeleteDocumentResponse confirms the document deletion.
+message DeleteDocumentResponse {
+  bool success = 1;
+}
+
 // ListVersionsRequest lists versions for a document.
 message ListVersionsRequest {
   string document_id = 1;
@@ -265,6 +275,12 @@ service DocService {
     option (google.api.http) = {
       put: "/api/v1/generated-documents/{document_id}"
       body: "*"
+    };
+  }
+
+  rpc DeleteDocument(DeleteDocumentRequest) returns (DeleteDocumentResponse) {
+    option (google.api.http) = {
+      delete: "/api/v1/generated-documents/{document_id}"
     };
   }
 

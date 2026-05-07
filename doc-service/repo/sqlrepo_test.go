@@ -24,8 +24,7 @@ func setupMockDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock, func()) {
 
 func expectTenantTx(mock sqlmock.Sqlmock, tenantID string) {
 	mock.ExpectBegin()
-	mock.ExpectExec("SET LOCAL app.current_tenant = \\" + "$1").
-		WithArgs(tenantID).
+	mock.ExpectExec("SET LOCAL app.current_tenant = '" + tenantID + "'").
 		WillReturnResult(sqlmock.NewResult(0, 1))
 }
 
@@ -484,6 +483,92 @@ func TestSQLRepository_UpdateExportJobStatus_Processing(t *testing.T) {
 	err := repo.UpdateExportJobStatus(ctx, jobID, model.ExportStatusProcessing, nil, nil, nil)
 	require.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestSQLRepository_DeleteDocument(t *testing.T) {
+	db, mock, cleanup := setupMockDB(t)
+	defer cleanup()
+
+	repo := NewSQLRepository(db)
+	ctx := tenant.WithContext(context.Background(), uuid.New().String())
+
+	docID := uuid.New()
+	expectTenantTx(mock, tenant.MustFromContext(ctx))
+	mock.ExpectExec(`DELETE FROM generated_documents WHERE id = \$1`).
+		WithArgs(docID).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+	mock.ExpectCommit()
+
+	err := repo.DeleteDocument(ctx, docID)
+	require.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestSQLRepository_DeleteDocument_BeginTxError(t *testing.T) {
+	db, mock, cleanup := setupMockDB(t)
+	defer cleanup()
+
+	repo := NewSQLRepository(db)
+	ctx := tenant.WithContext(context.Background(), uuid.New().String())
+
+	mock.ExpectBegin().WillReturnError(errors.New("connection refused"))
+
+	err := repo.DeleteDocument(ctx, uuid.New())
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "begin tenant tx")
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestSQLRepository_DeleteDocument_ExecError(t *testing.T) {
+	db, mock, cleanup := setupMockDB(t)
+	defer cleanup()
+
+	repo := NewSQLRepository(db)
+	ctx := tenant.WithContext(context.Background(), uuid.New().String())
+
+	docID := uuid.New()
+	expectTenantTx(mock, tenant.MustFromContext(ctx))
+	mock.ExpectExec(`DELETE FROM generated_documents WHERE id = \$1`).
+		WithArgs(docID).
+		WillReturnError(errors.New("foreign key violation"))
+	mock.ExpectRollback()
+
+	err := repo.DeleteDocument(ctx, docID)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "delete document")
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestSQLRepository_DeleteDocument_NotFound(t *testing.T) {
+	db, mock, cleanup := setupMockDB(t)
+	defer cleanup()
+
+	repo := NewSQLRepository(db)
+	ctx := tenant.WithContext(context.Background(), uuid.New().String())
+
+	docID := uuid.New()
+	expectTenantTx(mock, tenant.MustFromContext(ctx))
+	mock.ExpectExec(`DELETE FROM generated_documents WHERE id = \$1`).
+		WithArgs(docID).
+		WillReturnResult(sqlmock.NewResult(0, 0))
+	mock.ExpectRollback()
+
+	err := repo.DeleteDocument(ctx, docID)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "document not found")
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
+func TestSQLRepository_DeleteDocument_MissingTenant(t *testing.T) {
+	db, _, cleanup := setupMockDB(t)
+	defer cleanup()
+
+	repo := NewSQLRepository(db)
+	ctx := context.Background()
+
+	err := repo.DeleteDocument(ctx, uuid.New())
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "tenant context required")
 }
 
 func TestSQLRepository_DB(t *testing.T) {

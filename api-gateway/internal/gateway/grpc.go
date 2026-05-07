@@ -32,6 +32,7 @@ type Mux struct {
 	handler    *runtime.ServeMux
 	conns      []*grpc.ClientConn
 	repoClient repov1.RepoServiceClient
+	ragClient  ragv1.RAGServiceClient
 }
 
 // Handler returns the underlying http.Handler.
@@ -42,6 +43,11 @@ func (m *Mux) Handler() http.Handler {
 // RepoClient returns the repo-service gRPC client.
 func (m *Mux) RepoClient() repov1.RepoServiceClient {
 	return m.repoClient
+}
+
+// RAGClient returns the rag-service gRPC client.
+func (m *Mux) RAGClient() ragv1.RAGServiceClient {
+	return m.ragClient
 }
 
 // Close closes all gRPC connections.
@@ -85,6 +91,7 @@ func New(cfg config.Config) (*Mux, error) {
 
 	var conns []*grpc.ClientConn
 	var repoClient repov1.RepoServiceClient
+	var ragClient ragv1.RAGServiceClient
 	ctx := context.Background()
 
 	// Helper to dial a backend
@@ -153,6 +160,7 @@ func New(cfg config.Config) (*Mux, error) {
 			return nil, err
 		}
 		conns = append(conns, conn)
+		ragClient = ragv1.NewRAGServiceClient(conn)
 		if err := ragv1.RegisterRAGServiceHandler(ctx, mux, conn); err != nil {
 			return nil, fmt.Errorf("register rag handler: %w", err)
 		}
@@ -206,7 +214,7 @@ func New(cfg config.Config) (*Mux, error) {
 		}
 	}
 
-	return &Mux{handler: mux, conns: conns, repoClient: repoClient}, nil
+	return &Mux{handler: mux, conns: conns, repoClient: repoClient, ragClient: ragClient}, nil
 }
 
 // ShouldHandle returns true if the request path should be handled by grpc-gateway.
@@ -219,6 +227,7 @@ func ShouldHandle(path string) bool {
 		"/api/v1/repository-webhooks/",
 		"/api/v1/documents/",
 		"/api/v1/rag/",
+		"/api/v1/chat/",
 		"/api/v1/generated-documents/",
 		"/api/v1/export-jobs/",
 		"/api/v1/audit-jobs/",

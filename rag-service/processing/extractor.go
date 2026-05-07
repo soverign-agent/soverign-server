@@ -5,6 +5,8 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
+	"os/exec"
 	"strings"
 	"unicode"
 
@@ -35,8 +37,7 @@ func (e *Extractor) Extract(content []byte, fileType string) (string, error) {
 	case "md", "markdown":
 		return e.extractMarkdown(content)
 	case "pdf":
-		// PDF extraction requires external library; for now return error
-		return "", fmt.Errorf("PDF extraction not implemented yet")
+		return e.extractPDF(content)
 	case "docx", "doc":
 		// DOCX extraction requires external library; for now return error
 		return "", fmt.Errorf("DOCX extraction not implemented yet")
@@ -45,6 +46,38 @@ func (e *Extractor) Extract(content []byte, fileType string) (string, error) {
 	default:
 		return string(content), nil
 	}
+}
+
+func (e *Extractor) extractPDF(content []byte) (string, error) {
+	tmpFile, err := os.CreateTemp("", "sovereign-rag-*.pdf")
+	if err != nil {
+		return "", fmt.Errorf("create temp pdf: %w", err)
+	}
+	tmpPath := tmpFile.Name()
+	defer os.Remove(tmpPath)
+
+	if _, err := tmpFile.Write(content); err != nil {
+		tmpFile.Close()
+		return "", fmt.Errorf("write temp pdf: %w", err)
+	}
+	if err := tmpFile.Close(); err != nil {
+		return "", fmt.Errorf("close temp pdf: %w", err)
+	}
+
+	cmd := exec.Command("pdftotext", "-layout", "-enc", "UTF-8", tmpPath, "-")
+	output, err := cmd.Output()
+	if err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return "", fmt.Errorf("pdftotext failed: %s", strings.TrimSpace(string(exitErr.Stderr)))
+		}
+		return "", fmt.Errorf("run pdftotext: %w", err)
+	}
+
+	text := strings.TrimSpace(string(output))
+	if text == "" {
+		return "", fmt.Errorf("no text extracted from PDF")
+	}
+	return text, nil
 }
 
 func (e *Extractor) extractMarkdown(content []byte) (string, error) {

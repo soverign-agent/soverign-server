@@ -408,6 +408,33 @@ func (r *SQLRepository) GetExportJobByID(ctx context.Context, id uuid.UUID) (*mo
 	return &job, nil
 }
 
+// DeleteDocument deletes a document by ID.
+func (r *SQLRepository) DeleteDocument(ctx context.Context, id uuid.UUID) error {
+	tx, err := r.base.BeginTenantTx(ctx, nil)
+	if err != nil {
+		return fmt.Errorf("begin tenant tx: %w", err)
+	}
+	defer tx.Rollback()
+
+	result, err := tx.ExecContext(ctx,
+		`DELETE FROM generated_documents WHERE id = $1`,
+		id,
+	)
+	if err != nil {
+		return fmt.Errorf("delete document: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("rows affected: %w", err)
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("document not found")
+	}
+
+	return tx.Commit()
+}
+
 // UpdateExportJobStatus updates the status and result of an export job.
 func (r *SQLRepository) UpdateExportJobStatus(ctx context.Context, id uuid.UUID, status string, filePath *string, fileSize *int64, errorMessage *string) error {
 	tx, err := r.base.BeginTenantTx(ctx, nil)

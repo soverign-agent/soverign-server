@@ -23,6 +23,7 @@ const (
 	DocService_GenerateDocument_FullMethodName = "/doc.v1.DocService/GenerateDocument"
 	DocService_GetDocument_FullMethodName      = "/doc.v1.DocService/GetDocument"
 	DocService_UpdateDocument_FullMethodName   = "/doc.v1.DocService/UpdateDocument"
+	DocService_DeleteDocument_FullMethodName   = "/doc.v1.DocService/DeleteDocument"
 	DocService_ListVersions_FullMethodName     = "/doc.v1.DocService/ListVersions"
 	DocService_RollbackVersion_FullMethodName  = "/doc.v1.DocService/RollbackVersion"
 	DocService_CreateExportJob_FullMethodName  = "/doc.v1.DocService/CreateExportJob"
@@ -40,6 +41,7 @@ type DocServiceClient interface {
 	GenerateDocument(ctx context.Context, in *GenerateDocumentRequest, opts ...grpc.CallOption) (*GenerateDocumentResponse, error)
 	GetDocument(ctx context.Context, in *GetDocumentRequest, opts ...grpc.CallOption) (*GetDocumentResponse, error)
 	UpdateDocument(ctx context.Context, in *UpdateDocumentRequest, opts ...grpc.CallOption) (*UpdateDocumentResponse, error)
+	DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*DeleteDocumentResponse, error)
 	ListVersions(ctx context.Context, in *ListVersionsRequest, opts ...grpc.CallOption) (*ListVersionsResponse, error)
 	RollbackVersion(ctx context.Context, in *RollbackVersionRequest, opts ...grpc.CallOption) (*RollbackVersionResponse, error)
 	CreateExportJob(ctx context.Context, in *CreateExportJobRequest, opts ...grpc.CallOption) (*CreateExportJobResponse, error)
@@ -89,6 +91,16 @@ func (c *docServiceClient) UpdateDocument(ctx context.Context, in *UpdateDocumen
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(UpdateDocumentResponse)
 	err := c.cc.Invoke(ctx, DocService_UpdateDocument_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *docServiceClient) DeleteDocument(ctx context.Context, in *DeleteDocumentRequest, opts ...grpc.CallOption) (*DeleteDocumentResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteDocumentResponse)
+	err := c.cc.Invoke(ctx, DocService_DeleteDocument_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -155,6 +167,7 @@ type DocServiceServer interface {
 	GenerateDocument(context.Context, *GenerateDocumentRequest) (*GenerateDocumentResponse, error)
 	GetDocument(context.Context, *GetDocumentRequest) (*GetDocumentResponse, error)
 	UpdateDocument(context.Context, *UpdateDocumentRequest) (*UpdateDocumentResponse, error)
+	DeleteDocument(context.Context, *DeleteDocumentRequest) (*DeleteDocumentResponse, error)
 	ListVersions(context.Context, *ListVersionsRequest) (*ListVersionsResponse, error)
 	RollbackVersion(context.Context, *RollbackVersionRequest) (*RollbackVersionResponse, error)
 	CreateExportJob(context.Context, *CreateExportJobRequest) (*CreateExportJobResponse, error)
@@ -181,6 +194,9 @@ func (UnimplementedDocServiceServer) GetDocument(context.Context, *GetDocumentRe
 }
 func (UnimplementedDocServiceServer) UpdateDocument(context.Context, *UpdateDocumentRequest) (*UpdateDocumentResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateDocument not implemented")
+}
+func (UnimplementedDocServiceServer) DeleteDocument(context.Context, *DeleteDocumentRequest) (*DeleteDocumentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteDocument not implemented")
 }
 func (UnimplementedDocServiceServer) ListVersions(context.Context, *ListVersionsRequest) (*ListVersionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListVersions not implemented")
@@ -286,6 +302,24 @@ func _DocService_UpdateDocument_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(DocServiceServer).UpdateDocument(ctx, req.(*UpdateDocumentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _DocService_DeleteDocument_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteDocumentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DocServiceServer).DeleteDocument(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: DocService_DeleteDocument_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DocServiceServer).DeleteDocument(ctx, req.(*DeleteDocumentRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -402,6 +436,10 @@ var DocService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateDocument",
 			Handler:    _DocService_UpdateDocument_Handler,
+		},
+		{
+			MethodName: "DeleteDocument",
+			Handler:    _DocService_DeleteDocument_Handler,
 		},
 		{
 			MethodName: "ListVersions",

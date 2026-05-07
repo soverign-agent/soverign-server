@@ -544,6 +544,93 @@ func TestDocumentLogic_runGeneration_CreateVersionError(t *testing.T) {
 	assert.Equal(t, model.StatusEditing, doc.Status)
 }
 
+func TestDocumentLogic_DeleteDocument(t *testing.T) {
+	tenantID := uuid.New()
+	docID := uuid.New()
+	mockRepo := &repo.MockRepository{
+		GetDocumentByIDFunc: func(ctx context.Context, id uuid.UUID) (*model.GeneratedDocument, error) {
+			return &model.GeneratedDocument{
+				ID:       docID,
+				TenantID: tenantID,
+				Status:   model.StatusEditing,
+			}, nil
+		},
+		DeleteDocumentFunc: func(ctx context.Context, id uuid.UUID) error {
+			assert.Equal(t, docID, id)
+			return nil
+		},
+	}
+	logic := newTestDocumentLogic(mockRepo)
+	ctx := tenant.WithContext(context.Background(), tenantID.String())
+
+	resp, err := logic.DeleteDocument(ctx, types.DeleteDocumentRequest{DocumentID: docID})
+	require.NoError(t, err)
+	assert.True(t, resp.Success)
+}
+
+func TestDocumentLogic_DeleteDocument_NotFound(t *testing.T) {
+	mockRepo := &repo.MockRepository{
+		GetDocumentByIDFunc: func(ctx context.Context, id uuid.UUID) (*model.GeneratedDocument, error) {
+			return nil, nil
+		},
+	}
+	logic := newTestDocumentLogic(mockRepo)
+	ctx := tenant.WithContext(context.Background(), uuid.New().String())
+
+	_, err := logic.DeleteDocument(ctx, types.DeleteDocumentRequest{DocumentID: uuid.New()})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "document not found")
+}
+
+func TestDocumentLogic_DeleteDocument_GetError(t *testing.T) {
+	mockRepo := &repo.MockRepository{
+		GetDocumentByIDFunc: func(ctx context.Context, id uuid.UUID) (*model.GeneratedDocument, error) {
+			return nil, errors.New("db connection lost")
+		},
+	}
+	logic := newTestDocumentLogic(mockRepo)
+	ctx := tenant.WithContext(context.Background(), uuid.New().String())
+
+	_, err := logic.DeleteDocument(ctx, types.DeleteDocumentRequest{DocumentID: uuid.New()})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "get document")
+}
+
+func TestDocumentLogic_DeleteDocument_RepoError(t *testing.T) {
+	docID := uuid.New()
+	mockRepo := &repo.MockRepository{
+		GetDocumentByIDFunc: func(ctx context.Context, id uuid.UUID) (*model.GeneratedDocument, error) {
+			return &model.GeneratedDocument{
+				ID:     docID,
+				Status: model.StatusEditing,
+			}, nil
+		},
+		DeleteDocumentFunc: func(ctx context.Context, id uuid.UUID) error {
+			return errors.New("delete failed")
+		},
+	}
+	logic := newTestDocumentLogic(mockRepo)
+	ctx := tenant.WithContext(context.Background(), uuid.New().String())
+
+	_, err := logic.DeleteDocument(ctx, types.DeleteDocumentRequest{DocumentID: docID})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "delete document")
+}
+
+func TestDocumentLogic_DeleteDocument_MissingTenant(t *testing.T) {
+	mockRepo := &repo.MockRepository{
+		GetDocumentByIDFunc: func(ctx context.Context, id uuid.UUID) (*model.GeneratedDocument, error) {
+			return nil, errors.New("tenant context required")
+		},
+	}
+	logic := newTestDocumentLogic(mockRepo)
+	ctx := context.Background()
+
+	_, err := logic.DeleteDocument(ctx, types.DeleteDocumentRequest{DocumentID: uuid.New()})
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "get document")
+}
+
 func TestDocumentLogic_failGeneration_Success(t *testing.T) {
 	docID := uuid.New()
 	mockRepo := &repo.MockRepository{

@@ -192,6 +192,23 @@ func (s *Server) UpdateDocument(ctx context.Context, req *docv1.UpdateDocumentRe
 	}, nil
 }
 
+// DeleteDocument deletes a document.
+func (s *Server) DeleteDocument(ctx context.Context, req *docv1.DeleteDocumentRequest) (*docv1.DeleteDocumentResponse, error) {
+	ctx = withTenant(ctx)
+
+	docID, err := uuid.Parse(req.DocumentId)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid document_id: %v", err)
+	}
+
+	_, err = s.documentLogic.DeleteDocument(ctx, types.DeleteDocumentRequest{DocumentID: docID})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "delete document: %v", err)
+	}
+
+	return &docv1.DeleteDocumentResponse{Success: true}, nil
+}
+
 // ListVersions lists version history for a document.
 func (s *Server) ListVersions(ctx context.Context, req *docv1.ListVersionsRequest) (*docv1.ListVersionsResponse, error) {
 	ctx = withTenant(ctx)
