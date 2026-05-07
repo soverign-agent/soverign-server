@@ -32,6 +32,14 @@ func (m *mockLLMClient) Health(ctx context.Context) error {
 	return nil
 }
 
+func (m *mockLLMClient) StreamComplete(ctx context.Context, req llm.CompletionRequest, onDelta func(token string)) (llm.StreamCompletionResponse, error) {
+	resp, err := m.Complete(ctx, req)
+	if err != nil {
+		return llm.StreamCompletionResponse{}, err
+	}
+	return llm.StreamCompletionResponse{Content: resp.Content}, nil
+}
+
 func TestDocumentGenerator_ValidateContent(t *testing.T) {
 	logger, _ := zap.NewDevelopment()
 	gen := NewDocumentGenerator(&mockLLMClient{}, logger)

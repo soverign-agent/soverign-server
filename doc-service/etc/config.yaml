@@ -8,7 +8,7 @@ Database:
 
 LLM:
   Provider: openai
-  APIKey: ""
+  APIKey: ${OPENAI_API_KEY}
   BaseURL: ""
   Model: gpt-4o
   Timeout: 120s

@@ -2,224 +2,335 @@ package logic
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
-	"sovereign-ai-compliance/shared/tenant"
-
+	"github.com/prometheus/common/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"sovereign-ai-compliance/shared/tenant"
 )
 
-func TestNewGenerator(t *testing.T) {
-	g := NewGenerator()
-	require.NotNil(t, g)
-	require.NotNil(t, g.rng)
+// fakeQuerier is a hand-rolled fake — keeps tests free of network mocks.
+type fakeQuerier struct {
+	instant      map[string]model.Value
+	rng          map[string]model.Value
+	instantErr   error
+	rangeErr     error
+	instantCalls []string
+	rangeCalls   []string
+}
+
+func (f *fakeQuerier) QueryInstant(_ context.Context, query string, _ time.Time) (model.Value, error) {
+	f.instantCalls = append(f.instantCalls, query)
+	if f.instantErr != nil {
+		return nil, f.instantErr
+	}
+	if v, ok := f.instant[query]; ok {
+		return v, nil
+	}
+	return model.Vector{}, nil
+}
+
+func (f *fakeQuerier) QueryRange(_ context.Context, query string, _, _ time.Time, _ time.Duration) (model.Value, error) {
+	f.rangeCalls = append(f.rangeCalls, query)
+	if f.rangeErr != nil {
+		return nil, f.rangeErr
+	}
+	if v, ok := f.rng[query]; ok {
+		return v, nil
+	}
+	return model.Matrix{}, nil
+}
+
+func vec(v float64) model.Vector {
+	return model.Vector{&model.Sample{Value: model.SampleValue(v), Timestamp: 0}}
+}
+
+func mat(points map[int64]float64) model.Matrix {
+	pairs := make([]model.SamplePair, 0, len(points))
+	// Iterate map keys in a deterministic order — Prometheus returns sorted.
+	keys := make([]int64, 0, len(points))
+	for k := range points {
+		keys = append(keys, k)
+	}
+	for i := 0; i < len(keys); i++ {
+		for j := i + 1; j < len(keys); j++ {
+			if keys[i] > keys[j] {
+				keys[i], keys[j] = keys[j], keys[i]
+			}
+		}
+	}
+	for _, k := range keys {
+		pairs = append(pairs, model.SamplePair{Timestamp: model.Time(k), Value: model.SampleValue(points[k])})
+	}
+	return model.Matrix{&model.SampleStream{Values: pairs}}
+}
+
+func tenantCtx(id string) context.Context {
+	return tenant.WithContext(context.Background(), id)
+}
+
+func TestNewService_NilLogger(t *testing.T) {
+	s := NewService(&fakeQuerier{}, nil)
+	require.NotNil(t, s)
+	require.NotNil(t, s.logger)
 }
 
 func TestGetOverview_MissingTenant(t *testing.T) {
-	g := NewGenerator()
-	ctx := context.Background()
-
-	overview, err := g.GetOverview(ctx)
+	s := NewService(&fakeQuerier{}, nil)
+	ov, err := s.GetOverview(context.Background())
 	require.Error(t, err)
-	assert.Nil(t, overview)
+	assert.Nil(t, ov)
 	assert.Contains(t, err.Error(), "tenant context required")
 }
 
-func TestGetOverview_Success(t *testing.T) {
-	g := NewGenerator()
-	ctx := tenant.WithContext(context.Background(), "tenant-123")
+func TestGetOverview_HappyPath(t *testing.T) {
+	tenantID := "tenant-1"
+	q := &fakeQuerier{
+		instant: map[string]model.Value{
+			fmtq(overviewHallucinationRateQuery, tenantID): vec(0.023), // 2.3%
+			fmtq(overviewAvgTTFTQuery, tenantID):           vec(0.120), // 120ms
+			fmtq(overviewAvgTPOTQuery, tenantID):           vec(0.045), // 45ms
+		},
+	}
+	s := NewService(q, nil)
 
-	overview, err := g.GetOverview(ctx)
+	ov, err := s.GetOverview(tenantCtx(tenantID))
 	require.NoError(t, err)
-	require.NotNil(t, overview)
-
-	// Verify format
-	assert.Contains(t, overview.HallucinationRate, "%")
-	assert.Contains(t, overview.AvgTTFT, "ms")
-	assert.Contains(t, overview.AvgTPOT, "ms")
-
-	// Verify determinism: same tenant should return same values
-	overview2, err := g.GetOverview(ctx)
-	require.NoError(t, err)
-	assert.Equal(t, overview.HallucinationRate, overview2.HallucinationRate)
-	assert.Equal(t, overview.AvgTTFT, overview2.AvgTTFT)
-	assert.Equal(t, overview.AvgTPOT, overview2.AvgTPOT)
-	assert.Equal(t, overview.Alert, overview2.Alert)
+	require.NotNil(t, ov)
+	assert.Equal(t, "2.3%", ov.HallucinationRate)
+	assert.Equal(t, "120ms", ov.AvgTTFT)
+	assert.Equal(t, "45ms", ov.AvgTPOT)
+	assert.False(t, ov.Alert)
 }
 
-func TestGetOverview_DifferentTenants(t *testing.T) {
-	g := NewGenerator()
-	ctx1 := tenant.WithContext(context.Background(), "tenant-a")
-	ctx2 := tenant.WithContext(context.Background(), "tenant-b")
+func TestGetOverview_AlertThresholds(t *testing.T) {
+	tests := []struct {
+		name          string
+		hallRate      float64
+		ttft          float64
+		tpot          float64
+		expectedAlert bool
+	}{
+		{"all green", 0.02, 0.10, 0.04, false},
+		{"hallucination too high", 0.05, 0.10, 0.04, true},
+		{"ttft too high", 0.02, 0.20, 0.04, true},
+		{"tpot too high", 0.02, 0.10, 0.07, true},
+		{"all red", 0.10, 0.30, 0.10, true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			tenantID := "t"
+			q := &fakeQuerier{instant: map[string]model.Value{
+				fmtq(overviewHallucinationRateQuery, tenantID): vec(tc.hallRate),
+				fmtq(overviewAvgTTFTQuery, tenantID):           vec(tc.ttft),
+				fmtq(overviewAvgTPOTQuery, tenantID):           vec(tc.tpot),
+			}}
+			s := NewService(q, nil)
+			ov, err := s.GetOverview(tenantCtx(tenantID))
+			require.NoError(t, err)
+			assert.Equal(t, tc.expectedAlert, ov.Alert)
+		})
+	}
+}
 
-	overview1, err := g.GetOverview(ctx1)
+func TestGetOverview_EmptyVector(t *testing.T) {
+	// No data in Prometheus yet — must NOT error, return formatted zeros.
+	q := &fakeQuerier{} // all queries return empty Vector
+	s := NewService(q, nil)
+
+	ov, err := s.GetOverview(tenantCtx("tenant-empty"))
 	require.NoError(t, err)
+	assert.Equal(t, "0.0%", ov.HallucinationRate)
+	assert.Equal(t, "0ms", ov.AvgTTFT)
+	assert.Equal(t, "0ms", ov.AvgTPOT)
+	assert.False(t, ov.Alert)
+}
 
-	overview2, err := g.GetOverview(ctx2)
-	require.NoError(t, err)
+func TestGetOverview_QuerierError(t *testing.T) {
+	q := &fakeQuerier{instantErr: errors.New("boom")}
+	s := NewService(q, nil)
 
-	// Different tenants should get different data (with very high probability)
-	// We only check that they are not all identical
-	allSame := overview1.HallucinationRate == overview2.HallucinationRate &&
-		overview1.AvgTTFT == overview2.AvgTTFT &&
-		overview1.AvgTPOT == overview2.AvgTPOT &&
-		overview1.Alert == overview2.Alert
-	assert.False(t, allSame, "different tenants should get different demo data")
+	ov, err := s.GetOverview(tenantCtx("t"))
+	require.Error(t, err)
+	assert.Nil(t, ov)
+	assert.Contains(t, err.Error(), "boom")
+}
+
+func TestGetOverview_NonVectorResult(t *testing.T) {
+	tenantID := "t"
+	q := &fakeQuerier{instant: map[string]model.Value{
+		fmtq(overviewHallucinationRateQuery, tenantID): mat(map[int64]float64{1: 0.5}),
+	}}
+	s := NewService(q, nil)
+
+	ov, err := s.GetOverview(tenantCtx(tenantID))
+	require.Error(t, err)
+	assert.Nil(t, ov)
+	assert.Contains(t, err.Error(), "expected vector")
 }
 
 func TestGetHallucinationMetrics_MissingTenant(t *testing.T) {
-	g := NewGenerator()
-	ctx := context.Background()
-
-	metrics, err := g.GetHallucinationMetrics(ctx, time.Time{}, time.Time{})
+	s := NewService(&fakeQuerier{}, nil)
+	out, err := s.GetHallucinationMetrics(context.Background(), time.Time{}, time.Time{})
 	require.Error(t, err)
-	assert.Nil(t, metrics)
+	assert.Nil(t, out)
 }
 
-func TestGetHallucinationMetrics_DefaultRange(t *testing.T) {
-	g := NewGenerator()
-	ctx := tenant.WithContext(context.Background(), "tenant-123")
+func TestGetHallucinationMetrics_AlignedSeries(t *testing.T) {
+	tenantID := "t"
+	q := &fakeQuerier{rng: map[string]model.Value{
+		fmtq(hallucinationTimeSeriesQuery, tenantID): mat(map[int64]float64{1000: 0.02, 2000: 0.03, 3000: 0.04}),
+		fmtq(biasTimeSeriesQuery, tenantID):          mat(map[int64]float64{1000: 0.10, 2000: 0.11, 3000: 0.12}),
+		fmtq(toxicityTimeSeriesQuery, tenantID):      mat(map[int64]float64{1000: 0.01, 2000: 0.02, 3000: 0.03}),
+	}}
+	s := NewService(q, nil)
 
-	metrics, err := g.GetHallucinationMetrics(ctx, time.Time{}, time.Time{})
+	pts, err := s.GetHallucinationMetrics(tenantCtx(tenantID), time.Time{}, time.Time{})
 	require.NoError(t, err)
-	require.NotEmpty(t, metrics)
-
-	// Should generate ~25 points for 24 hours
-	assert.GreaterOrEqual(t, len(metrics), 24)
-	assert.LessOrEqual(t, len(metrics), 25)
-
-	for _, m := range metrics {
-		assert.False(t, m.Time.IsZero())
-		assert.GreaterOrEqual(t, m.Rate, 0.0)
-		assert.LessOrEqual(t, m.Rate, 1.0)
-		assert.GreaterOrEqual(t, m.Bias, 0.0)
-		assert.LessOrEqual(t, m.Bias, 1.0)
-		assert.GreaterOrEqual(t, m.Toxicity, 0.0)
-		assert.LessOrEqual(t, m.Toxicity, 1.0)
-	}
+	require.Len(t, pts, 3)
+	assert.InDelta(t, 0.02, pts[0].Rate, 1e-9)
+	assert.InDelta(t, 0.10, pts[0].Bias, 1e-9)
+	assert.InDelta(t, 0.01, pts[0].Toxicity, 1e-9)
+	assert.InDelta(t, 0.04, pts[2].Rate, 1e-9)
+	assert.InDelta(t, 0.12, pts[2].Bias, 1e-9)
+	assert.InDelta(t, 0.03, pts[2].Toxicity, 1e-9)
 }
 
-func TestGetHallucinationMetrics_CustomRange(t *testing.T) {
-	g := NewGenerator()
-	ctx := tenant.WithContext(context.Background(), "tenant-123")
+func TestGetHallucinationMetrics_MisalignedSeries(t *testing.T) {
+	tenantID := "t"
+	// Bias missing one timestamp (2000); toxicity missing two (1000, 3000).
+	q := &fakeQuerier{rng: map[string]model.Value{
+		fmtq(hallucinationTimeSeriesQuery, tenantID): mat(map[int64]float64{1000: 0.02, 2000: 0.03, 3000: 0.04}),
+		fmtq(biasTimeSeriesQuery, tenantID):          mat(map[int64]float64{1000: 0.10, 3000: 0.12}),
+		fmtq(toxicityTimeSeriesQuery, tenantID):      mat(map[int64]float64{2000: 0.02}),
+	}}
+	s := NewService(q, nil)
 
-	start := time.Now().Add(-6 * time.Hour)
-	end := time.Now()
-
-	metrics, err := g.GetHallucinationMetrics(ctx, start, end)
+	pts, err := s.GetHallucinationMetrics(tenantCtx(tenantID), time.Time{}, time.Time{})
 	require.NoError(t, err)
-	require.NotEmpty(t, metrics)
-
-	// Should generate ~7 points for 6 hours
-	assert.GreaterOrEqual(t, len(metrics), 6)
-	assert.LessOrEqual(t, len(metrics), 7)
+	require.Len(t, pts, 3)
+	// Bias missing at t=2000 → 0.0
+	assert.InDelta(t, 0.0, pts[1].Bias, 1e-9)
+	// Toxicity present only at t=2000
+	assert.InDelta(t, 0.0, pts[0].Toxicity, 1e-9)
+	assert.InDelta(t, 0.02, pts[1].Toxicity, 1e-9)
+	assert.InDelta(t, 0.0, pts[2].Toxicity, 1e-9)
 }
 
-func TestGetHallucinationMetrics_Determinism(t *testing.T) {
-	g := NewGenerator()
-	ctx := tenant.WithContext(context.Background(), "tenant-abc")
+func TestGetHallucinationMetrics_EmptyMatrix(t *testing.T) {
+	q := &fakeQuerier{} // all queries return empty Matrix
+	s := NewService(q, nil)
 
-	start := time.Now().Add(-12 * time.Hour)
-	end := time.Now()
-
-	m1, err := g.GetHallucinationMetrics(ctx, start, end)
+	pts, err := s.GetHallucinationMetrics(tenantCtx("t"), time.Time{}, time.Time{})
 	require.NoError(t, err)
+	assert.Empty(t, pts)
+}
 
-	m2, err := g.GetHallucinationMetrics(ctx, start, end)
-	require.NoError(t, err)
+func TestGetHallucinationMetrics_QuerierError(t *testing.T) {
+	q := &fakeQuerier{rangeErr: errors.New("prom down")}
+	s := NewService(q, nil)
 
-	require.Equal(t, len(m1), len(m2))
-	for i := range m1 {
-		assert.Equal(t, m1[i].Time, m2[i].Time)
-		assert.Equal(t, m1[i].Rate, m2[i].Rate)
-		assert.Equal(t, m1[i].Bias, m2[i].Bias)
-		assert.Equal(t, m1[i].Toxicity, m2[i].Toxicity)
-	}
+	pts, err := s.GetHallucinationMetrics(tenantCtx("t"), time.Time{}, time.Time{})
+	require.Error(t, err)
+	assert.Nil(t, pts)
+	assert.Contains(t, err.Error(), "prom down")
 }
 
 func TestGetTokenPerformance_MissingTenant(t *testing.T) {
-	g := NewGenerator()
-	ctx := context.Background()
-
-	metrics, err := g.GetTokenPerformance(ctx, time.Time{}, time.Time{})
+	s := NewService(&fakeQuerier{}, nil)
+	out, err := s.GetTokenPerformance(context.Background(), time.Time{}, time.Time{})
 	require.Error(t, err)
-	assert.Nil(t, metrics)
+	assert.Nil(t, out)
 }
 
-func TestGetTokenPerformance_DefaultRange(t *testing.T) {
-	g := NewGenerator()
-	ctx := tenant.WithContext(context.Background(), "tenant-123")
+func TestGetTokenPerformance_HappyPath(t *testing.T) {
+	tenantID := "t"
+	q := &fakeQuerier{rng: map[string]model.Value{
+		// Values stored in seconds; service converts to ms.
+		fmtq(ttftTimeSeriesQuery, tenantID): mat(map[int64]float64{1000: 0.120, 2000: 0.140}),
+		fmtq(tpotTimeSeriesQuery, tenantID): mat(map[int64]float64{1000: 0.045, 2000: 0.050}),
+	}}
+	s := NewService(q, nil)
 
-	metrics, err := g.GetTokenPerformance(ctx, time.Time{}, time.Time{})
+	pts, err := s.GetTokenPerformance(tenantCtx(tenantID), time.Time{}, time.Time{})
 	require.NoError(t, err)
-	require.NotEmpty(t, metrics)
-
-	assert.GreaterOrEqual(t, len(metrics), 24)
-	assert.LessOrEqual(t, len(metrics), 25)
-
-	for _, m := range metrics {
-		assert.False(t, m.Time.IsZero())
-		assert.GreaterOrEqual(t, m.TTFT, 20.0)
-		assert.LessOrEqual(t, m.TTFT, 500.0)
-		assert.GreaterOrEqual(t, m.TPOT, 10.0)
-		assert.LessOrEqual(t, m.TPOT, 120.0)
-	}
+	require.Len(t, pts, 2)
+	assert.InDelta(t, 120.0, pts[0].TTFT, 1e-9)
+	assert.InDelta(t, 45.0, pts[0].TPOT, 1e-9)
+	assert.InDelta(t, 140.0, pts[1].TTFT, 1e-9)
+	assert.InDelta(t, 50.0, pts[1].TPOT, 1e-9)
 }
 
-func TestGetTokenPerformance_Determinism(t *testing.T) {
-	g := NewGenerator()
-	ctx := tenant.WithContext(context.Background(), "tenant-xyz")
+func TestGetTokenPerformance_MisalignedSeries(t *testing.T) {
+	tenantID := "t"
+	q := &fakeQuerier{rng: map[string]model.Value{
+		fmtq(ttftTimeSeriesQuery, tenantID): mat(map[int64]float64{1000: 0.120, 2000: 0.140}),
+		fmtq(tpotTimeSeriesQuery, tenantID): mat(map[int64]float64{1000: 0.045}), // missing 2000
+	}}
+	s := NewService(q, nil)
 
-	start := time.Now().Add(-8 * time.Hour)
-	end := time.Now()
-
-	m1, err := g.GetTokenPerformance(ctx, start, end)
+	pts, err := s.GetTokenPerformance(tenantCtx(tenantID), time.Time{}, time.Time{})
 	require.NoError(t, err)
+	require.Len(t, pts, 2)
+	assert.InDelta(t, 0.0, pts[1].TPOT, 1e-9)
+}
 
-	m2, err := g.GetTokenPerformance(ctx, start, end)
+func TestGetTokenPerformance_EmptyMatrix(t *testing.T) {
+	s := NewService(&fakeQuerier{}, nil)
+	pts, err := s.GetTokenPerformance(tenantCtx("t"), time.Time{}, time.Time{})
 	require.NoError(t, err)
+	assert.Empty(t, pts)
+}
 
-	require.Equal(t, len(m1), len(m2))
-	for i := range m1 {
-		assert.Equal(t, m1[i].Time, m2[i].Time)
-		assert.Equal(t, m1[i].TTFT, m2[i].TTFT)
-		assert.Equal(t, m1[i].TPOT, m2[i].TPOT)
+func TestGetTokenPerformance_QuerierError(t *testing.T) {
+	q := &fakeQuerier{rangeErr: errors.New("prom down")}
+	s := NewService(q, nil)
+
+	pts, err := s.GetTokenPerformance(tenantCtx("t"), time.Time{}, time.Time{})
+	require.Error(t, err)
+	assert.Nil(t, pts)
+}
+
+func TestNormalizeRange_DefaultsBothZero(t *testing.T) {
+	start, end, step := normalizeRange(time.Time{}, time.Time{})
+	assert.False(t, start.IsZero())
+	assert.False(t, end.IsZero())
+	assert.Equal(t, time.Hour, step)
+	assert.WithinDuration(t, end.Add(-24*time.Hour), start, time.Second)
+}
+
+func TestNormalizeRange_CustomEnd(t *testing.T) {
+	end := time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC)
+	start, gotEnd, _ := normalizeRange(time.Time{}, end)
+	assert.Equal(t, end, gotEnd)
+	assert.Equal(t, end.Add(-24*time.Hour), start)
+}
+
+func TestIndexByTimestamp_Empty(t *testing.T) {
+	idx := indexByTimestamp(nil)
+	assert.Empty(t, idx)
+}
+
+// fmtq is a tiny helper so we can build expected query strings without
+// importing fmt directly into every test case. Mirrors the fmt.Sprintf in
+// the service — keep in sync.
+func fmtq(template, tenantID string) string {
+	// Same %q semantics the service uses.
+	const dq = `"`
+	return replaceFirst(template, "%q", dq+tenantID+dq)
+}
+
+// replaceFirst is a minimal replacement helper for the test utility above.
+// We avoid pulling in strings.Replace in this hot path for clarity.
+func replaceFirst(s, old, new string) string {
+	for i := 0; i+len(old) <= len(s); i++ {
+		if s[i:i+len(old)] == old {
+			return s[:i] + new + s[i+len(old):]
+		}
 	}
-}
-
-func TestClamp(t *testing.T) {
-	assert.Equal(t, 5.0, clamp(3.0, 5.0, 10.0))
-	assert.Equal(t, 10.0, clamp(15.0, 5.0, 10.0))
-	assert.Equal(t, 7.0, clamp(7.0, 5.0, 10.0))
-}
-
-func TestHashString(t *testing.T) {
-	h1 := hashString("abc")
-	h2 := hashString("abc")
-	h3 := hashString("def")
-
-	assert.Equal(t, h1, h2)
-	assert.NotEqual(t, h1, h3)
-}
-
-func TestGenerateHourlyPoints(t *testing.T) {
-	start := time.Date(2024, 1, 1, 10, 30, 0, 0, time.UTC)
-	end := time.Date(2024, 1, 1, 14, 45, 0, 0, time.UTC)
-
-	points := generateHourlyPoints(start, end)
-	require.Len(t, points, 5)
-
-	// Verify truncation and hourly spacing
-	assert.Equal(t, 10, points[0].Hour())
-	assert.Equal(t, 11, points[1].Hour())
-	assert.Equal(t, 12, points[2].Hour())
-	assert.Equal(t, 13, points[3].Hour())
-	assert.Equal(t, 14, points[4].Hour())
-
-	for _, p := range points {
-		assert.Equal(t, 0, p.Minute())
-		assert.Equal(t, 0, p.Second())
-	}
+	return s
 }

@@ -12,6 +12,7 @@ type Config struct {
 	Temporal sharedconfig.TemporalConfig
 	LLM      sharedconfig.LLMConfig
 	GRPC     GRPCConfig
+	Metrics  MetricsConfig
 	Clients  client.Config
 }
 
@@ -21,4 +22,9 @@ type GRPCConfig struct {
 	TLSCertFile string `json:"tls_cert_file,optional"`
 	TLSKeyFile  string `json:"tls_key_file,optional"`
 	Insecure    bool   `json:"insecure"`
+}
+
+// MetricsConfig holds the Prometheus /metrics HTTP server configuration.
+type MetricsConfig struct {
+	Port int `json:"port"`
 }

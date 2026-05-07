@@ -1,10 +1,7 @@
--- Seed data for development/testing
+-- Seed data for development and testing.
 -- Creates a default tenant and admin user for initial platform access.
--- Run this after 002-init-schema.sql.
 
--- =============================================================================
--- 1. Default Tenant
--- =============================================================================
+-- Default Tenant
 INSERT INTO tenants (id, name, slug, domain, settings, created_at, updated_at)
 VALUES (
     '00000000-0000-0000-0000-000000000001',
@@ -17,9 +14,7 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;
 
--- =============================================================================
--- 2. Admin User
--- =============================================================================
+-- Admin User
 -- Password: SovereignAdmin123!
 -- bcrypt cost 12 hash generated via auth-service password package
 INSERT INTO users (id, tenant_id, email, password_hash, role, is_active, created_at, updated_at)
@@ -35,9 +30,7 @@ VALUES (
 )
 ON CONFLICT (tenant_id, email) DO NOTHING;
 
--- =============================================================================
--- 3. Default Compliance Policy
--- =============================================================================
+-- Default Compliance Policy
 INSERT INTO compliance_policies (id, tenant_id, name, policy_type, rules, is_active, created_at, updated_at)
 VALUES (
     '00000000-0000-0000-0000-000000000003',

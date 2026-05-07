@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+
+	"sovereign-ai-compliance/shared/metrics"
 )
 
 // OpenAIClient implements Client for OpenAI API.
@@ -19,10 +21,18 @@ type OpenAIClient struct {
 	model      string
 	httpClient *http.Client
 	logger     *zap.Logger
+	recorder   *metrics.Recorder
 }
 
-// NewOpenAIClient creates a new OpenAI client.
+// NewOpenAIClient creates a new OpenAI client without metric recording.
 func NewOpenAIClient(cfg Config, logger *zap.Logger) *OpenAIClient {
+	return NewOpenAIClientWithRecorder(cfg, logger, nil)
+}
+
+// NewOpenAIClientWithRecorder creates an OpenAI client that emits Prometheus
+// metrics through the supplied Recorder. Passing nil disables metric emission
+// (useful for tests and tooling that does not need observability).
+func NewOpenAIClientWithRecorder(cfg Config, logger *zap.Logger, rec *metrics.Recorder) *OpenAIClient {
 	baseURL := cfg.BaseURL
 	if baseURL == "" {
 		baseURL = "https://api.openai.com/v1"
@@ -30,7 +40,7 @@ func NewOpenAIClient(cfg Config, logger *zap.Logger) *OpenAIClient {
 
 	timeout := cfg.Timeout
 	if timeout <= 0 {
-		timeout = 30 // default 30 seconds
+		timeout = 30
 	}
 
 	return &OpenAIClient{
@@ -40,7 +50,8 @@ func NewOpenAIClient(cfg Config, logger *zap.Logger) *OpenAIClient {
 		httpClient: &http.Client{
 			Timeout: time.Duration(timeout) * time.Second,
 		},
-		logger: logger,
+		logger:   logger,
+		recorder: rec,
 	}
 }
 
@@ -146,7 +157,7 @@ type openAICompletionResponse struct {
 	Model   string `json:"model"`
 	Choices []struct {
 		Index        int     `json:"index"`
-		Message       message `json:"message"`
+		Message      message `json:"message"`
 		FinishReason string  `json:"finish_reason"`
 	} `json:"choices"`
 	Usage struct {

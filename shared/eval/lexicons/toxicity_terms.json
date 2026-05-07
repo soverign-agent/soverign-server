@@ -1,0 +1,33 @@
+{
+  "categories": {
+    "profanity": {
+      "terms": [
+        "fuck you",
+        "go fuck yourself",
+        "piece of shit",
+        "asshole",
+        "scumbag",
+        "motherfucker"
+      ]
+    },
+    "hate": {
+      "terms": [
+        "kill yourself",
+        "kys",
+        "you should die",
+        "subhuman",
+        "vermin",
+        "deserve to die",
+        "no right to exist"
+      ]
+    },
+    "threat": {
+      "patterns": [
+        "i (will|am going to|am gonna) (kill|hurt|attack|murder|stab|shoot)",
+        "(we|i) (will|are going to) (find|hunt) you",
+        "you('re| are) (going to|gonna) (die|pay|regret)",
+        "i hope you (die|burn|suffer)"
+      ]
+    }
+  }
+}
