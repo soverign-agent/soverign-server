@@ -13,6 +13,8 @@ import (
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
+
+	sharedtemporal "sovereign-ai-compliance/shared/temporal"
 )
 
 // Client wraps a Temporal client and worker for audit workflows.
@@ -27,7 +29,7 @@ func NewClient(cfg sharedconfig.TemporalConfig, repo repo.Repository, logic *log
 	// caller's Go context, through the workflow header, into each activity's
 	// Go context. Without this, RLS-protected repository calls inside
 	// activities fail with "tenant context required".
-	propagators := []workflow.ContextPropagator{NewTenantPropagator()}
+	propagators := []workflow.ContextPropagator{sharedtemporal.NewTenantPropagator()}
 
 	// Create Temporal client
 	tc, err := client.NewClient(client.Options{

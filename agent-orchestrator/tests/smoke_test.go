@@ -68,7 +68,7 @@ func TestSmoke_EndToEndMetrics(t *testing.T) {
 		Timeout:  30,
 	}, zap.NewNop(), rec)
 
-	sup := orchestrator.NewSupervisor(nil, zap.NewNop(), sharedconfig.LLMConfig{Model: "gpt-4o"}, llmClient, evalPipeline)
+	sup := orchestrator.NewSupervisor(nil, zap.NewNop(), sharedconfig.LLMConfig{Model: "gpt-4o"}, llmClient, evalPipeline, nil)
 
 	req := &agentv1.AgentRequest{
 		RequestId: "smoke-req-1",
