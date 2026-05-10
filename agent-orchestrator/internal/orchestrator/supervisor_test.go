@@ -110,7 +110,7 @@ func TestSupervisor_Invoke(t *testing.T) {
 				clientIface = nil
 			}
 
-			s := NewSupervisor(nil, zap.NewNop(), sharedconfig.LLMConfig{Model: "gpt-4o"}, clientIface, nil)
+			s := NewSupervisor(nil, zap.NewNop(), sharedconfig.LLMConfig{Model: "gpt-4o"}, clientIface, nil, nil)
 
 			req := &agentv1.AgentRequest{
 				RequestId: "req-1",

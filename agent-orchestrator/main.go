@@ -17,6 +17,9 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
+	temporalclient "go.temporal.io/sdk/client"
+	"go.temporal.io/sdk/worker"
+	"go.temporal.io/sdk/workflow"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -30,6 +33,7 @@ import (
 	"sovereign-ai-compliance/shared/eval"
 	"sovereign-ai-compliance/shared/llm"
 	"sovereign-ai-compliance/shared/metrics"
+	sharedtemporal "sovereign-ai-compliance/shared/temporal"
 )
 
 var configFile = flag.String("f", "etc/config.yaml", "the config file")
@@ -84,7 +88,35 @@ func main() {
 	}
 	defer downstreamClients.Close()
 
-	orc := orchestrator.NewSupervisor(downstreamClients, logger, c.LLM, llmClient, evalPipeline)
+	// Create Temporal client with the shared tenant propagator so the tenant
+	// context flows from inbound gRPC calls into workflow / activity Go-context.
+	// Without it, downstream RLS-protected gRPC calls invoked from activities
+	// would lose their tenant ID and fail authorization.
+	temporalClient, err := temporalclient.Dial(temporalclient.Options{
+		HostPort:           c.Temporal.HostPort,
+		Namespace:          c.Temporal.Namespace,
+		ContextPropagators: []workflow.ContextPropagator{sharedtemporal.NewTenantPropagator()},
+	})
+	if err != nil {
+		logx.Must(fmt.Errorf("failed to create temporal client: %w", err))
+	}
+	defer temporalClient.Close()
+
+	// Register orchestrator workflows and activities on a worker bound to the
+	// orchestrator task queue. The worker shares the Temporal client, so all
+	// dispatched workflows inherit the tenant propagator above.
+	orchestratorWorker := worker.New(temporalClient, orchestrator.OrchestratorTaskQueue, worker.Options{})
+	orchestratorWorker.RegisterWorkflow(orchestrator.DocumentGenerationWorkflow)
+	orchestratorWorker.RegisterWorkflow(orchestrator.AuditWorkflow)
+	orchestratorWorker.RegisterWorkflow(orchestrator.SearchKnowledgeWorkflow)
+	orchestratorWorker.RegisterActivity(orchestrator.NewActivities(downstreamClients))
+
+	if err := orchestratorWorker.Start(); err != nil {
+		logx.Must(fmt.Errorf("failed to start temporal worker: %w", err))
+	}
+	defer orchestratorWorker.Stop()
+
+	orc := orchestrator.NewSupervisor(downstreamClients, logger, c.LLM, llmClient, evalPipeline, temporalClient)
 
 	grpcAddr := fmt.Sprintf(":%d", c.GRPC.Port)
 	lis, err := net.Listen("tcp", grpcAddr)
